@@ -38,8 +38,19 @@
     }
   ],
   "operator": {
-    "address": null,
-    "_comment": "Operator address will be populated when the dedicated Mainstreet Operator wallet is provisioned. Until then, no signed attestations are published onchain."
+    "address": "0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9",
+    "chain": "eip155:8453",
+    "basescan": "https://basescan.org/address/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9"
+  },
+  "token": {
+    "address": "0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe",
+    "symbol": "MAIN",
+    "name": "Mainstreet",
+    "decimals": 18,
+    "totalSupply": "1000000000000000000000000",
+    "chain": "eip155:8453",
+    "basescan": "https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe",
+    "immutable": true
   },
   "registries": {
     "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
