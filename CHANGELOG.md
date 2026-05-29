@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.4] — 2026-05-30
+
+### Added
+- `GET /api/agent/leaderboard` — public, free, cached 1h. Ranks the Mainstreet score for a seeded set of known onchain agents (Ethy AI, HeyElsa, Axelrod, Bankr at v0.1; full Virtuals enumeration in v0.3).
+- `benchmark/score-perf.js` — perf benchmark: business 15M ops/s, agent 8M ops/s, payload build 350k ops/s (with SHA-256 hash).
+- `mainstreet-status.bat` (upstream) — Windows monitoring snapshot: prod health, wallet balance, MAIN supply, test suite, cron schedule, backlog.
+
+### Resolved
+- Earlier x402 facilitator 401 was a SDK regression in `@x402/* v2.x`, not a credentials issue. Direct CDP probe confirms key is valid. Workaround: pin to v1 packages (`@coinbase/x402` 1.0.1, `x402-express` 1.x). See `scripts/probe-cdp-facilitator.js` (upstream) for the diagnostic tool.
+
 ## [0.1.3] — 2026-05-30
 
 ### Deployed onchain
