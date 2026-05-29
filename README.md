@@ -141,7 +141,7 @@ This project is operated by `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9` on Base
 
 - **Name**: Mainstreet
 - **Symbol**: MAIN
-- **Contract**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) on Base mainnet
+- **Contract**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) on Base mainnet ([source verified on Sourcify, full match](https://repo.sourcify.dev/contracts/full_match/8453/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe/))
 - **Total supply**: 1,000,000 MAIN (18 decimals, fixed, immutable)
 - **Deployer + initial holder**: `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9`
 - **Deploy tx**: [`0xe57a1d1f...4e6fc969`](https://basescan.org/tx/0xe57a1d1fe50afffbc3f10862c9afe158915f130a62f96ac6e4037b7d4e6fc969)
