@@ -20,7 +20,7 @@ Aspirational, not a commitment. Order indicates rough priority; items can slip o
 - [ ] Liaison signed message: operator wallet attested by founder's main wallet
 - [ ] Onchain attestation publisher: sign payload via EIP-712, submit to `ReputationRegistry`
 - [ ] Daily cron scoring the top 100 Virtuals ACP agents → publish attestations
-- [ ] First settled paid x402 query → indexation in x402 Bazaar + agentic.market
+- [x] **First settled paid x402 query** (2026-05-30, 0.05 USDC, buyer `0xa1Dd5a2526D49626Ed7b9BF3bC16e61B205D678C`) → indexation in x402 Bazaar + agentic.market
 
 ## v0.3 — score quality
 

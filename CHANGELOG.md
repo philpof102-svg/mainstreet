@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.5] — 2026-05-30
+
+### Live in production
+- **First real x402 settlement**: 0.05 USDC paid by buyer `0xa1Dd5a2526D49626Ed7b9BF3bC16e61B205D678C` to operator `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9` for a `/api/agent/score` call. CDP facilitator settled successfully and is now indexing the service in the x402 Bazaar.
+- Service is becoming discoverable via `agentic.market` (auto-feed from Bazaar).
+
+### Fixed
+- Route key patterns in `paywallMiddleware` must use Next.js `[name]` syntax (not Express `:name`) — x402-express's `computeRoutePatterns` only converts square brackets to `[^/]+` regex. Without the fix, the paywall was silently bypassed.
+- Route keys must be relative to the Express router mount point (e.g. `GET /score/[agentAddress]`, not `GET /api/agent/score/[agentAddress]`).
+- Score endpoint had `requireAgentAuth` but no paywall middleware mounted — fixed.
+
+### Lessons
+- The CDP facilitator rejects self-payments with `self_send_not_allowed`. Use a separate buyer wallet for end-to-end tests. The upstream repo includes a one-shot buyer wallet generator.
+
 ## [0.1.4] — 2026-05-30
 
 ### Added
