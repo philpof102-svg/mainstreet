@@ -63,10 +63,11 @@ function computeScoreBusiness(snapshot) {
  * @returns {number} score 0-100
  */
 function computeScoreAgent(metrics) {
-  const successRate = Math.max(0, Math.min(1, Number(metrics?.successRate) || 0));
-  const usdcVolume = Math.max(0, Number(metrics?.usdcVolume) || 0);
-  const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob) || 365);
-  const jobCount = Math.max(0, Number(metrics?.jobCount) || 0);
+  // ?? 0 not || 0 — daysSinceLastJob can legitimately be 0 (active today)
+  const successRate = Math.max(0, Math.min(1, Number(metrics?.successRate ?? 0)));
+  const usdcVolume = Math.max(0, Number(metrics?.usdcVolume ?? 0));
+  const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob ?? 365));
+  const jobCount = Math.max(0, Number(metrics?.jobCount ?? 0));
 
   // Success rate : 50 pts, pénalisé si très peu de jobs (< 10) pour
   // éviter qu'un agent avec 1 succès = score parfait.
