@@ -3,8 +3,24 @@
   "version": "0.1.0",
   "description": "Onchain reputation oracle for AI agents and real-world businesses (ERC-8004 on Base).",
   "main": "oracle.js",
+  "types": "types/oracle.d.ts",
+  "files": [
+    "oracle.js",
+    "types/oracle.d.ts",
+    "contracts/Main.sol",
+    "contracts/Main.compiled.json",
+    "scripts/compile.js",
+    "scripts/deploy-token.js",
+    "examples/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
-    "example": "node examples/basic-usage.js"
+    "test": "node --test test/oracle.test.js",
+    "example": "node examples/basic-usage.js",
+    "leaderboard": "node examples/score-leaderboard.js",
+    "verify": "node examples/verify-payload.js"
   },
   "keywords": [
     "erc-8004",
