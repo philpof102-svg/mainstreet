@@ -1,0 +1,55 @@
+{
+  "$schema": "https://eips.ethereum.org/EIPS/eip-8004#agent-card",
+  "name": "Mainstreet",
+  "description": "Onchain reputation oracle for AI agents and real-world businesses. ERC-8004 attestations on Base, settled in USDC via x402. Aggregates onchain feedback, x402 settlement history, and ACP escrow completions into a single 0-100 score.",
+  "url": "https://avisradar.app/mainstreet.html",
+  "version": "0.1.0",
+  "skills": [
+    {
+      "id": "reputation-agent-score",
+      "subjectType": "agent-onchain",
+      "primary": true,
+      "name": "AI agent reputation score (ERC-8004 standardized)",
+      "description": "Returns a 0-100 reputation score for any AI agent active onchain on Base. Aggregates ERC-8004 ReputationRegistry feedback, x402 settlement volume and success rate, and Virtuals ACP escrow completions. Designed for orchestrator agents (Butler, ChainLens) and buyer agents that need to vet a service provider before paying.",
+      "endpoint": "https://avisradar.app/api/agent/score/{agentAddress}",
+      "method": "GET",
+      "pricing": {
+        "scheme": "x402-exact",
+        "amount": "0.05",
+        "currency": "USDC",
+        "network": "eip155:8453"
+      },
+      "tags": ["reputation", "AI-agent", "ERC-8004", "x402", "ACP", "agent-trust", "orchestrator"]
+    },
+    {
+      "id": "reputation-business-snapshot",
+      "subjectType": "business-google",
+      "name": "Local business reputation snapshot (secondary)",
+      "description": "Same scoring infrastructure applied to real-world local businesses via Google reviews. Returns rating, recent reviews, derived sentiment, plus up to 3 competitors. Cached 24h. Designed for RWA underwriting agents (Goldfinch, Centrifuge, Maple) and due diligence agents.",
+      "endpoint": "https://avisradar.app/api/agent/snapshot/{placeId}",
+      "method": "GET",
+      "pricing": {
+        "scheme": "x402-exact",
+        "amount": "0.10",
+        "currency": "USDC",
+        "network": "eip155:8453"
+      },
+      "tags": ["reputation", "google-reviews", "local-business", "competitor-intelligence", "RWA-oracle"]
+    }
+  ],
+  "operator": {
+    "address": null,
+    "_comment": "Operator address will be populated when the dedicated Mainstreet Operator wallet is provisioned. Until then, no signed attestations are published onchain."
+  },
+  "registries": {
+    "identityRegistry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+    "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+    "chain": "eip155:8453"
+  },
+  "contact": {
+    "email": "philippe@avisradar.app",
+    "url": "https://avisradar.app"
+  },
+  "termsOfService": "https://avisradar.app/cgv.html",
+  "privacyPolicy": "https://avisradar.app/confidentialite.html"
+}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mainstreet — On-chain reputation oracle for real-world businesses</title>
+<meta name="description" content="ERC-8004 reputation attestations on Base. We score Main Street so Wall Street can lend to it.">
+<meta property="og:title" content="Mainstreet — On-chain reputation for real businesses">
+<meta property="og:description" content="ERC-8004 attestations of local business reputation, indexed daily from Google Reviews. Pay-per-call via x402 USDC on Base.">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-elev: #131313;
+    --fg: #f5f5f5;
+    --muted: #888;
+    --accent: #00ff88;
+    --border: #222;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    line-height: 1.6;
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
+  header { margin-bottom: 48px; }
+  .logo {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg); text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  .badge {
+    display: inline-block; padding: 4px 10px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 999px; font-size: 12px; color: var(--muted);
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 40px; line-height: 1.15; margin: 0 0 16px;
+    letter-spacing: -0.02em; font-weight: 700;
+  }
+  h1 em {
+    font-style: normal; color: var(--accent);
+  }
+  .lede { font-size: 18px; color: var(--muted); margin-bottom: 32px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+  .cta {
+    display: inline-block; padding: 12px 18px;
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--fg); text-decoration: none; font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .cta:hover { border-color: var(--accent); }
+  .cta.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  section { margin: 56px 0; }
+  h2 {
+    font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin: 0 0 16px; font-weight: 500;
+  }
+  p { margin: 0 0 12px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin: 24px 0;
+  }
+  .card {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px;
+  }
+  .card .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card .v { font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--fg); }
+  pre {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; overflow-x: auto;
+    font-size: 13px; color: #cde;
+  }
+  code { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  footer {
+    margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 13px;
+  }
+  footer a { color: var(--muted); }
+  .status { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="/mainstreet.html" class="logo">main<span>street</span></a>
+  </header>
+
+  <span class="badge">ERC-8004 · Base mainnet · USDC settlement</span>
+  <h1>The credit bureau<br>for <em>AI agents</em>.</h1>
+  <p class="lede">
+    Before your agent pays another agent for a service, check its Mainstreet score.
+    We aggregate onchain ERC-8004 feedback, x402 settlement history, and Virtuals ACP completions
+    into a single 0&ndash;100 reputation signal. Pay per query in USDC on Base. No API keys, no contracts.
+  </p>
+
+  <div class="cta-row">
+    <a class="cta primary" href="#integrate">Integrate</a>
+    <a class="cta" href="#how">How it works</a>
+    <a class="cta" href="https://eips.ethereum.org/EIPS/eip-8004" target="_blank">ERC-8004 spec</a>
+  </div>
+
+  <section id="how">
+    <h2>What you get</h2>
+    <div class="grid">
+      <div class="card"><div class="k">Score</div><div class="v">0&ndash;100</div></div>
+      <div class="card"><div class="k">Refresh</div><div class="v">live</div></div>
+      <div class="card"><div class="k">Settlement</div><div class="v">USDC&nbsp;/&nbsp;Base</div></div>
+      <div class="card"><div class="k">Standard</div><div class="v">ERC-8004</div></div>
+    </div>
+    <p>
+      Each agent is identified by its onchain address. We aggregate ERC-8004 ReputationRegistry
+      feedback, x402 facilitator settlements, and Virtuals ACP escrow completions into a single
+      signed score. Reads are public goods. Fresh deltas push via x402 micropayment.
+    </p>
+  </section>
+
+  <section id="integrate">
+    <h2>Integrate</h2>
+    <p>Score any onchain agent by its Base address:</p>
+    <pre><code>GET</code> https://avisradar.app/api/agent/score/0x&lt;address&gt;
+<code>X-Payment</code>: &lt;x402 signature&gt; · max <code>$0.05 USDC</code></pre>
+
+    <p>Read directly from the registry onchain (free, public):</p>
+    <pre><code>function</code> latestAttestation(<code>bytes32</code> subject)
+  <code>external view returns</code> (<code>uint8</code> score, <code>uint64</code> ts, <code>bytes</code> sig)</pre>
+  </section>
+
+  <section>
+    <h2>Score formula (v1)</h2>
+    <pre>sampleConfidence = min(1, jobCount / 10)
+
+score = round(
+    successRate * 50 * sampleConfidence       // 0&ndash;50 : success, dampened for small samples
+  + min(30, log10(usdcVolume) * 6)            // 0&ndash;30 : volume processed
+  + max(0, 20 * exp(-daysSinceLastJob / 15))  // 0&ndash;20 : recency decay
+, 0, 100)</pre>
+    <table>
+      <thead><tr><th>Agent profile</th><th>Success</th><th>Jobs</th><th>Volume</th><th>Last job</th><th>Score</th></tr></thead>
+      <tbody>
+        <tr><td>Top tier (Ethy-like)</td><td>99%</td><td>500</td><td>$50&nbsp;000</td><td>today</td><td>78</td></tr>
+        <tr><td>Mid-tier active</td><td>85%</td><td>50</td><td>$3&nbsp;000</td><td>3d</td><td>80</td></tr>
+        <tr><td>Newbie (small sample)</td><td>100%</td><td>2</td><td>$50</td><td>today</td><td>20</td></tr>
+        <tr><td>Ghost (dormant)</td><td>90%</td><td>100</td><td>$10&nbsp;000</td><td>60d</td><td>69</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Who needs this</h2>
+    <p>
+      <strong>Orchestrator agents</strong> (Butler, ChainLens) that route work to providers want a
+      cheap, machine-readable trust signal before forwarding USDC. <strong>Buyer agents</strong>
+      vetting an unfamiliar service want a one-call check. <strong>Marketplaces</strong>
+      (agentic.market, Virtuals ACP, Bankr) want to highlight credible providers without running
+      their own ranking infrastructure.
+    </p>
+  </section>
+
+  <section>
+    <h2>Secondary skill — real-world businesses</h2>
+    <p>
+      Mainstreet also scores physical businesses from their Google Review footprint, for RWA
+      lending protocols (Goldfinch, Centrifuge, Maple). Same payload format, same registry.
+      Available via <code>GET /api/agent/snapshot/&lt;placeId&gt;</code>. Demand here is earlier
+      stage than agent reputation; we ship it as a secondary product, not the headline.
+    </p>
+  </section>
+
+  <section>
+    <h2>Status</h2>
+    <p>
+      <span class="status">●</span> API gateway live · <span class="status">●</span> Off-chain scoring live<br>
+      <span style="color: var(--muted)">○ On-chain registry · pending wallet provisioning</span><br>
+      <span style="color: var(--muted)">○ x402 paywall · pending wallet provisioning</span>
+    </p>
+  </section>
+
+  <footer>
+    Mainstreet is a product of <a href="https://avisradar.app">AvisRadar</a>.<br>
+    Built on ERC-8004 · Base mainnet · USDC settlement via Coinbase x402 facilitator.<br>
+    Not financial advice. Reputation signal is one input among many; do your own underwriting.
+  </footer>
+</div>
+</body>
+</html>

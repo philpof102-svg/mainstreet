@@ -1,0 +1,30 @@
+{
+  "name": "mainstreet-oracle",
+  "version": "0.1.0",
+  "description": "Onchain reputation oracle for AI agents and real-world businesses (ERC-8004 on Base).",
+  "main": "oracle.js",
+  "scripts": {
+    "example": "node examples/basic-usage.js"
+  },
+  "keywords": [
+    "erc-8004",
+    "reputation",
+    "oracle",
+    "base",
+    "x402",
+    "ai-agent",
+    "usdc"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philpof102-svg/mainstreet"
+  },
+  "homepage": "https://avisradar.app/mainstreet.html",
+  "bugs": {
+    "url": "https://github.com/philpof102-svg/mainstreet/issues"
+  }
+}
