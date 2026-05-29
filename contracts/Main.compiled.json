@@ -1,0 +1,254 @@
+{
+  "contractName": "Main",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.24;\n\n/**\n * @title Main — Mainstreet token (ERC-20 minimal, immutable)\n * @notice 1,000,000 MAIN minted at deploy to the Mainstreet operator wallet.\n *         No further mint, no admin, no upgrade path. Anyone can transfer.\n * @dev Pure inline ERC-20 (no OpenZeppelin import) so it deploys from Remix\n *      without any dependency setup. Same behavior as OZ ERC20.\n *      Deployed via Remix on Base mainnet (chain 8453).\n */\ncontract Main {\n    string public constant name = \"Mainstreet\";\n    string public constant symbol = \"MAIN\";\n    uint8 public constant decimals = 18;\n    uint256 public immutable totalSupply;\n\n    mapping(address => uint256) public balanceOf;\n    mapping(address => mapping(address => uint256)) public allowance;\n\n    event Transfer(address indexed from, address indexed to, uint256 value);\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n\n    /// @param mintReceiver address that receives the full initial supply\n    /// @param supply       total supply in wei units (18 decimals)\n    constructor(address mintReceiver, uint256 supply) {\n        require(mintReceiver != address(0), \"zero receiver\");\n        require(supply > 0, \"zero supply\");\n        totalSupply = supply;\n        balanceOf[mintReceiver] = supply;\n        emit Transfer(address(0), mintReceiver, supply);\n    }\n\n    function transfer(address to, uint256 value) external returns (bool) {\n        return _transfer(msg.sender, to, value);\n    }\n\n    function transferFrom(address from, address to, uint256 value) external returns (bool) {\n        uint256 allowed = allowance[from][msg.sender];\n        require(allowed >= value, \"allowance\");\n        if (allowed != type(uint256).max) {\n            allowance[from][msg.sender] = allowed - value;\n        }\n        return _transfer(from, to, value);\n    }\n\n    function approve(address spender, uint256 value) external returns (bool) {\n        allowance[msg.sender][spender] = value;\n        emit Approval(msg.sender, spender, value);\n        return true;\n    }\n\n    function _transfer(address from, address to, uint256 value) internal returns (bool) {\n        require(to != address(0), \"zero to\");\n        require(balanceOf[from] >= value, \"balance\");\n        unchecked {\n            balanceOf[from] -= value;\n            balanceOf[to] += value;\n        }\n        emit Transfer(from, to, value);\n        return true;\n    }\n}\n",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "mintReceiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "supply",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60a060405234801561000f575f80fd5b506040516106c33803806106c383398101604081905261002e9161010c565b6001600160a01b0382166100795760405162461bcd60e51b815260206004820152600d60248201526c3d32b937903932b1b2b4bb32b960991b60448201526064015b60405180910390fd5b5f81116100b65760405162461bcd60e51b815260206004820152600b60248201526a7a65726f20737570706c7960a81b6044820152606401610070565b60808190526001600160a01b0382165f81815260208181526040808320859055518481527fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a35050610143565b5f806040838503121561011d575f80fd5b82516001600160a01b0381168114610133575f80fd5b6020939093015192949293505050565b60805161056961015a5f395f60fb01526105695ff3fe608060405234801561000f575f80fd5b5060043610610090575f3560e01c8063313ce56711610063578063313ce5671461013e57806370a082311461015857806395d89b4114610177578063a9059cbb1461019a578063dd62ed3e146101ad575f80fd5b806306fdde0314610094578063095ea7b3146100d357806318160ddd146100f657806323b872dd1461012b575b5f80fd5b6100bd6040518060400160405280600a81526020016913585a5b9cdd1c99595d60b21b81525081565b6040516100ca9190610402565b60405180910390f35b6100e66100e1366004610469565b6101d7565b60405190151581526020016100ca565b61011d7f000000000000000000000000000000000000000000000000000000000000000081565b6040519081526020016100ca565b6100e6610139366004610491565b610243565b610146601281565b60405160ff90911681526020016100ca565b61011d6101663660046104ca565b5f6020819052908152604090205481565b6100bd6040518060400160405280600481526020016326a0a4a760e11b81525081565b6100e66101a8366004610469565b6102f1565b61011d6101bb3660046104e3565b600160209081525f928352604080842090915290825290205481565b335f8181526001602090815260408083206001600160a01b038716808552925280832085905551919290917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925906102319086815260200190565b60405180910390a35060015b92915050565b6001600160a01b0383165f908152600160209081526040808320338452909152812054828110156102a75760405162461bcd60e51b8152602060048201526009602482015268616c6c6f77616e636560b81b60448201526064015b60405180910390fd5b5f1981146102dd576102b98382610514565b6001600160a01b0386165f9081526001602090815260408083203384529091529020555b6102e8858585610304565b95945050505050565b5f6102fd338484610304565b9392505050565b5f6001600160a01b0383166103455760405162461bcd60e51b81526020600482015260076024820152667a65726f20746f60c81b604482015260640161029e565b6001600160a01b0384165f908152602081905260409020548211156103965760405162461bcd60e51b815260206004820152600760248201526662616c616e636560c81b604482015260640161029e565b6001600160a01b038481165f818152602081815260408083208054889003905593871680835291849020805487019055925185815290927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a35060019392505050565b5f602080835283518060208501525f5b8181101561042e57858101830151858201604001528201610412565b505f604082860101526040601f19601f8301168501019250505092915050565b80356001600160a01b0381168114610464575f80fd5b919050565b5f806040838503121561047a575f80fd5b6104838361044e565b946020939093013593505050565b5f805f606084860312156104a3575f80fd5b6104ac8461044e565b92506104ba6020850161044e565b9150604084013590509250925092565b5f602082840312156104da575f80fd5b6102fd8261044e565b5f80604083850312156104f4575f80fd5b6104fd8361044e565b915061050b6020840161044e565b90509250929050565b8181038181111561023d57634e487b7160e01b5f52601160045260245ffdfea2646970667358221220b8d4657150312ce154d1a27f6c5f445c0864d788065272c3ff5899853bde4c0a64736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561000f575f80fd5b5060043610610090575f3560e01c8063313ce56711610063578063313ce5671461013e57806370a082311461015857806395d89b4114610177578063a9059cbb1461019a578063dd62ed3e146101ad575f80fd5b806306fdde0314610094578063095ea7b3146100d357806318160ddd146100f657806323b872dd1461012b575b5f80fd5b6100bd6040518060400160405280600a81526020016913585a5b9cdd1c99595d60b21b81525081565b6040516100ca9190610402565b60405180910390f35b6100e66100e1366004610469565b6101d7565b60405190151581526020016100ca565b61011d7f000000000000000000000000000000000000000000000000000000000000000081565b6040519081526020016100ca565b6100e6610139366004610491565b610243565b610146601281565b60405160ff90911681526020016100ca565b61011d6101663660046104ca565b5f6020819052908152604090205481565b6100bd6040518060400160405280600481526020016326a0a4a760e11b81525081565b6100e66101a8366004610469565b6102f1565b61011d6101bb3660046104e3565b600160209081525f928352604080842090915290825290205481565b335f8181526001602090815260408083206001600160a01b038716808552925280832085905551919290917f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925906102319086815260200190565b60405180910390a35060015b92915050565b6001600160a01b0383165f908152600160209081526040808320338452909152812054828110156102a75760405162461bcd60e51b8152602060048201526009602482015268616c6c6f77616e636560b81b60448201526064015b60405180910390fd5b5f1981146102dd576102b98382610514565b6001600160a01b0386165f9081526001602090815260408083203384529091529020555b6102e8858585610304565b95945050505050565b5f6102fd338484610304565b9392505050565b5f6001600160a01b0383166103455760405162461bcd60e51b81526020600482015260076024820152667a65726f20746f60c81b604482015260640161029e565b6001600160a01b0384165f908152602081905260409020548211156103965760405162461bcd60e51b815260206004820152600760248201526662616c616e636560c81b604482015260640161029e565b6001600160a01b038481165f818152602081815260408083208054889003905593871680835291849020805487019055925185815290927fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef910160405180910390a35060019392505050565b5f602080835283518060208501525f5b8181101561042e57858101830151858201604001528201610412565b505f604082860101526040601f19601f8301168501019250505092915050565b80356001600160a01b0381168114610464575f80fd5b919050565b5f806040838503121561047a575f80fd5b6104838361044e565b946020939093013593505050565b5f805f606084860312156104a3575f80fd5b6104ac8461044e565b92506104ba6020850161044e565b9150604084013590509250925092565b5f602082840312156104da575f80fd5b6102fd8261044e565b5f80604083850312156104f4575f80fd5b6104fd8361044e565b915061050b6020840161044e565b90509250929050565b8181038181111561023d57634e487b7160e01b5f52601160045260245ffdfea2646970667358221220b8d4657150312ce154d1a27f6c5f445c0864d788065272c3ff5899853bde4c0a64736f6c63430008180033",
+  "compiler": {
+    "version": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    }
+  },
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"mintReceiver\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"supply\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Pure inline ERC-20 (no OpenZeppelin import) so it deploys from Remix      without any dependency setup. Same behavior as OZ ERC20.      Deployed via Remix on Base mainnet (chain 8453).\",\"kind\":\"dev\",\"methods\":{\"constructor\":{\"params\":{\"mintReceiver\":\"address that receives the full initial supply\",\"supply\":\"total supply in wei units (18 decimals)\"}}},\"title\":\"Main \\u2014 Mainstreet token (ERC-20 minimal, immutable)\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"notice\":\"1,000,000 MAIN minted at deploy to the Mainstreet operator wallet.         No further mint, no admin, no upgrade path. Anyone can transfer.\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"Main.sol\":\"Main\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"Main.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.24;\\n\\n/**\\n * @title Main \\u2014 Mainstreet token (ERC-20 minimal, immutable)\\n * @notice 1,000,000 MAIN minted at deploy to the Mainstreet operator wallet.\\n *         No further mint, no admin, no upgrade path. Anyone can transfer.\\n * @dev Pure inline ERC-20 (no OpenZeppelin import) so it deploys from Remix\\n *      without any dependency setup. Same behavior as OZ ERC20.\\n *      Deployed via Remix on Base mainnet (chain 8453).\\n */\\ncontract Main {\\n    string public constant name = \\\"Mainstreet\\\";\\n    string public constant symbol = \\\"MAIN\\\";\\n    uint8 public constant decimals = 18;\\n    uint256 public immutable totalSupply;\\n\\n    mapping(address => uint256) public balanceOf;\\n    mapping(address => mapping(address => uint256)) public allowance;\\n\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /// @param mintReceiver address that receives the full initial supply\\n    /// @param supply       total supply in wei units (18 decimals)\\n    constructor(address mintReceiver, uint256 supply) {\\n        require(mintReceiver != address(0), \\\"zero receiver\\\");\\n        require(supply > 0, \\\"zero supply\\\");\\n        totalSupply = supply;\\n        balanceOf[mintReceiver] = supply;\\n        emit Transfer(address(0), mintReceiver, supply);\\n    }\\n\\n    function transfer(address to, uint256 value) external returns (bool) {\\n        return _transfer(msg.sender, to, value);\\n    }\\n\\n    function transferFrom(address from, address to, uint256 value) external returns (bool) {\\n        uint256 allowed = allowance[from][msg.sender];\\n        require(allowed >= value, \\\"allowance\\\");\\n        if (allowed != type(uint256).max) {\\n            allowance[from][msg.sender] = allowed - value;\\n        }\\n        return _transfer(from, to, value);\\n    }\\n\\n    function approve(address spender, uint256 value) external returns (bool) {\\n        allowance[msg.sender][spender] = value;\\n        emit Approval(msg.sender, spender, value);\\n        return true;\\n    }\\n\\n    function _transfer(address from, address to, uint256 value) internal returns (bool) {\\n        require(to != address(0), \\\"zero to\\\");\\n        require(balanceOf[from] >= value, \\\"balance\\\");\\n        unchecked {\\n            balanceOf[from] -= value;\\n            balanceOf[to] += value;\\n        }\\n        emit Transfer(from, to, value);\\n        return true;\\n    }\\n}\\n\",\"keccak256\":\"0xc1c52f79a28957afc3abdc938ce4be018929ec5edc023489033b0933bd72395c\",\"license\":\"MIT\"}},\"version\":1}"
+}
