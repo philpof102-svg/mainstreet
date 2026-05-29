@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.6] — 2026-05-30
+
+### Added
+- **MAIN.sol verified on Sourcify** (`full_match` level). Sources publicly inspectable at https://repo.sourcify.dev/contracts/full_match/8453/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe/ — Basescan will mirror automatically within minutes.
+- `contracts/Main.compiled.json` and `contracts/Main.metadata.json` pinned for deterministic reverify.
+- `GET /api/agent/status` (upstream) — live infra snapshot: x402 init state, operator, token. Public, no auth.
+
+### Changed
+- `compile.js`: emits metadata.json with `useLiteralContent: true, bytecodeHash: ipfs` — required for Sourcify verification.
+- `leaderboard`: Bazaar query fixed (`payTo` not `address`); seeded agents now include real Bazaar-active sellers (OttoAI, Onesource).
+
 ## [0.1.5] — 2026-05-30
 
 ### Live in production
