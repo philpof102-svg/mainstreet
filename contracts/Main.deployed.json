@@ -1,0 +1,11 @@
+{
+  "address": "0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe",
+  "deployer": "0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9",
+  "mintReceiver": "0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9",
+  "supply": "1000000000000000000000000",
+  "txHash": "0xe57a1d1fe50afffbc3f10862c9afe158915f130a62f96ac6e4037b7d4e6fc969",
+  "block": 46652536,
+  "gasUsed": "382341",
+  "deployedAt": "2026-05-29T22:40:53.826Z",
+  "chain": "base-mainnet"
+}

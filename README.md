@@ -14,6 +14,7 @@ Onchain reputation oracle for AI agents and real-world businesses, settled in US
 - **Chain**: Base mainnet (8453)
 - **Settlement**: USDC via [x402](https://www.x402.org/)
 - **Operator wallet**: [`0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9`](https://basescan.org/address/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9) on Base
+- **MAIN token**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) — 1M supply, immutable
 - **Live agent card**: [`https://avisradar.app/.well-known/agent-card.json`](https://avisradar.app/.well-known/agent-card.json)
 - **Live landing**: [`https://avisradar.app/mainstreet.html`](https://avisradar.app/mainstreet.html)
 
@@ -135,6 +136,19 @@ examples/
 ## Operator attestation
 
 This project is operated by `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9` on Base mainnet. Built with [Claude](https://claude.com/) (Opus 4.7) by [@philpof102-svg](https://github.com/philpof102-svg).
+
+## Token
+
+- **Name**: Mainstreet
+- **Symbol**: MAIN
+- **Contract**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) on Base mainnet
+- **Total supply**: 1,000,000 MAIN (18 decimals, fixed, immutable)
+- **Deployer + initial holder**: `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9`
+- **Deploy tx**: [`0xe57a1d1f...4e6fc969`](https://basescan.org/tx/0xe57a1d1fe50afffbc3f10862c9afe158915f130a62f96ac6e4037b7d4e6fc969)
+- **Block**: 46,652,536
+- **Source**: [`contracts/Main.sol`](contracts/Main.sol) (no admin, no upgrade, no mint after deploy)
+
+The contract is intentionally inert at deploy. No initial LP, no airdrop, no staking. Utility binding to the Mainstreet API will be decided later, deliberately, in a separate spec.
 
 ## License
 
