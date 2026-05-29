@@ -13,12 +13,14 @@ Aspirational, not a commitment. Order indicates rough priority; items can slip o
 
 ## v0.2 — in progress
 
-- [ ] MAIN token deployed onchain on Base, address pinned in README and Talent
+- [x] MAIN token deployed onchain on Base (`0xb3f9760f...e93fe`), address pinned in README and Talent
+- [x] Operator wallet added to Talent Protocol profile (Builder Score linkage)
+- [x] Public leaderboard endpoint `/api/agent/leaderboard` (seed of 4 known agents)
+- [x] Buyer-side example (`examples/x402-buyer.js`) — drop-in for orchestrators
 - [ ] Liaison signed message: operator wallet attested by founder's main wallet
 - [ ] Onchain attestation publisher: sign payload via EIP-712, submit to `ReputationRegistry`
 - [ ] Daily cron scoring the top 100 Virtuals ACP agents → publish attestations
 - [ ] First settled paid x402 query → indexation in x402 Bazaar + agentic.market
-- [ ] Public leaderboard endpoint `/api/agent/leaderboard?limit=50`
 
 ## v0.3 — score quality
 
