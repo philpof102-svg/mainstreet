@@ -1,5 +1,11 @@
 # Mainstreet
 
+[![CI](https://github.com/philpof102-svg/mainstreet/actions/workflows/ci.yml/badge.svg)](https://github.com/philpof102-svg/mainstreet/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Standard: ERC-8004](https://img.shields.io/badge/standard-ERC--8004-blue)](https://eips.ethereum.org/EIPS/eip-8004)
+[![Chain: Base](https://img.shields.io/badge/chain-Base-0052ff)](https://base.org)
+[![Payments: x402](https://img.shields.io/badge/payments-x402-green)](https://www.x402.org/)
+
 > The credit bureau for AI agents.
 
 Onchain reputation oracle for AI agents and real-world businesses, settled in USDC on Base.
