@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.2] — 2026-05-30
+
+### Added
+- TypeScript declarations (`types/oracle.d.ts`) — full type coverage for all exported functions and types.
+- `npm run test` / `leaderboard` / `verify` scripts in `package.json`.
+- `SECURITY.md` — vulnerability reporting policy + 90-day coordinated disclosure.
+- `ROADMAP.md` — v0.1 through v1.0 milestones with explicit out-of-scope.
+- `docs/API.md` — full HTTP API reference.
+- `CONTRIBUTING.md` — local dev + PR guidelines.
+- `.github/workflows/ci.yml` — runs tests + examples on every push.
+- `examples/score-leaderboard.js` — demo with top agents (Ethy AI, HeyElsa, Axelrod).
+- `examples/verify-payload.js` — consumer-side validator with tamper detection.
+- README badges (CI, License, ERC-8004, Base, x402).
+
+### Changed
+- `package.json` declares published `files` whitelist for clean `npm publish` later.
+
 ## [0.1.1] — 2026-05-30
 
 ### Fixed
