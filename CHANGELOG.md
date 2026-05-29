@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3] — 2026-05-30
+
+### Deployed onchain
+- **MAIN token live on Base mainnet** at `0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe` (block 46,652,536, gas 382,341). 1M supply minted to operator wallet. Immutable.
+
+### Added
+- `contracts/Main.deployed.json` — pinned deploy metadata (tx hash, block, deployer).
+- `agent-card.json` populated with operator + token info (was `null` previously).
+
 ## [0.1.2] — 2026-05-30
 
 ### Added
