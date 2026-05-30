@@ -1,7 +1,7 @@
 {
   "name": "mainstreet-oracle",
-  "version": "0.1.0",
-  "description": "Onchain reputation oracle for AI agents and real-world businesses (ERC-8004 on Base).",
+  "version": "0.4.0",
+  "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
   "files": [
@@ -29,7 +29,11 @@
     "base",
     "x402",
     "ai-agent",
-    "usdc"
+    "usdc",
+    "agent-trust",
+    "agent-discovery",
+    "leaderboard",
+    "onchain"
   ],
   "license": "MIT",
   "engines": {
