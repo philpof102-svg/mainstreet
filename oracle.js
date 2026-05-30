@@ -83,6 +83,52 @@ function computeScoreAgent(metrics) {
   return Math.round(successPart + volumePart + recencyPart);
 }
 
+// ─── Scoring : activity (public leaderboard) ───────────────────
+/**
+ * Composite "activity rank" used when full reputation metrics are not
+ * available (Bazaar exposes resource_count but no successRate/volume).
+ *
+ * Goal: produce a usable ranking across all indexed agents while keeping
+ * the strict reputation score reserved for agents with real evidence.
+ *
+ * Components:
+ *  - activity: log10(jobCount) capped → up to 50 pts
+ *  - recency: exp decay → up to 20 pts
+ *  - reputation bump: successRate * sampleConfidence → up to 30 pts
+ *
+ * Total 0-100. Designed so a Bazaar-only agent with 1000 services can
+ * reach ~55 while an ERC-8004-attested agent with proven 99% success can
+ * reach the high 80s.
+ */
+function computeActivityScore(metrics) {
+  const jobCount = Math.max(0, Number(metrics?.jobCount ?? 0));
+  const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob ?? 30));
+  const successRate = metrics?.successRate == null ? null : Math.max(0, Math.min(1, Number(metrics.successRate)));
+  // alive: true → endpoint pinged successfully (HTTP 200/402/etc), false → unreachable
+  const alive = metrics?.alive;
+
+  // Activity: log10(1)=0, log10(10)=1, log10(100)=2, log10(1000)=3 ...
+  // Cap at log10(10000)=4 → 45 pts. Polymarket (27k) maxes out.
+  const activityPart = Math.min(45, Math.log10(Math.max(1, jobCount)) * 11.25);
+
+  // Recency: full pts if active today, decays over 30 days
+  const recencyPart = Math.max(0, 20 * Math.exp(-daysSinceLastJob / 15));
+
+  // Reputation bump only if explicit ERC-8004 evidence
+  let reputationPart = 0;
+  if (successRate != null) {
+    const sampleConfidence = Math.min(1, jobCount / 10);
+    reputationPart = successRate * 30 * sampleConfidence;
+  }
+
+  // Health bonus: +5 if endpoint verified alive in last 24h, 0 if unprobed, -3 if dead
+  let healthPart = 0;
+  if (alive === true) healthPart = 5;
+  else if (alive === false) healthPart = -3;
+
+  return Math.max(0, Math.min(100, Math.round(activityPart + recencyPart + reputationPart + healthPart)));
+}
+
 // ─── Dispatcher ────────────────────────────────────────────────
 function computeScore(subject) {
   if (subject?.subjectType === SUBJECT_TYPES.AGENT_ONCHAIN) {
@@ -192,6 +238,7 @@ module.exports = {
   computeScore,
   computeScoreBusiness,
   computeScoreAgent,
+  computeActivityScore,
   hashSubject,
   buildAttestationPayload,
   attest,
