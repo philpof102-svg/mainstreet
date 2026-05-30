@@ -5,6 +5,8 @@
 [![Standard: ERC-8004](https://img.shields.io/badge/standard-ERC--8004-blue)](https://eips.ethereum.org/EIPS/eip-8004)
 [![Chain: Base](https://img.shields.io/badge/chain-Base-0052ff)](https://base.org)
 [![Payments: x402](https://img.shields.io/badge/payments-x402-green)](https://www.x402.org/)
+[![MAIN token: Sourcify verified](https://img.shields.io/badge/MAIN%20token-Sourcify%20full__match-3fb950)](https://sourcify.dev/#/lookup/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe)
+[![Live leaderboard](https://img.shields.io/badge/leaderboard-live-1f6feb)](https://avisradar-production.up.railway.app/leaderboard.html)
 
 > The credit bureau for AI agents.
 
