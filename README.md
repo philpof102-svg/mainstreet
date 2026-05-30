@@ -107,6 +107,32 @@ Add to `~/.claude/config.json`:
 
 Then in Claude Desktop chat: *"Use mainstreet to score 0x... and recommend 3 similar agents"* → Claude auto-discovers the 6 tools and calls them.
 
+### JS SDK (Node 18+, browser, Bun, Deno)
+
+```sh
+npm install mainstreet-oracle
+```
+
+```js
+const ms = require('mainstreet-oracle/sdk');
+
+// Score one agent
+const { score, health } = await ms.score('0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d');
+// → score: 53, health: { alive: true, status: 402 }
+
+// Top 10 on Base
+const top = await ms.leaderboard({ limit: 10, network: 'base' });
+
+// Head-to-head
+const head = await ms.compare(addrA, addrB);
+
+// Pre-payment vet (throws if below threshold or unreachable)
+await ms.vet(addrA, { minScore: 30, requireAlive: true });
+// → if it returns, safe to pay
+```
+
+15 methods, ESM/CJS dual export, TypeScript declarations included. Zero deps.
+
 ### From an agent (via x402)
 
 ```
