@@ -4,6 +4,15 @@
   "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
+  "exports": {
+    ".": "./oracle.js",
+    "./sdk": {
+      "import": "./sdk/index.mjs",
+      "require": "./sdk/index.js",
+      "types": "./sdk/index.d.ts"
+    },
+    "./oracle": "./oracle.js"
+  },
   "bin": {
     "mainstreet": "bin/mainstreet.js",
     "mainstreet-mcp": "scripts/mcp-server.js"
@@ -11,10 +20,12 @@
   "files": [
     "oracle.js",
     "types/oracle.d.ts",
+    "sdk/",
     "contracts/Main.sol",
     "contracts/Main.compiled.json",
     "scripts/compile.js",
     "scripts/deploy-token.js",
+    "scripts/mcp-server.js",
     "bin/",
     "examples/",
     "README.md",

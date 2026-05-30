@@ -1,0 +1,20 @@
+// ESM re-export for tree-shakable imports.
+import sdk from './index.js';
+export const configure = sdk.configure;
+export const origin = sdk.origin;
+export const score = sdk.score.bind(sdk);
+export const leaderboard = sdk.leaderboard.bind(sdk);
+export const compare = sdk.compare.bind(sdk);
+export const movers = sdk.movers.bind(sdk);
+export const featured = sdk.featured.bind(sdk);
+export const trending = sdk.trending.bind(sdk);
+export const search = sdk.search.bind(sdk);
+export const recommend = sdk.recommend.bind(sdk);
+export const history = sdk.history.bind(sdk);
+export const healthSummary = sdk.healthSummary.bind(sdk);
+export const me = sdk.me.bind(sdk);
+export const badges = sdk.badges.bind(sdk);
+export const random = sdk.random.bind(sdk);
+export const claimBadge = sdk.claimBadge.bind(sdk);
+export const vet = sdk.vet.bind(sdk);
+export default sdk;
