@@ -140,6 +140,12 @@ test('activity: bounded 0..100 even with extreme inputs', () => {
   assert.ok(s2 >= 0, `expected ≥0, got ${s2}`);
 });
 
+test('activity: longevity (age + consistency + diversity) adds up to +10', () => {
+  const bare = computeActivityScore({ jobCount: 100, daysSinceLastJob: 0 });
+  const aged = computeActivityScore({ jobCount: 100, daysSinceLastJob: 0, ageDays: 30, snapshotDaysLast30: 21, tagCount: 5 });
+  assert.equal(aged - bare, 10, `expected +10 longevity bonus, got ${aged - bare}`);
+});
+
 test('activity: ERC-8004 reputation bump is dampened for small samples', () => {
   // jobCount=3 → sampleConfidence=0.3 → reputation bump = 0.9*30*0.3 = 8.1
   const low = computeActivityScore({ jobCount: 3, daysSinceLastJob: 0, successRate: 0.9 });

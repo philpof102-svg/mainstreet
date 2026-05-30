@@ -104,29 +104,54 @@ function computeActivityScore(metrics) {
   const jobCount = Math.max(0, Number(metrics?.jobCount ?? 0));
   const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob ?? 30));
   const successRate = metrics?.successRate == null ? null : Math.max(0, Math.min(1, Number(metrics.successRate)));
-  // alive: true → endpoint pinged successfully (HTTP 200/402/etc), false → unreachable
   const alive = metrics?.alive;
+  // Longevity signals — agent has been around for a while + showed up consistently
+  const ageDays = Math.max(0, Number(metrics?.ageDays ?? 0));
+  const snapshotDays = Math.max(0, Number(metrics?.snapshotDaysLast30 ?? 0));
+  // Diversity — number of distinct tags / categories surfaced in Bazaar metadata
+  const tagCount = Math.max(0, Number(metrics?.tagCount ?? 0));
 
-  // Activity: log10(1)=0, log10(10)=1, log10(100)=2, log10(1000)=3 ...
-  // Cap at log10(10000)=4 → 45 pts. Polymarket (27k) maxes out.
-  const activityPart = Math.min(45, Math.log10(Math.max(1, jobCount)) * 11.25);
+  // Activity (40 pts max — was 45, lowered to leave room for longevity/diversity)
+  const activityPart = Math.min(40, Math.log10(Math.max(1, jobCount)) * 10);
 
-  // Recency: full pts if active today, decays over 30 days
-  const recencyPart = Math.max(0, 20 * Math.exp(-daysSinceLastJob / 15));
+  // Recency (15 pts max — was 20)
+  const recencyPart = Math.max(0, 15 * Math.exp(-daysSinceLastJob / 15));
 
-  // Reputation bump only if explicit ERC-8004 evidence
+  // Reputation (30 pts max — unchanged)
   let reputationPart = 0;
   if (successRate != null) {
     const sampleConfidence = Math.min(1, jobCount / 10);
     reputationPart = successRate * 30 * sampleConfidence;
   }
 
-  // Health bonus: +5 if endpoint verified alive in last 24h, 0 if unprobed, -3 if dead
+  // Health (-3 to +5)
   let healthPart = 0;
   if (alive === true) healthPart = 5;
   else if (alive === false) healthPart = -3;
 
-  return Math.max(0, Math.min(100, Math.round(activityPart + recencyPart + reputationPart + healthPart)));
+  // Longevity & diversity (10 pts max):
+  //   - age:        +3 if ageDays >= 30, +2 if >= 14, +1 if >= 7
+  //   - consistency: +3 if snapshotDays >= 21, +2 if >= 10, +1 if >= 5
+  //   - diversity:  +4 if tagCount >= 5, +2 if >= 2, 0 otherwise
+  let agePart = 0;
+  if (ageDays >= 30) agePart = 3;
+  else if (ageDays >= 14) agePart = 2;
+  else if (ageDays >= 7) agePart = 1;
+
+  let consistencyPart = 0;
+  if (snapshotDays >= 21) consistencyPart = 3;
+  else if (snapshotDays >= 10) consistencyPart = 2;
+  else if (snapshotDays >= 5) consistencyPart = 1;
+
+  let diversityPart = 0;
+  if (tagCount >= 5) diversityPart = 4;
+  else if (tagCount >= 2) diversityPart = 2;
+
+  const longevityPart = agePart + consistencyPart + diversityPart;
+
+  return Math.max(0, Math.min(100, Math.round(
+    activityPart + recencyPart + reputationPart + healthPart + longevityPart
+  )));
 }
 
 // ─── Dispatcher ────────────────────────────────────────────────
