@@ -1,6 +1,6 @@
-# Contributing to Mainstreet
+# Contributing to MainStreet
 
-Thanks for your interest. Mainstreet is small and intentionally minimal.
+Thanks for your interest. MainStreet is small and intentionally minimal.
 
 ## Scope
 

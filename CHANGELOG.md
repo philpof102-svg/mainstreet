@@ -15,7 +15,7 @@
 - **Hall of Fame** `/badges.html`: lists all claimed badges. Empty state with claim CTA.
 - **Categories**: 5 SSR landings (/categories/{ai,crypto,data,news,sports}) + `/categories/` hub.
 - **/stats.html**: KPI dashboard with networks breakdown, score distribution, alive/dead ratio, top categories.
-- **Bookmarklet**: drag-to-bar JS bookmarklet detects 0x address on any Basescan page and opens its Mainstreet profile.
+- **Bookmarklet**: drag-to-bar JS bookmarklet detects 0x address on any Basescan page and opens its MainStreet profile.
 - **Embed widget** `public/widget.js`: 1-line `<script>` tag any agent site can embed to display a live score badge.
 
 ### Discovery

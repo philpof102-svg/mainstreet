@@ -1,4 +1,4 @@
-# Mainstreet — Base x402 ecosystem scan (2026-05-30)
+# MainStreet — Base x402 ecosystem scan (2026-05-30)
 
 First full scan of the Coinbase Developer Platform x402 Bazaar after indexing all 41 753 resources.
 
@@ -36,11 +36,11 @@ First full scan of the Coinbase Developer Platform x402 Bazaar after indexing al
 
 4. **Early adopter pool is bigger than the business pool.** 163 single-service agents > 88 multi-service agents. Onboarding a hobby agent to claim a badge is easier (low stakes, no enterprise risk).
 
-5. **No direct competitor found.** 0x24FAcafEB has 90 services including one called "Register an AI agent and create a reputation profile" — but it's a generic data-tools wallet (ClinVar, news, MLB), the "register" line is one product among 89 unrelated ones. **Mainstreet appears to be the first public reputation oracle on Base.**
+5. **No direct competitor found.** 0x24FAcafEB has 90 services including one called "Register an AI agent and create a reputation profile" — but it's a generic data-tools wallet (ClinVar, news, MLB), the "register" line is one product among 89 unrelated ones. **MainStreet appears to be the first public reputation oracle on Base.**
 
 ## Implications for next 30 days
 
 - **Outreach** : prioritize the 88 multi-service agents (business cohort) for /badge/claim invitations. The 163 single-service ones get a self-serve flow via /leaderboard.html SEO.
 - **Pricing** : keep $0.05 for /score?live=1. Consider bundle ($0.50 for 20 scores) when buyer agents start querying systematically.
-- **Distribution** : Polymarket's dominance proves the indexer works for high-volume producers. To beat Mainstreet's own 0-indexation problem, run the weekly settlement cron + cluster ≥5 paid hits in a single day to trigger the discovery threshold.
+- **Distribution** : Polymarket's dominance proves the indexer works for high-volume producers. To beat MainStreet's own 0-indexation problem, run the weekly settlement cron + cluster ≥5 paid hits in a single day to trigger the discovery threshold.
 - **Moat** : ERC-8004 is on-chain, anyone can read it. Our moat is the **aggregation pipeline** (Bazaar + ERC-8004 + soon ACP escrow), the **score formula**, and the **distribution surface** (leaderboard + badges).

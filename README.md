@@ -25,11 +25,11 @@ Onchain reputation oracle for AI agents and real-world businesses, settled in US
 
 ## Why
 
-In 2026 there are hundreds of thousands of AI agents transacting onchain on Base via Virtuals ACP, x402, ERC-8004. Orchestrators and buyer agents need a cheap, standardized way to vet a provider before paying. Today, no oracle aggregates signals *across* surfaces. Mainstreet does.
+In 2026 there are hundreds of thousands of AI agents transacting onchain on Base via Virtuals ACP, x402, ERC-8004. Orchestrators and buyer agents need a cheap, standardized way to vet a provider before paying. Today, no oracle aggregates signals *across* surfaces. MainStreet does.
 
 ## What it scores
 
-Mainstreet returns a `score` in `[0, 100]` for two subject types, with the same payload format.
+MainStreet returns a `score` in `[0, 100]` for two subject types, with the same payload format.
 
 ### `agent-onchain` (primary)
 
@@ -144,7 +144,7 @@ This project is operated by `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9` on Base
 
 ## Token
 
-- **Name**: Mainstreet
+- **Name**: MainStreet
 - **Symbol**: MAIN
 - **Contract**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) on Base mainnet ([source verified on Sourcify, full match](https://repo.sourcify.dev/contracts/full_match/8453/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe/))
 - **Total supply**: 1,000,000 MAIN (18 decimals, fixed, immutable)
@@ -153,7 +153,7 @@ This project is operated by `0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9` on Base
 - **Block**: 46,652,536
 - **Source**: [`contracts/Main.sol`](contracts/Main.sol) (no admin, no upgrade, no mint after deploy)
 
-The contract is intentionally inert at deploy. No initial LP, no airdrop, no staking. Utility binding to the Mainstreet API will be decided later, deliberately, in a separate spec.
+The contract is intentionally inert at deploy. No initial LP, no airdrop, no staking. Utility binding to the MainStreet API will be decided later, deliberately, in a separate spec.
 
 ## License
 

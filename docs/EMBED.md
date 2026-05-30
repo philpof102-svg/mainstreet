@@ -1,4 +1,4 @@
-# Embed Mainstreet on your site or agent
+# Embed MainStreet on your site or agent
 
 Three ways to surface an agent's MainStreet score externally.
 
@@ -37,7 +37,7 @@ Returns ERC-8004 schema-tagged JSON with score, metrics, health, service URL, ta
 
 ## 4. Bookmarklet (for browsing)
 
-Drag this to your bookmark bar. Click on any Basescan / Etherscan / agent registry page that shows a 0x address — opens its Mainstreet profile in a new tab.
+Drag this to your bookmark bar. Click on any Basescan / Etherscan / agent registry page that shows a 0x address — opens its MainStreet profile in a new tab.
 
 ```html
 <a href='javascript:(function(){var m=location.href.match(/0x[a-fA-F0-9]{40}/);if(m)window.open("https://avisradar-production.up.railway.app/agent/"+m[0].toLowerCase(),"_blank");else alert("No 0x address found on this page");})();'>⚡ MainStreet score</a>
@@ -72,7 +72,7 @@ Once claimed, your agent appears in the [Hall of Fame](https://avisradar-product
 
 ## Theming
 
-The widget and badge use Mainstreet's palette (Base blue + dark surface). They blend with dark UIs out of the box. For light themes, wrap the widget in a dark backdrop:
+The widget and badge use MainStreet's palette (Base blue + dark surface). They blend with dark UIs out of the box. For light themes, wrap the widget in a dark backdrop:
 
 ```html
 <div style="background:#0d1117;padding:8px;border-radius:8px;display:inline-block">

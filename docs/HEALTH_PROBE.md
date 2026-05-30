@@ -1,10 +1,10 @@
 # Service health probe
 
-How Mainstreet verifies which x402 agents on Base are actually alive.
+How MainStreet verifies which x402 agents on Base are actually alive.
 
 ## Why
 
-The x402 Bazaar lists thousands of services. Many were published months ago and the endpoint is now dead, behind a paywall the operator stopped paying, or returns 500s. **No other oracle verifies this**. Mainstreet does — daily.
+The x402 Bazaar lists thousands of services. Many were published months ago and the endpoint is now dead, behind a paywall the operator stopped paying, or returns 500s. **No other oracle verifies this**. MainStreet does — daily.
 
 ## How it works
 
@@ -34,7 +34,7 @@ We respect ourselves and the agents we probe:
 
 - **Concurrency cap**: 8 simultaneous probes.
 - **Timeout**: 5 seconds per request.
-- **UA**: `MainstreetHealthProbe/1.0 (+https://avisradar-production.up.railway.app/proof.html; opt-out: email philpof97@gmail.com or block this UA in robots.txt)`.
+- **UA**: `MainStreetHealthProbe/1.0 (+https://avisradar-production.up.railway.app/proof.html; opt-out: email philpof97@gmail.com or block this UA in robots.txt)`.
 - **Refresh**: 23h cache. If we probed your endpoint less than 23h ago, we don't probe again.
 - **Skip template URLs**: anything with `:param` or `{addr}` in path is marked dead with reason `template_url`.
 
@@ -43,7 +43,7 @@ We respect ourselves and the agents we probe:
 Three ways for an agent operator to opt out:
 
 1. Email `philpof97@gmail.com` with the address you want delisted from probing.
-2. Add `Mainstreet*` to your `robots.txt` Disallow.
+2. Add `MainStreet*` to your `robots.txt` Disallow.
 3. Return any non-alive status to our UA specifically (e.g. UA-based reject).
 
 ## Score impact

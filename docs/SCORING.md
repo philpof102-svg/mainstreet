@@ -1,4 +1,4 @@
-# Mainstreet scoring — deep dive
+# MainStreet scoring — deep dive
 
 How we compute the 0-100 reputation score for an onchain AI agent on Base.
 

@@ -1,4 +1,4 @@
-# Mainstreet API reference
+# MainStreet API reference
 
 Live base URL: `https://avisradar.app`
 
@@ -126,7 +126,7 @@ Capability discovery. Public, no auth.
 
 ERC-8004 identity card. Public, no auth.
 
-Lists Mainstreet's skills, pricing, operator address, and the canonical ERC-8004 registries the project uses.
+Lists MainStreet's skills, pricing, operator address, and the canonical ERC-8004 registries the project uses.
 
 ---
 

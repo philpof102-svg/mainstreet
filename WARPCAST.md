@@ -23,7 +23,7 @@ https://avisradar-production.up.railway.app/leaderboard.html
 ```
 before your agent pays another agent on Base, do you check its reputation?
 
-we just shipped Mainstreet — public reputation oracle for x402 + ERC-8004 agents.
+we just shipped MainStreet — public reputation oracle for x402 + ERC-8004 agents.
 405 indexed. free reads. live refresh via x402.
 
 https://avisradar-production.up.railway.app/leaderboard.html
@@ -34,7 +34,7 @@ https://avisradar-production.up.railway.app/leaderboard.html
 ## Option C — Builder angle
 
 ```
-spent 3 days building Mainstreet — reputation oracle for onchain agents on Base.
+spent 3 days building MainStreet — reputation oracle for onchain agents on Base.
 
 scores every x402 agent on activity + ERC-8004 feedback + live endpoint health. 405 indexed so far.
 

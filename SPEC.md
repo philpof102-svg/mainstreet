@@ -1,16 +1,16 @@
-# Mainstreet — ERC-8004 reputation attestations on Base
+# MainStreet — ERC-8004 reputation attestations on Base
 
 > *Wall Street meets Main Street: we score the local businesses Wall Street wants to lend to.*
 
 **Status** : design + scaffold. Activation gated by dedicated wallet provisioning.
 
-Mainstreet is a spin-off product of AvisRadar. AvisRadar produces the underlying Google review data; Mainstreet is the on-chain delivery layer for that data, targeted at DeFi RWA lenders and agent buyers.
+MainStreet is a spin-off product of AvisRadar. AvisRadar produces the underlying Google review data; MainStreet is the on-chain delivery layer for that data, targeted at DeFi RWA lenders and agent buyers.
 
 ## Why this exists
 
 Real-world asset (RWA) lending protocols on Base (Goldfinch, Centrifuge, Maple, etc) lend USDC to physical businesses. Their underwriting agents need a **verifiable, machine-readable** signal of business reputation — currently they manually scrape Google or rely on opaque private data.
 
-AvisRadar already produces this data daily for our paying customers. Mainstreet publishes aggregate scores on-chain as ERC-8004 attestations, becoming a **reputation oracle** that any agent or smart contract can consume permissionlessly.
+AvisRadar already produces this data daily for our paying customers. MainStreet publishes aggregate scores on-chain as ERC-8004 attestations, becoming a **reputation oracle** that any agent or smart contract can consume permissionlessly.
 
 ## Economic model
 
@@ -121,7 +121,7 @@ Inputs come from observable onchain activity: ERC-8004 ReputationRegistry feedba
 
 ## Activation prerequisites
 
-1. **Dedicated Mainstreet Operator wallet** on Base mainnet, funded with ~$5 ETH for gas.
+1. **Dedicated MainStreet Operator wallet** on Base mainnet, funded with ~$5 ETH for gas.
    - MUST NOT be the founder's main wallet (airdrop / personal funds exposure).
    - Created via `npx awal auth login operator@mainstreet.app` (Coinbase CDP managed) **or** a fresh EOA whose private key is stored in Railway env (`OPERATOR_PRIVATE_KEY`).
 2. ERC-8004 registry contract address on Base (use the canonical deployment when available, else deploy our own minimal registry).

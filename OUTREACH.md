@@ -1,4 +1,4 @@
-# Outreach playbook — get Mainstreet listed on agent markets & registries
+# Outreach playbook — get MainStreet listed on agent markets & registries
 
 Ready-to-paste DM templates + submission steps. Targets ranked by ROI.
 
@@ -15,7 +15,7 @@ Ready-to-paste DM templates + submission steps. Targets ranked by ROI.
 
 **DM template**:
 ```
-gm — built Mainstreet, the first public reputation oracle for onchain agents on Base.
+gm — built MainStreet, the first public reputation oracle for onchain agents on Base.
 
 405 agents auto-indexed from the x402 Bazaar, scored daily on activity + ERC-8004 feedback + live endpoint health.
 
@@ -39,7 +39,7 @@ JSON: https://avisradar-production.up.railway.app/api/agent/openapi.json
 
 **DM template** (Twitter @autonolas):
 ```
-hi @autonolas — Mainstreet is an open-source reputation oracle for onchain agents on Base. We'd be a natural fit in your awesome-autonolas list and Pearl ecosystem.
+hi @autonolas — MainStreet is an open-source reputation oracle for onchain agents on Base. We'd be a natural fit in your awesome-autonolas list and Pearl ecosystem.
 
 Specs:
 - ERC-8004 compliant
@@ -84,7 +84,7 @@ demo: https://avisradar-production.up.railway.app/agent/0x2bb72231eed303cc91a462
 
 **DM template**:
 ```
-hi — orchestrators need a cheap trust signal before routing work to an unknown agent. Mainstreet provides that for onchain agents on Base.
+hi — orchestrators need a cheap trust signal before routing work to an unknown agent. MainStreet provides that for onchain agents on Base.
 
 /api/agent/score/<agentAddress> returns 0-100 + service URL + alive/dead. Free reads, $0.05 USDC for live refresh.
 
@@ -106,7 +106,7 @@ OpenAPI: https://avisradar-production.up.railway.app/api/agent/openapi.json
 
 **DM template** (concise, builder→builder):
 ```
-gm @jessepollak — built Mainstreet on top of x402.
+gm @jessepollak — built MainStreet on top of x402.
 
 reputation oracle for onchain agents on Base. 405 indexed from the x402 Bazaar, scored daily. now also pinging each service URL to verify alive. Bonus: agents that respond properly get +5, dead -3.
 
@@ -118,7 +118,7 @@ spec: https://avisradar-production.up.railway.app/.well-known/x402.json
 
 ## 6. Awesome lists (low effort, high SEO)
 
-Open PRs to add Mainstreet entry:
+Open PRs to add MainStreet entry:
 - https://github.com/base/awesome-base
 - https://github.com/coinbase/x402 (README "Built with x402" section if exists)
 - https://github.com/erc-8004/awesome-erc-8004 (if exists)
@@ -126,7 +126,7 @@ Open PRs to add Mainstreet entry:
 
 **PR commit message template**:
 ```
-Add Mainstreet — reputation oracle for onchain agents on Base
+Add MainStreet — reputation oracle for onchain agents on Base
 
 Public leaderboard scoring all x402 + ERC-8004 agents on Base.
 405 indexed. Free reads + paid live refresh via x402.
@@ -144,9 +144,9 @@ MIT licensed, OpenAPI spec available.
 
 **Pitch DM**:
 ```
-hi — built something that might interest you. Mainstreet is the first public reputation oracle for onchain agents on Base. Free leaderboard ranking 405 agents by x402 activity + ERC-8004 feedback + live endpoint health.
+hi — built something that might interest you. MainStreet is the first public reputation oracle for onchain agents on Base. Free leaderboard ranking 405 agents by x402 activity + ERC-8004 feedback + live endpoint health.
 
-If it helps, here's a 1-paragraph story angle: "no one currently knows which agents in the Coinbase x402 Bazaar are actually alive — we just pinged 25 of them, only 17 responded. Mainstreet surfaces that gap."
+If it helps, here's a 1-paragraph story angle: "no one currently knows which agents in the Coinbase x402 Bazaar are actually alive — we just pinged 25 of them, only 17 responded. MainStreet surfaces that gap."
 
 happy to write a guest piece or just feed you data.
 ```

@@ -1,4 +1,4 @@
-# Mainstreet — Distribution Playbook
+# MainStreet — Distribution Playbook
 
 Three surfaces. One technical setup unlocks two of them.
 
@@ -21,7 +21,7 @@ Three surfaces. One technical setup unlocks two of them.
 - Description optimized for semantic search: *"Real-time Google review snapshot for a local business + up to 3 competitors..."*
 
 **Activation checklist**:
-- [ ] Provision Mainstreet receiver wallet on Base (not founder main).
+- [ ] Provision MainStreet receiver wallet on Base (not founder main).
 - [ ] Generate CDP API key at `https://portal.cdp.coinbase.com` → `CDP_API_KEY_ID`, `CDP_API_KEY_SECRET`.
 - [ ] Set env on Railway: `AGENT_X402_ENABLED=1`, `AGENT_X402_PAYTO=0x...`, `AGENT_X402_PRICE_USD=0.10`, `CDP_API_KEY_ID`, `CDP_API_KEY_SECRET`.
 - [ ] `npm i @x402/express @x402/evm @x402/core`.
@@ -70,7 +70,7 @@ acp serve                  # runtime accepting jobs via WebSocket
 **Payment escrow**: USDC is held in an ACP intermediary escrow until the job completes, then released to the provider wallet. Different model from raw x402 (instant settlement).
 
 **Activation checklist**:
-- [ ] `acp setup` — creates Mainstreet provider wallet (distinct from x402 receiver wallet).
+- [ ] `acp setup` — creates MainStreet provider wallet (distinct from x402 receiver wallet).
 - [ ] Top up that wallet with ~$2 ETH on Base for gas.
 - [ ] `acp sell init mainstreet` + edit offering config.
 - [ ] `acp sell create mainstreet` — onchain registration.
@@ -85,9 +85,9 @@ We end up with THREE wallets. None of them is Phil's main.
 
 | Wallet | Created via | Purpose | Funded with |
 |---|---|---|---|
-| **Mainstreet x402 Receiver** | `npx awal auth login receiver@mainstreet.app` (Coinbase CDP managed) | Receives USDC from x402 payments (Surfaces 1 & 2) | $0 — receives only |
-| **Mainstreet ACP Provider** | `acp setup` (Virtuals openclaw-acp CLI) | Identity for Virtuals provider role + escrow recipient | ~$2 ETH for gas |
-| **Mainstreet Oracle Operator** | future — when ERC-8004 publishing goes live | Signs reputation attestations on Base ReputationRegistry | ~$5 ETH for gas |
+| **MainStreet x402 Receiver** | `npx awal auth login receiver@mainstreet.app` (Coinbase CDP managed) | Receives USDC from x402 payments (Surfaces 1 & 2) | $0 — receives only |
+| **MainStreet ACP Provider** | `acp setup` (Virtuals openclaw-acp CLI) | Identity for Virtuals provider role + escrow recipient | ~$2 ETH for gas |
+| **MainStreet Oracle Operator** | future — when ERC-8004 publishing goes live | Signs reputation attestations on Base ReputationRegistry | ~$5 ETH for gas |
 
 Phil's main Base Account never appears in this topology. Sweep cron transfers USDC from Receiver → wherever Phil decides (weekly).
 

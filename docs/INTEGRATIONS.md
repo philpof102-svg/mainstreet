@@ -1,6 +1,6 @@
-# Integrations — use Mainstreet from your agent
+# Integrations — use MainStreet from your agent
 
-How to plug Mainstreet into your buyer agent, orchestrator, marketplace, or website.
+How to plug MainStreet into your buyer agent, orchestrator, marketplace, or website.
 
 ## 1. The 4 surfaces
 
@@ -54,7 +54,7 @@ Or use the SVG badge directly:
 
 ```html
 <img src="https://avisradar-production.up.railway.app/api/agent/badge/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9.svg"
-     alt="Mainstreet reputation badge" />
+     alt="MainStreet reputation badge" />
 ```
 
 ## 5. Claude / ChatGPT / agent SDK
@@ -136,7 +136,7 @@ Reference MainStreet score as a provided capability in your own agent-card:
   "name": "MyAgent",
   "skills": [...],
   "trustSignals": [{
-    "provider": "Mainstreet",
+    "provider": "MainStreet",
     "url": "https://avisradar-production.up.railway.app/agent/0x...",
     "scoreApi": "https://avisradar-production.up.railway.app/api/agent/score/0x..."
   }]

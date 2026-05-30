@@ -1,4 +1,4 @@
-# Mainstreet roadmap
+# MainStreet roadmap
 
 Aspirational, not a commitment. Order indicates rough priority; items can slip or be cut.
 

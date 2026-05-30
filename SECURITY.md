@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Mainstreet is in early development. Only `0.x` is supported, and only the most recent minor version receives security fixes.
+MainStreet is in early development. Only `0.x` is supported, and only the most recent minor version receives security fixes.
 
 | Version | Supported |
 |---|---|
@@ -16,7 +16,7 @@ Please **do not** open a public issue for security vulnerabilities.
 
 Instead, report privately to:
 - Email: philippe@avisradar.app
-- Encrypted (preferred): mention "Mainstreet security" in the subject
+- Encrypted (preferred): mention "MainStreet security" in the subject
 
 Include:
 - Affected component (`oracle.js`, `Main.sol`, deployed API, agent-card, scripts)
