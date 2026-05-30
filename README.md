@@ -25,6 +25,8 @@ Onchain reputation oracle for AI agents and real-world businesses, settled in US
 - **MAIN token**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) — 1M supply, immutable
 - **Live agent card**: [`https://avisradar.app/.well-known/agent-card.json`](https://avisradar.app/.well-known/agent-card.json)
 - **Live landing**: [`https://avisradar.app/mainstreet.html`](https://avisradar.app/mainstreet.html)
+- **Coinbase x402 Bazaar**: [indexed](https://api.cdp.coinbase.com/platform/v2/x402/discovery/merchant?payTo=0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9) (v2 protocol)
+- **Agent Arena ERC-8004**: agentId [`53953`](https://agentarena.site/api/agent/8453/53953)
 
 ## Why
 
@@ -194,10 +196,11 @@ examples/
 - [x] ERC-8004-shaped payload builder
 - [x] Agent card published
 - [x] x402 paywall integration (in upstream avisradar repo)
-- [ ] First settled paid query → x402 Bazaar indexation
+- [x] **First settled paid query → x402 Bazaar indexation** (2026-05-30, v2 protocol)
+- [x] **Agent Arena ERC-8004 NFT registration** (agentId `53953`, [profile](https://agentarena.site/api/agent/8453/53953))
+- [x] Public leaderboard ([live](https://avisradar-production.up.railway.app/leaderboard.html))
 - [ ] Onchain attestation publisher (signs and submits to ReputationRegistry)
 - [ ] Virtuals ACP escrow event ingestion
-- [ ] Public leaderboard
 
 ## Operator attestation
 
