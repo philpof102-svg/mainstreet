@@ -6,7 +6,8 @@ Mainstreet is in early development. Only `0.x` is supported, and only the most r
 
 | Version | Supported |
 |---|---|
-| 0.1.x | ✅ |
+| 0.4.x | ✅ |
+| 0.1.x – 0.3.x | ⚠️ best-effort only |
 | < 0.1 | ❌ |
 
 ## Reporting a vulnerability
@@ -28,10 +29,13 @@ Expected first response: within 72 hours.
 ## Scope
 
 ### In scope
-- Score formula manipulation (e.g., inputs that produce out-of-range scores)
+- Score formula manipulation (e.g., inputs that produce out-of-range scores, integer overflow, NaN propagation)
 - Payload tampering that bypasses `verify-payload` checks
 - `Main.sol` contract bugs (note: it is immutable, so disclosure is for awareness only)
-- Public API authentication bypass (`/api/agent/score`, `/api/agent/snapshot`)
+- Public API authentication bypass (`/api/agent/score?live=1`, `/api/agent/snapshot`, `/api/agent/badge/claim`)
+- EIP-191 signature verification bypass on badge claims
+- XSS / HTML injection in agent description fields (we escape; report if found unescaped)
+- Health probe abuse (using us to portscan / DoS third-party endpoints)
 - Private key or credential leakage in the public repo
 
 ### Out of scope
