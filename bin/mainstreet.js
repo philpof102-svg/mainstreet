@@ -2,8 +2,8 @@
 /**
  * MainStreet CLI — query the reputation oracle from your terminal.
  *
- * Install:  npm i -g mainstreet-oracle
- * Run:      npx mainstreet-oracle 0x...
+ * Install:  npm i -g @raskhaaa/mainstreet-oracle
+ * Run:      npx @raskhaaa/mainstreet-oracle 0x...
  *
  * Commands:
  *   mainstreet score 0x<addr>             — get score for an agent

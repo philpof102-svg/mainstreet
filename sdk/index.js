@@ -5,7 +5,7 @@
  * Same module works in CJS and ESM via index.js + index.mjs (mjs re-exports this).
  *
  * Quick start:
- *   const ms = require('mainstreet-oracle/sdk');
+ *   const ms = require('@raskhaaa/mainstreet-oracle/sdk');
  *   const { score, alive } = await ms.score('0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d');
  *   // → { score: 53, alive: true, description: 'Polymarket prediction market data and AI signals', ... }
  *

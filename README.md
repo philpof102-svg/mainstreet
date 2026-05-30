@@ -80,14 +80,14 @@ For RWA underwriting agents that need to vet local businesses.
 ### CLI (any terminal)
 
 ```sh
-npx mainstreet-oracle 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
+npx @raskhaaa/mainstreet-oracle 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
 # → 53/100 MainStreet score · Polymarket prediction market data · alive · 27.2k svc
 
-npx mainstreet-oracle leaderboard 10
-npx mainstreet-oracle compare 0xA... 0xB...
-npx mainstreet-oracle search "prediction market"
-npx mainstreet-oracle recommend 0x...
-npx mainstreet-oracle stats
+npx @raskhaaa/mainstreet-oracle leaderboard 10
+npx @raskhaaa/mainstreet-oracle compare 0xA... 0xB...
+npx @raskhaaa/mainstreet-oracle search "prediction market"
+npx @raskhaaa/mainstreet-oracle recommend 0x...
+npx @raskhaaa/mainstreet-oracle stats
 ```
 
 10 commands, colorized output, zero deps. See `bin/mainstreet.js`.
@@ -101,7 +101,7 @@ Add to `~/.claude/config.json`:
   "mcpServers": {
     "mainstreet": {
       "command": "npx",
-      "args": ["-y", "mainstreet-oracle", "mainstreet-mcp"]
+      "args": ["-y", "@raskhaaa/mainstreet-oracle", "mainstreet-mcp"]
     }
   }
 }
@@ -112,11 +112,11 @@ Then in Claude Desktop chat: *"Use mainstreet to score 0x... and recommend 3 sim
 ### JS SDK (Node 18+, browser, Bun, Deno)
 
 ```sh
-npm install mainstreet-oracle
+npm install @raskhaaa/mainstreet-oracle
 ```
 
 ```js
-const ms = require('mainstreet-oracle/sdk');
+const ms = require('@raskhaaa/mainstreet-oracle/sdk');
 
 // Score one agent
 const { score, health } = await ms.score('0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d');

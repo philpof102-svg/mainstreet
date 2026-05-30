@@ -60,7 +60,7 @@ Where else MainStreet (or any agent) should be listed beyond the x402 Bazaar, in
 
 ## Tier 4 — developer-side surfaces
 
-### 11. npm registry (mainstreet-oracle package)
+### 11. npm registry (@raskhaaa/mainstreet-oracle package)
 - **Status**: ✅ published-ready (package.json filled, version 0.4.0, bin + types + sdk exports configured). Phil to `npm publish` when ready.
 
 ### 12. PyPI mirror (Python SDK)

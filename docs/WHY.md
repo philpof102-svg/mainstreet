@@ -77,7 +77,7 @@ We don't have answers yet:
 
 ## Build with us
 
-- Use the [SDK](../sdk/index.js): `npm install mainstreet-oracle`
+- Use the [SDK](../sdk/index.js): `npm install @raskhaaa/mainstreet-oracle`
 - Read the [Scoring deep dive](SCORING.md)
 - Submit a PR to add your network
 - Cast at [@rakshasar.base.eth](https://warpcast.com/rakshasar.base.eth)

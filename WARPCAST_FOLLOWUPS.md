@@ -40,7 +40,7 @@ would be amazing to surface MainStreet score on Coinbase Wallet agent profiles o
 ## Reply #4 — show the CLI (devs love instant gratification)
 
 ```
-npx mainstreet-oracle@latest 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
+npx @raskhaaa/mainstreet-oracle@latest 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
 
 → 53/100 MainStreet score
   Polymarket prediction market data and AI signals

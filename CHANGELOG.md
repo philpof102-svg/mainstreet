@@ -5,7 +5,7 @@
 ### Added — devtools
 - **JS SDK** at `sdk/index.js` (CJS) + `sdk/index.mjs` (ESM) + `sdk/index.d.ts` (TypeScript declarations). 15 typed methods covering all endpoints. `vet()` helper gates buyer-agent payment on minScore + alive + has-serviceUrl. Zero deps (native fetch). 14/14 unit tests pass.
 - **CLI** at `bin/mainstreet.js`. 10 commands (score, leaderboard, compare, search, recommend, history, stats, movers, featured, me). Colorized output. Address-shortcut: `mainstreet 0x...` runs score by default.
-- **MCP server** at `scripts/mcp-server.js`. Native JSON-RPC over stdio, MCP protocol 2024-11-05. Claude Desktop / Claude Code can attach via `npx mainstreet-oracle mainstreet-mcp` and get 6 tools (score, leaderboard, compare, search, recommend, history).
+- **MCP server** at `scripts/mcp-server.js`. Native JSON-RPC over stdio, MCP protocol 2024-11-05. Claude Desktop / Claude Code can attach via `npx @raskhaaa/mainstreet-oracle mainstreet-mcp` and get 6 tools (score, leaderboard, compare, search, recommend, history).
 - `examples/sdk-quickstart.js` — 5-step buyer-agent demo flow.
 - `examples/recommend.js`, `examples/movers.js`, `examples/search.js`, `examples/compare.js`, `examples/stats.js`, `examples/health-aware-buyer.js`.
 
