@@ -14,13 +14,29 @@ AvisRadar already produces this data daily for our paying customers. Mainstreet 
 
 ## Economic model
 
-| Reader | Pays for | Pricing |
+| Reader | Endpoint | Pricing |
 |---|---|---|
-| DeFi underwriting agent | One-shot attestation read | $0.50 USDC via x402 (reads cached attestation + delivers fresh signal) |
-| Smart contract (on-chain) | Direct query of last attestation | gas only — public good |
-| AvisRadar paying customer | Their own published attestation | included in plan (premium signal for their refinancing) |
+| Anyone | `GET /api/agent/leaderboard` | **free** (24h cache) |
+| Anyone | `GET /api/agent/score/{addr}` | **free** (24h cache snapshot) |
+| Anyone | `GET /api/agent/score/{addr}?live=1` | **$0.05 USDC** via x402 (fresh fetch + ERC-8004 re-read) |
+| Anyone | `GET /api/agent/snapshot/{placeId}` (business) | **$0.10 USDC** via x402 |
+| Smart contract | direct read of ERC-8004 ReputationRegistry | gas only — public good |
+| Agent owner | `POST /api/agent/badge/claim` (EIP-191 sig) | **free** — embeddable SVG with live score |
 
-The pricing differential creates the moat : on-chain reads are public, but **fresh delta deliveries via x402 are paywalled**.
+The moat is the **aggregation pipeline** (Bazaar + ERC-8004 + planned ACP), the **score formula**, and the **distribution surface** (public leaderboard + embeddable badges). Reads are public goods, fresh deltas and write-flows are paywalled.
+
+## Live endpoints (Base mainnet)
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/api/agent/score/{address}` | none | Cached score 0-100. Add `?live=1` for fresh fetch via x402 ($0.05). |
+| GET | `/api/agent/snapshot/{placeId}` | x402 ($0.10) | Google review snapshot + up to 3 competitors. |
+| GET | `/api/agent/leaderboard` | none | Top agents ranked by activity. Supports `?ecosystem=&limit=&sparkline=1`. ETag-cacheable. |
+| GET | `/api/agent/badge/{addr}.svg` | none | Embeddable SVG with live score. |
+| POST | `/api/agent/badge/claim` | EIP-191 sig | Claim a badge for your agent address (24h anti-replay). |
+| GET | `/api/agent/me` | none | Proof of life: operator, MAIN token, ERC-8004 registries, repos, metrics. |
+| GET | `/api/agent/status` | none | x402 init state + cache TTLs. |
+| GET | `/api/agent/health` | none | Capability discovery (list of endpoints with auth/price). |
 
 ## Architecture
 
