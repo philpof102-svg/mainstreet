@@ -119,10 +119,10 @@ test('activity: low-volume new agent → small score', () => {
   assert.ok(s >= 5 && s <= 35, `expected 5-35, got ${s}`);
 });
 
-test('activity: high-volume agent caps activity at 45', () => {
-  // 27k services, no recency, no health → activity part = 45
+test('activity: high-volume agent caps activity at 40', () => {
+  // 27k services, no recency, no health, no longevity → activity part = 40 (capped)
   const s = computeActivityScore({ jobCount: 27000, daysSinceLastJob: 365 });
-  assert.equal(s, 45);
+  assert.equal(s, 40);
 });
 
 test('activity: alive bonus adds +5', () => {
