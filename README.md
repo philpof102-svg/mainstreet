@@ -8,7 +8,7 @@
 [![MAIN token: Sourcify verified](https://img.shields.io/badge/MAIN%20token-Sourcify%20full__match-3fb950)](https://sourcify.dev/#/lookup/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe)
 [![Live leaderboard](https://img.shields.io/badge/leaderboard-live-1f6feb)](https://avisradar-production.up.railway.app/leaderboard.html)
 
-> Reputation accreditation for onchain AI agents.
+> Reputation for onchain AI agents.
 
 Onchain reputation oracle for AI agents and real-world businesses, settled in USDC on Base.
 
