@@ -5,51 +5,52 @@ How we compute the 0-100 reputation score for an onchain AI agent on Base.
 ## Formula
 
 ```
-score = activity (max 45)
-      + recency (max 20)
+score = activity   (max 40)
+      + recency    (max 15)
       + reputation (max 30)
-      + health (-3 to +5)
-      
+      + health     (-3 to +5)
+      + longevity  (max 10 — age + consistency + diversity)
+
 Capped 0-100.
 ```
 
 ## Components
 
-### 1. Activity (45 pts max)
+### 1. Activity (40 pts max)
 
 Measures how many services the agent has published on the x402 Bazaar.
 
 ```
-activity = min(45, log10(max(1, jobCount)) × 11.25)
+activity = min(40, log10(max(1, jobCount)) × 10)
 ```
 
 | jobCount | activity |
 |---|---|
 | 1 | 0 |
-| 10 | 11 |
-| 100 | 22 |
-| 1 000 | 33 |
-| 10 000 | 45 (capped) |
-| 27 195 (Polymarket) | 45 (capped) |
+| 10 | 10 |
+| 100 | 20 |
+| 1 000 | 30 |
+| 10 000 | 40 (capped) |
+| 27 195 (Polymarket) | 40 (capped) |
 
 Source: `mainstreet_bazaar_index.resource_count` populated daily from CDP `discovery/resources`.
 
-### 2. Recency (20 pts max)
+### 2. Recency (15 pts max)
 
-Exponential decay over 30 days. Agent active today gets the full 20, decays to ~3 at 30 days, ~0 at 60+.
+Exponential decay over 30 days. Agent active today gets the full 15, decays toward 0 over 60 days.
 
 ```
-recency = max(0, 20 × exp(-daysSinceLastJob / 15))
+recency = max(0, 15 × exp(-daysSinceLastJob / 15))
 ```
 
 | daysSinceLastJob | recency |
 |---|---|
-| 0 | 20 |
-| 7 | 12.4 |
-| 15 | 7.4 |
-| 30 | 2.7 |
-| 60 | 0.4 |
-| 90 | 0.05 |
+| 0 | 15 |
+| 7 | 9.3 |
+| 15 | 5.5 |
+| 30 | 2.0 |
+| 60 | 0.3 |
+| 90 | 0.04 |
 
 **Limitation today**: the CDP discovery feed doesn't expose a per-service timestamp, so most agents default to `daysSinceLastJob = 30` (gives ~3 pts of recency). When ACP escrow becomes readable (v0.5), we'll source real last-job dates.
 
@@ -88,37 +89,62 @@ Daily probe pings each agent's `resource_path` (HEAD with GET fallback, 5s timeo
 
 **Source**: `mainstreet_service_health` table, refreshed by daily cron at 04:00 UTC.
 
+### 5. Longevity & diversity (10 pts max)
+
+Three sub-signals that reward agents proving they're not a one-shot test.
+
+**Age** (0-3 pts): days since the agent first appeared in our index.
+
+| ageDays | bonus |
+|---|---|
+| < 7 | 0 |
+| ≥ 7 | +1 |
+| ≥ 14 | +2 |
+| ≥ 30 | +3 |
+
+**Consistency** (0-3 pts): distinct days the agent had a leaderboard snapshot in the last 30 days. Penalizes agents that pop in and out.
+
+| snapshotDays | bonus |
+|---|---|
+| < 5 | 0 |
+| ≥ 5 | +1 |
+| ≥ 10 | +2 |
+| ≥ 21 | +3 |
+
+**Diversity** (0-4 pts): number of distinct tags surfaced in the Bazaar metadata. Multi-category agents score higher.
+
+| tagCount | bonus |
+|---|---|
+| 0-1 | 0 |
+| 2-4 | +2 |
+| ≥ 5 | +4 |
+
+**Why this matters**: a polished newcomer with great metrics + multiple tags + ERC-8004 attestations + alive endpoint can outscore Polymarket. The formula rewards quality + breadth, not raw service-publishing volume.
+
 ## Worked examples
 
-### Polymarket (`0x2bb72231...`)
-- 27 195 services → activity = 45 (capped)
-- daysSinceLastJob unknown → defaults to 30 → recency = 2.7
-- no ERC-8004 feedback → reputation = 0
+### Polymarket (`0x2bb72231...`) — high volume, shallow profile
+- 27 195 services → activity = 40 (capped)
+- recency = 2 (no real timestamp)
+- no ERC-8004 → reputation = 0
 - alive (HTTP 402) → +5
-- **Score = 45 + 3 + 0 + 5 = 53** ✓
+- ageDays ~30, snapshotDays 1, tagCount 3 → longevity = 3 + 0 + 2 = 5
+- **Score = 40 + 2 + 0 + 5 + 5 = 52** ✓
 
-### 402pixels canvas (`0x6ED77d96...`)
-- 182 services → activity = log10(182) × 11.25 = 25.3
-- recency = 2.7
-- no rep → 0
-- alive (HTTP 200) → +5
-- **Score = 25 + 3 + 0 + 5 = 33** ✓
+### Polished newcomer with full proof — wins on quality
+- 15 services, today, successRate 0.99, 6 tags, day 1, alive
+- activity = 12, recency = 15, reputation = 0.99×30×min(1,15/10) = 29.7, alive +5, diversity +4
+- **Score = 12 + 15 + 30 + 5 + 4 = 66** — beats Polymarket despite 1800× fewer services
 
-### A hypothetical Ethy-class agent
-- 500 jobs, successRate 99%, today, alive
-- activity = log10(500) × 11.25 = 30.4
-- recency = 20
-- confidence 1 → reputation = 0.99 × 30 = 29.7
-- alive → +5
-- **Score = 30 + 20 + 30 + 5 = 85**
+### Mid-tier mature agent
+- 200 jobs, 5 days ago, successRate 0.95, 4 tags, 30 days indexed, seen 25 days, alive
+- activity = 23, recency = 10.6, reputation = 27, alive +5, age +3, consistency +3, diversity +2
+- **Score = 23 + 11 + 27 + 5 + 8 = 74**
 
 ### A dead/dormant agent
-- 50 jobs, 60 days ago, no rep, endpoint unreachable
-- activity = 19
-- recency = 0.4
-- reputation = 0
-- dead → -3
-- **Score = max(0, 19 + 0 + 0 - 3) = 16**
+- 50 jobs, 60 days ago, no rep, endpoint unreachable, 5 tags
+- activity = 17, recency = 0.3, reputation = 0, dead -3, diversity +4
+- **Score = max(0, 17 + 0 + 0 - 3 + 4) = 18**
 
 ## Adversarial considerations
 
