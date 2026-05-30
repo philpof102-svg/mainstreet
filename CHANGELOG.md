@@ -1,5 +1,64 @@
 # Changelog
 
+## [0.4.1] — 2026-05-30 — Developer surface
+
+### Added — devtools
+- **JS SDK** at `sdk/index.js` (CJS) + `sdk/index.mjs` (ESM) + `sdk/index.d.ts` (TypeScript declarations). 15 typed methods covering all endpoints. `vet()` helper gates buyer-agent payment on minScore + alive + has-serviceUrl. Zero deps (native fetch). 14/14 unit tests pass.
+- **CLI** at `bin/mainstreet.js`. 10 commands (score, leaderboard, compare, search, recommend, history, stats, movers, featured, me). Colorized output. Address-shortcut: `mainstreet 0x...` runs score by default.
+- **MCP server** at `scripts/mcp-server.js`. Native JSON-RPC over stdio, MCP protocol 2024-11-05. Claude Desktop / Claude Code can attach via `npx mainstreet-oracle mainstreet-mcp` and get 6 tools (score, leaderboard, compare, search, recommend, history).
+- `examples/sdk-quickstart.js` — 5-step buyer-agent demo flow.
+- `examples/recommend.js`, `examples/movers.js`, `examples/search.js`, `examples/compare.js`, `examples/stats.js`, `examples/health-aware-buyer.js`.
+
+### Added — scoring v3 (longevity)
+- New 5th component: **longevity & diversity** (max 10 pts), composed of:
+  - Age bonus: +1/+2/+3 at 7/14/30 days since first indexed
+  - Consistency: +1/+2/+3 at 5/10/21 distinct days seen in last 30
+  - Diversity: +2/+4 at 2/5 Bazaar tags
+- Activity cap reduced 45 → 40 to make room
+- Recency cap reduced 20 → 15 to make room
+- Reward profile shifts: polished newcomers with ERC-8004 attestations + consistency can outscore pure-volume agents
+- 21/21 oracle tests pass
+
+### Added — endpoints (upstream)
+- `GET /api/agent/random` — pick a random indexed agent (optional `?network=`)
+- `GET /api/agent/trending?limit=` — 7-day score-delta gainers
+- `GET /api/agent/shield/:metric.json` — shields.io-compatible live badges (indexed, alive, badges, scored, version)
+- `GET /agent/{0x...}.json` — ERC-8004 schema-tagged per-agent card (CORS *)
+
+### Added — SEO + discovery
+- FAQPage JSON-LD schema (6 Q/A) on landing — unlocks Google rich results
+- `scripts/mainstreet-indexnow-ping.js` — push 14 URLs to IndexNow (Bing/Yandex/Seznam) for non-Google search engines
+- README adds 3 live shields.io badges (Agents indexed, Endpoints alive, Badges claimed) auto-updating from `/api/agent/shield/*.json`
+
+### Added — content for launch
+- `WARPCAST.md` — 4 launch cast variations + reply templates (English)
+- `WARPCAST_FOLLOWUPS.md` — 4 self-reply templates with timing playbook
+- `OUTREACH.md` — DM templates for agentic.market, Olas, Virtuals, ChainLens, Coinbase x402 team, awesome lists, press
+- `LAUNCH_POSTS.md` — 5 ready-to-paste posts for HackerNews (Show HN), Reddit r/ethereum + r/CryptoCurrency, IndieHackers, ProductHunt, Mirror outline
+- `docs/SCORING.md` — full deep-dive on the 5-component formula with worked examples + adversarial considerations
+- `docs/HEALTH_PROBE.md` — how we verify endpoints alive, polite-scanning rules, opt-out
+- `docs/EMBED.md` — 5 ways to surface (widget, SVG badge, JSON card, bookmarklet, Farcaster Frame)
+- `docs/INTEGRATIONS.md` — 11 ready-to-paste recipes (buyer agents, orchestrators, Claude SDK tool use, marketplaces, RSS, CSV, Frame, agent-card embed)
+- `docs/ECOSYSTEM-SCAN-2026-05-30.md` — analytical breakdown of all 41,753 Bazaar resources
+
+### Brand
+- Single canonical spelling: **MainStreet** (PascalCase, no space)
+- Brand wordmark fixed: inline-flex was treating `Main` and `<span>Street</span>` as separate flex items with 10px gap. Wrapped in single span so it renders tight without space.
+
+### Live distribution surface (production)
+- 7 pages all branded: `/mainstreet.html`, `/leaderboard.html`, `/agent.html` (+ SSR `/agent/0x...`), `/compare.html`, `/badges.html`, `/stats.html`, `/proof.html`
+- 5 SSR category landings (`/categories/{ai,crypto,data,news,sports}`) + `/categories/` hub
+- 1 embed widget (`/widget.js`) + 1 bookmarklet on landing
+- 24 API endpoints + OpenAPI 3.0.3 spec + `/.well-known/x402.json` + `/.well-known/agent-card.json`
+
+### Infrastructure
+- Cron `0 10 * * * UTC` — boot-phase aggressive settle (3 settlements/day) auto-stops after `MAINSTREET_BOOT_PHASE_UNTIL` date
+- 7 internal crons total (daily indexer + scorer, alerter q6h, weekly settle, health probe, boot-phase, social DRY, etc.)
+
+### Operational
+- 4 real x402 settlements completed (2026-05-30) to seed Bazaar indexation
+- Public repo passed 50 commits — currently 61
+
 ## [0.4.0] — 2026-05-30 — Production polish + scoring v2
 
 ### Scoring engine
