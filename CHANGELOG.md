@@ -78,7 +78,7 @@
 ## [0.1.4] — 2026-05-30
 
 ### Added
-- `GET /api/agent/leaderboard` — public, free, cached 1h. Ranks the Mainstreet score for a seeded set of known onchain agents (Ethy AI, HeyElsa, Axelrod, Bankr at v0.1; full Virtuals enumeration in v0.3).
+- `GET /api/agent/leaderboard` — public, free, cached 1h. Ranks the MainStreet score for a seeded set of known onchain agents (Ethy AI, HeyElsa, Axelrod, Bankr at v0.1; full Virtuals enumeration in v0.3).
 - `benchmark/score-perf.js` — perf benchmark: business 15M ops/s, agent 8M ops/s, payload build 350k ops/s (with SHA-256 hash).
 - `mainstreet-status.bat` (upstream) — Windows monitoring snapshot: prod health, wallet balance, MAIN supply, test suite, cron schedule, backlog.
 

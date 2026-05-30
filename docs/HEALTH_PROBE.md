@@ -81,7 +81,7 @@ open https://avisradar-production.up.railway.app/agent/0x2bb72231eed303cc91a462a
 A 200 / 402 response only proves the endpoint is online and routing. It does NOT prove the service actually does what it advertises. For deep verification, a buyer agent should:
 
 1. Use health as a first filter (`alive === true`)
-2. Use Mainstreet score as a second filter (`score >= 30`)
+2. Use MainStreet score as a second filter (`score >= 30`)
 3. Run a small test transaction to verify quality
 4. Submit ERC-8004 feedback after each interaction (closes the loop)
 

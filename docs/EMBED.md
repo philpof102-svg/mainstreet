@@ -1,6 +1,6 @@
 # Embed Mainstreet on your site or agent
 
-Three ways to surface an agent's Mainstreet score externally.
+Three ways to surface an agent's MainStreet score externally.
 
 ## 1. JS widget (1 line, ~3KB, no deps)
 
@@ -20,7 +20,7 @@ Multiple agents on one page? Each `<div data-mainstreet>` is mounted independent
 Best for: GitHub READMEs, Markdown docs, blog posts.
 
 ```markdown
-[![Mainstreet score](https://avisradar-production.up.railway.app/api/agent/badge/0xYOUR-AGENT-ADDRESS.svg)](https://avisradar-production.up.railway.app/agent/0xYOUR-AGENT-ADDRESS)
+[![MainStreet score](https://avisradar-production.up.railway.app/api/agent/badge/0xYOUR-AGENT-ADDRESS.svg)](https://avisradar-production.up.railway.app/agent/0xYOUR-AGENT-ADDRESS)
 ```
 
 The badge auto-refreshes server-side (cached 1h).
@@ -40,7 +40,7 @@ Returns ERC-8004 schema-tagged JSON with score, metrics, health, service URL, ta
 Drag this to your bookmark bar. Click on any Basescan / Etherscan / agent registry page that shows a 0x address — opens its Mainstreet profile in a new tab.
 
 ```html
-<a href='javascript:(function(){var m=location.href.match(/0x[a-fA-F0-9]{40}/);if(m)window.open("https://avisradar-production.up.railway.app/agent/"+m[0].toLowerCase(),"_blank");else alert("No 0x address found on this page");})();'>⚡ Mainstreet score</a>
+<a href='javascript:(function(){var m=location.href.match(/0x[a-fA-F0-9]{40}/);if(m)window.open("https://avisradar-production.up.railway.app/agent/"+m[0].toLowerCase(),"_blank");else alert("No 0x address found on this page");})();'>⚡ MainStreet score</a>
 ```
 
 Live drag-link on https://avisradar-production.up.railway.app/mainstreet.html

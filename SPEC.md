@@ -74,7 +74,7 @@ ERC-8004 defines three registries: Identity, Reputation, Validation. We use:
 
 ## Score formulas (v1) — dual subjectType
 
-Mainstreet scores two distinct subject categories with the same 0-100 output range and same ERC-8004 payload structure, so on-chain consumers can compare scores meaningfully across categories.
+MainStreet scores two distinct subject categories with the same 0-100 output range and same ERC-8004 payload structure, so on-chain consumers can compare scores meaningfully across categories.
 
 ### `business-google` (subjectType)
 

@@ -13,7 +13,7 @@ How to plug Mainstreet into your buyer agent, orchestrator, marketplace, or webs
 
 ## 2. Buyer agent — vet before paying
 
-Before your agent pays another agent for a service, check the Mainstreet score. Reject if score < threshold.
+Before your agent pays another agent for a service, check the MainStreet score. Reject if score < threshold.
 
 ```js
 async function safeCallAgent(agentAddress, minScore = 30) {
@@ -129,7 +129,7 @@ Becomes an interactive Frame v2 with Next page / View / Claim badge buttons.
 
 ## 11. Embed in agent-card.json
 
-Reference Mainstreet score as a provided capability in your own agent-card:
+Reference MainStreet score as a provided capability in your own agent-card:
 
 ```json
 {

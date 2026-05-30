@@ -65,7 +65,7 @@ live: avisradar-production.up.railway.app
 ```
 hey @virtuals_io — built a reputation oracle for onchain agents on Base that's a natural complement to Virtuals' agent commerce.
 
-Mainstreet scores agents 0-100 from x402 activity + ERC-8004 feedback. Any Virtuals agent can be looked up via /api/agent/score/<address>. Would love to integrate — e.g. show Mainstreet score on Virtuals agent profiles.
+MainStreet scores agents 0-100 from x402 activity + ERC-8004 feedback. Any Virtuals agent can be looked up via /api/agent/score/<address>. Would love to integrate — e.g. show MainStreet score on Virtuals agent profiles.
 
 open source, MIT
 spec: https://avisradar-production.up.railway.app/.well-known/x402.json
