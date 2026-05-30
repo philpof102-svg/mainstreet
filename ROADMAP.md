@@ -11,32 +11,50 @@ Aspirational, not a commitment. Order indicates rough priority; items can slip o
 - [x] MAIN token contract scaffold
 - [x] Test suite + CI
 
-## v0.2 — in progress
+## v0.2 — shipped 2026-05-30
 
-- [x] MAIN token deployed onchain on Base (`0xb3f9760f...e93fe`), address pinned in README and Talent
-- [x] Operator wallet added to Talent Protocol profile (Builder Score linkage)
-- [x] Public leaderboard endpoint `/api/agent/leaderboard` (seed of 4 known agents)
-- [x] Buyer-side example (`examples/x402-buyer.js`) — drop-in for orchestrators
-- [ ] Liaison signed message: operator wallet attested by founder's main wallet
-- [ ] Onchain attestation publisher: sign payload via EIP-712, submit to `ReputationRegistry`
-- [ ] Daily cron scoring the top 100 Virtuals ACP agents → publish attestations
-- [x] **First settled paid x402 query** (2026-05-30, 0.05 USDC, buyer `0xa1Dd5a2526D49626Ed7b9BF3bC16e61B205D678C`) → indexation in x402 Bazaar + agentic.market
+- [x] MAIN token deployed + Sourcify-verified on Base
+- [x] Talent Protocol Builder Score linkage
+- [x] Public leaderboard endpoint
+- [x] Buyer-side example
+- [x] **5 settled paid x402 queries** (2026-05-30, 0.05 USDC each, buyer `0xa1Dd...678C`)
 
-## v0.3 — score quality
+## v0.3 — score quality + product polish — shipped 2026-05-30
 
-- [ ] Read ERC-8004 `ReputationRegistry.giveFeedback` events directly via RPC
-- [ ] Read Virtuals ACP escrow completion events
+- [x] Activity-based scoring (log10 of jobCount) — works without ERC-8004 data
+- [x] ERC-8004 enrichment via viem read of `getSummary`
+- [x] Per-agent SSR profile pages `/agent/0x...` with dynamic og:image + Frame v2
+- [x] Visual `/compare.html` head-to-head UI
+- [x] `/categories/{ai|crypto|data|news|sports}` SSR landings
+- [x] `/badges.html` Hall of Fame
+- [x] `/stats.html` public KPI dashboard
+- [x] Per-agent JSON card at `/agent/0x....json`
+
+## v0.4 — health bonus + distribution — shipped 2026-05-30
+
+- [x] **Service health probe**: HEAD-then-GET pings each `resource_path` daily (04h UTC). +5/-3/0 score bonus. Unique among agent oracles.
+- [x] **Multi-network**: indexer scans all Bazaar networks (Base + Solana + Polygon + others). Leaderboard `?network=` filter.
+- [x] **Discoverability**: `/.well-known/x402.json`, OpenAPI 3 spec, dynamic sitemap with top 100 agent permalinks
+- [x] **Distribution**: Farcaster Frame v2 (leaderboard + per-agent), embed `<script>` widget, drag-to-bar bookmarklet, RSS feed, CSV export
+- [x] **Cross-discovery**: `/api/agent/recommend?for=0x` returns similar agents by category + score band
+- [x] **Engagement**: Telegram alert on each new agent + each badge claim
+- [x] Tests: 20/20 pass — covers health bonus, bounds, sample confidence
+
+## v0.5 — onchain attestations + real volume signals
+
+- [ ] Onchain attestation publisher: EIP-712 sign + submit to `ReputationRegistry`
+- [ ] Read Virtuals ACP escrow events for real USDC volume
+- [ ] ERC-8004 `giveFeedback` event indexer (not just summary)
 - [ ] Weight `successRate` by counter-party reputation (recursive trust)
-- [ ] Calibration: backtest against known incidents (rugs, scams) — score should have predicted ≤ 30 in the week before incident
 - [ ] Confidence interval alongside score (e.g., `score: 78 ± 8`)
 
-## v0.4 — adoption
+## v0.6 — adoption
 
-- [ ] Partner with one orchestrator agent (Butler or ChainLens) for native integration
-- [ ] "Mainstreet verified" embed badge for agent landings
-- [ ] SDK in TypeScript, Python, Go (just wrap `GET /score/:addr`)
+- [ ] Partner with one orchestrator agent (ChainLens, Butler) for native integration
+- [ ] SDK in TypeScript, Python, Go (wrap `GET /score/:addr`)
 - [ ] Subgraph indexer for community-built dashboards
-- [ ] WebSocket feed for real-time score deltas
+- [ ] WebSocket / Server-Sent Events feed for real-time score deltas
+- [ ] Stripe-style developer dashboard for buyer agents (usage, cost, alerts)
 
 ## v1.0 — sustainability
 
