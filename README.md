@@ -75,6 +75,38 @@ For RWA underwriting agents that need to vet local businesses.
 
 ## Use it
 
+### CLI (any terminal)
+
+```sh
+npx mainstreet-oracle 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
+# → 53/100 MainStreet score · Polymarket prediction market data · alive · 27.2k svc
+
+npx mainstreet-oracle leaderboard 10
+npx mainstreet-oracle compare 0xA... 0xB...
+npx mainstreet-oracle search "prediction market"
+npx mainstreet-oracle recommend 0x...
+npx mainstreet-oracle stats
+```
+
+10 commands, colorized output, zero deps. See `bin/mainstreet.js`.
+
+### Claude Desktop (MCP)
+
+Add to `~/.claude/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "mainstreet": {
+      "command": "npx",
+      "args": ["-y", "mainstreet-oracle", "mainstreet-mcp"]
+    }
+  }
+}
+```
+
+Then in Claude Desktop chat: *"Use mainstreet to score 0x... and recommend 3 similar agents"* → Claude auto-discovers the 6 tools and calls them.
+
 ### From an agent (via x402)
 
 ```
