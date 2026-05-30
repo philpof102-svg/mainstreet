@@ -4,6 +4,9 @@
   "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
+  "bin": {
+    "mainstreet": "bin/mainstreet.js"
+  },
   "files": [
     "oracle.js",
     "types/oracle.d.ts",
@@ -11,6 +14,7 @@
     "contracts/Main.compiled.json",
     "scripts/compile.js",
     "scripts/deploy-token.js",
+    "bin/",
     "examples/",
     "README.md",
     "LICENSE",
@@ -20,7 +24,8 @@
     "test": "node --test test/oracle.test.js",
     "example": "node examples/basic-usage.js",
     "leaderboard": "node examples/score-leaderboard.js",
-    "verify": "node examples/verify-payload.js"
+    "verify": "node examples/verify-payload.js",
+    "cli": "node bin/mainstreet.js"
   },
   "keywords": [
     "erc-8004",
