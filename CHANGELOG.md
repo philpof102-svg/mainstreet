@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.4.0] — 2026-05-30 — Production polish + scoring v2
+
+### Scoring engine
+- **Health bonus**: `+5` if the agent's `resource_path` was pinged alive in the last 24h, `-3` if dead, `0` if unprobed. New 4th component on top of activity/recency/reputation. **Unique among all known agent rankings** — no other oracle verifies which x402 services are actually responsive.
+- `computeActivityScore` activity cap reduced 50 → 45 to leave room for the health component (total still 0-100, clamped).
+- Score is now bounded explicitly with `Math.max(0, Math.min(100, ...))` to defend against extreme inputs.
+- Tests extended to 20 cases covering bounds, sample confidence, health bonus.
+
+### Upstream — distribution surface (live on `avisradar-production.up.railway.app`)
+- **Per-agent permalinks**: `/agent/0x...` server-rendered with per-agent og:title + og:image (1200x628 SVG share card). Every agent is now Google-indexable + shareable.
+- **Visual /compare.html**: side-by-side head-to-head UI. Pick 2 agents, see winner + recommendation. Powered by `/api/agent/compare`.
+- **Selection of the Week**: algorithmic picks (trending, newcomer, volume leader, hidden gem) refreshed hourly.
+- **Hall of Fame** `/badges.html`: lists all claimed badges. Empty state with claim CTA.
+- **Categories**: 5 SSR landings (/categories/{ai,crypto,data,news,sports}) + `/categories/` hub.
+- **/stats.html**: KPI dashboard with networks breakdown, score distribution, alive/dead ratio, top categories.
+- **Bookmarklet**: drag-to-bar JS bookmarklet detects 0x address on any Basescan page and opens its Mainstreet profile.
+- **Embed widget** `public/widget.js`: 1-line `<script>` tag any agent site can embed to display a live score badge.
+
+### Discovery
+- `/.well-known/x402.json` — standard service descriptor with 3 priced endpoints + 15 free endpoints + discoveryHints. Crawled by external agent indexers.
+- `/api/agent/openapi.json` — full OpenAPI 3.0.3 spec (16 paths). Auto-discoverable by Claude / ChatGPT / agent SDKs.
+- `/agent/0x....json` — per-agent ERC-8004 schema-tagged card (CORS *).
+- Dynamic `sitemap.xml` including top 100 agent permalinks.
+- Farcaster Frame v2 on `/agent/0x` + `/frame/leaderboard` for interactive Warpcast casts.
+
+### Multi-network
+- Indexer + cron + bootstrap now scan ALL networks in the x402 Bazaar (not just Base). Solana, Polygon, Stellar, Worldchain visible.
+- Leaderboard `?network=base|solana|all|polygon|...` filter with `normalizeNetwork` helper.
+
+### New endpoints (upstream)
+- `GET /api/agent/compare?a=&b=` — head-to-head with winner + margin + recommendation
+- `GET /api/agent/movers` — daily top gainers / losers by score delta
+- `GET /api/agent/featured` — Selection of the Week (4 algorithmic picks)
+- `GET /api/agent/search?q=` — SQL LIKE search across description/address/tags
+- `GET /api/agent/recommend?for=0x` — similar agents (category + score band)
+- `GET /api/agent/history/:addr?days=` — daily time series
+- `GET /api/agent/health-summary` — alive/dead aggregate + top 10 alive
+- `GET /api/agent/badges` — Hall of Fame backing data
+- `GET /api/agent/feed.rss` — newcomers + movers RSS
+- `GET /api/agent/leaderboard.csv` — full snapshot CSV export
+- `GET /api/agent/og.png?addr=0x` — per-agent share image
+- `POST /api/agent/badge/claim` — EIP-191 verified badge claim → SVG embed
+
+### Infrastructure
+- Cron `0 4 * * * UTC` — daily service health probe (HEAD with GET fallback, 5s timeout, polite UA with opt-out).
+- Cron `0 */6 * * * UTC` — new-agent Telegram alerter for first-seen diff.
+- Cron `0 9 * * 1 UTC` — weekly auto-settlement (TEST_BUYER → operator $0.05) to maintain Bazaar indexation.
+- 5 SQLite tables (bazaar_index, leaderboard_history, badges, seen_agents, service_health).
+- Self-healing bootstrap re-populates DB at boot if empty.
+
 ## [0.1.6] — 2026-05-30
 
 ### Added
