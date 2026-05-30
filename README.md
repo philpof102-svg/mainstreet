@@ -10,6 +10,9 @@
 [![Tests](https://img.shields.io/badge/tests-21%2F21-3fb950)](test/oracle.test.js)
 [![Version](https://img.shields.io/badge/version-0.4.0-blue)](CHANGELOG.md)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-orange)](https://avisradar-production.up.railway.app/api/agent/openapi.json)
+[![Agents indexed](https://img.shields.io/endpoint?url=https%3A%2F%2Favisradar-production.up.railway.app%2Fapi%2Fagent%2Fshield%2Findexed.json)](https://avisradar-production.up.railway.app/leaderboard.html)
+[![Endpoints alive](https://img.shields.io/endpoint?url=https%3A%2F%2Favisradar-production.up.railway.app%2Fapi%2Fagent%2Fshield%2Falive.json)](https://avisradar-production.up.railway.app/stats.html)
+[![Badges claimed](https://img.shields.io/endpoint?url=https%3A%2F%2Favisradar-production.up.railway.app%2Fapi%2Fagent%2Fshield%2Fbadges.json)](https://avisradar-production.up.railway.app/badges.html)
 
 > Reputation for onchain AI agents.
 
