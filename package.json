@@ -5,7 +5,8 @@
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
   "bin": {
-    "mainstreet": "bin/mainstreet.js"
+    "mainstreet": "bin/mainstreet.js",
+    "mainstreet-mcp": "scripts/mcp-server.js"
   },
   "files": [
     "oracle.js",
