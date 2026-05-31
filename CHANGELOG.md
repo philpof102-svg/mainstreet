@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.0] — 2026-05-31 — Tags, webhooks, on-chain settlements
+
+### Added — discovery & alerts
+- **`tags()` + `tagged(tag, limit)`** SDK methods + `tags` / `tagged <tag>` CLI commands. Browse the 815-agent ecosystem by capability (top tag: `x402` × 11, followed by `agent`, `crypto`, `trading`).
+- **`subscribeWebhook(opts)` + `listWebhooks(addr)`** SDK methods. Subscribe to score-change alerts via webhook URL — daily diff cron POSTs when score crosses `thresholdDelta`. 30-day grace period free; future renewals via x402. HMAC-signed deliveries (`X-MainStreet-Signature`). SSRF-protected (private IPs blocked, no redirects).
+- **`metrics.settlements`** field in `/score` + `/leaderboard` + `/compare` + `/agent/0x….json` responses. Real on-chain USDC `Transfer` events to indexed agents are now aggregated by an indexer cron every 6h. Includes `count` + `volumeUsdc`.
+
+### Added — server infrastructure (upstream)
+- `mainstreet_settlements`, `mainstreet_erc8004_feedback`, `mainstreet_webhook_subs`, `mainstreet_watchlist`, `mainstreet_scan_cursor` tables.
+- Scheduler crons: settlement indexer (q6h), ERC-8004 feedback indexer (03h30 UTC), watchlist Telegram alerts (05h UTC), webhook delivery (05h10 UTC).
+- `/api/agent/status` now exposes all 8 mainstreet crons with `lastRun` + `schedule`.
+
+### Fixed
+- Webhook URL validation rejects private/loopback/metadata IPs + `.internal`/`.local`/`.railway.app` domains. `maxRedirects:0` prevents SSRF via redirect.
+- Settlement indexer filters `to_addr` at RPC level (was pulling millions of USDC transfers per scan).
+- ERC-8004 indexer correctly stores `agentId` as integer string (was treating uint256 topic as 20-byte address — bogus data).
+- Score color thresholds unified across all surfaces: 0–19 red, 20–39 amber, 40+ green (was 50/25 inconsistent; <20 was grey indistinguishable from "no data").
+- Network alias handling: `?network=base` and `?network=eip155:8453` now return the same results (624 Base agents, not split 405+219).
+- `/api/agent/search` escapes SQL `LIKE` wildcards (`%`, `_`).
+- `/categories/:slug` shows the active category in hero title + activates the matching filter chip (was visually identical to bare leaderboard).
+- og:title / og:description / RSS feed titles truncate at word boundary (no mid-word "Bazaar v2 i" cuts).
+- Pricing unified to $0.05 USDC across all paywalls, env vars, docs, and Agent Arena profile (was inconsistent $0.05/$0.10 split).
+- 25+ smaller UX/data integrity fixes — see git log on `claude/add-extra-features-vw7rO`.
+
+### Operations
+- **Coinbase x402 Bazaar**: indexed since 2026-05-30, single resource (`/score/:address`), price 50000 (=$0.05 USDC), v2 protocol.
+- **Agent Arena**: ERC-8004 NFT minted as agentId 53953 on Base. Profile lists 3 services with v0.5.0 pricing.
+- **Telegram bot** (Phil-only): `/watch 0x... [threshold]`, `/unwatch 0x...`, `/watchlist` — daily 05h UTC diff alerts.
+
 ## [0.4.1] — 2026-05-30 — Developer surface
 
 ### Added — devtools
