@@ -159,6 +159,26 @@ const commands = {
     console.log(`\n  ${DIM}indexed:${RESET} ${d.metrics?.bazaarIndexed}  ${DIM}scored:${RESET} ${d.metrics?.scoredToday}  ${DIM}badges:${RESET} ${d.metrics?.badgesClaimed}`);
   },
 
+  async tags(n) {
+    const d = await api('/api/agent/tags');
+    const limit = Number(n) || 20;
+    console.log(`${BOLD}Top ${limit} tags${RESET} ${DIM}(of ${d.count})${RESET}\n`);
+    (d.tags || []).slice(0, limit).forEach((t, i) => {
+      console.log(`${DIM}${String(i+1).padStart(2)}.${RESET} ${BOLD}${t.tag}${RESET} ${DIM}× ${t.count}${RESET}`);
+    });
+  },
+
+  async tagged(tag, n) {
+    if (!tag) throw new Error('usage: mainstreet tagged <tag> [limit]');
+    const limit = Number(n) || 10;
+    const d = await api(`/api/agent/tags/${encodeURIComponent(tag)}?limit=${limit}`);
+    console.log(`${BOLD}Agents tagged "${d.tag}"${RESET} ${DIM}(${d.count} of total)${RESET}\n`);
+    (d.results || []).forEach((r, i) => {
+      const c = color(r.score);
+      console.log(`${DIM}${String(i+1).padStart(2)}.${RESET} ${c}${String(r.score ?? '—').padStart(3)}${RESET}  ${shortAddr(r.payTo)}  ${(r.description||'').slice(0, 60)}`);
+    });
+  },
+
   help() {
     console.log(`MainStreet CLI
 
@@ -175,6 +195,8 @@ Commands:
   movers [N=5]              Daily top gainers + losers
   featured                  Selection of the Week
   me                        Proof of life
+  tags [N=20]               Top N tags across the ecosystem
+  tagged <tag> [N=10]       Agents matching a tag, ranked by score
 
 Shortcut: passing only an address runs 'score'.
 
