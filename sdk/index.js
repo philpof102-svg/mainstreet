@@ -184,6 +184,60 @@ const sdk = {
     if (!subscriberAddr) throw new Error('subscriberAddr required');
     return call(`/api/agent/webhook/list?for=${encodeURIComponent(subscriberAddr)}`);
   },
+
+  /**
+   * POST /api/agent/match — intent-based agent routing in 1 call
+   * @param {string|object} intent — plain text OR { intent, maxPrice?, minScore?, limit? }
+   */
+  async match(intent) {
+    const body = typeof intent === 'string' ? { intent } : intent;
+    if (!body?.intent) throw new Error('match requires { intent } or a string');
+    return call('/api/agent/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  },
+
+  /**
+   * POST /api/agent/receipt — post buyer-signed feedback after settlement.
+   * @param {object} payload — { buyerAddr, agentAddr, success, message, signature, ...optional }
+   */
+  async postReceipt(payload) {
+    if (!payload?.buyerAddr || !payload?.agentAddr || payload.success == null || !payload.message || !payload.signature) {
+      throw new Error('postReceipt requires { buyerAddr, agentAddr, success, message, signature }');
+    }
+    return call('/api/agent/receipt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /** GET /api/agent/receipts?for=0x... — public receipt feed for an agent */
+  async receipts(agentAddress) {
+    return call('/api/agent/receipts?for=' + requireAddr(agentAddress));
+  },
+
+  /**
+   * POST /api/agent/watchlist — wallet-signed watchlist entry
+   * @param {object} payload — { subscriberAddr, watchAddr, label?, thresholdDelta?, message, signature }
+   */
+  async addWatch(payload) {
+    if (!payload?.subscriberAddr || !payload?.watchAddr || !payload?.message || !payload?.signature) {
+      throw new Error('addWatch requires { subscriberAddr, watchAddr, message, signature }');
+    }
+    return call('/api/agent/watchlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /** GET /api/agent/watchlist?for=0x... — list watched agents */
+  async watchlist(subscriberAddr) {
+    return call('/api/agent/watchlist?for=' + requireAddr(subscriberAddr));
+  },
 };
 
 module.exports = sdk;
