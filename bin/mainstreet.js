@@ -38,8 +38,8 @@ function color(score) {
 function shortAddr(a) { return a ? a.slice(0, 6) + '…' + a.slice(-4) : '—'; }
 function fmtJobs(n) { if (n == null) return '—'; if (n >= 1000) return (n/1000).toFixed(1) + 'k'; return String(n); }
 
-async function api(path) {
-  const r = await fetch(ORIGIN + path);
+async function api(path, opts) {
+  const r = await fetch(ORIGIN + path, opts);
   if (!r.ok) throw new Error(`HTTP ${r.status}: ${path}`);
   return r.json();
 }
@@ -179,6 +179,54 @@ const commands = {
     });
   },
 
+  async match(...words) {
+    // Parse intent + flags. Mark indices to skip (flag name + its value).
+    const skip = new Set();
+    const opts = {};
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      if (w === '--limit') { opts.limit = Number(words[i+1]); skip.add(i); skip.add(i+1); }
+      else if (w === '--min') { opts.minScore = Number(words[i+1]); skip.add(i); skip.add(i+1); }
+      else if (w === '--max') { opts.maxPrice = words[i+1]; skip.add(i); skip.add(i+1); }
+    }
+    opts.intent = words.filter((_, i) => !skip.has(i)).join(' ');
+    if (!opts.intent || opts.intent.length < 3) throw new Error('usage: mainstreet match <intent...> [--limit 3] [--min 20] [--max 0.05]');
+    const d = await api('/api/agent/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts) });
+    console.log(`${BOLD}Match "${opts.intent}"${RESET} ${DIM}(${d.count} result${d.count === 1 ? '' : 's'})${RESET}\n`);
+    (d.matches || []).forEach((m, i) => {
+      const c = color(m.score);
+      const price = m.price ? `${m.price.amountUsdc.toFixed(4)} USDC` : 'free';
+      console.log(`${DIM}${i+1}.${RESET} ${c}${String(m.score ?? '—').padStart(3)}${RESET} match:${m.matchScore.toFixed(1)}  ${shortAddr(m.payTo)}  ${BLUE}${price}${RESET}`);
+      console.log(`   ${DIM}${(m.description||'').slice(0, 70)}${RESET}`);
+      if (m.serviceUrl) console.log(`   ${DIM}→${RESET} ${m.serviceUrl}`);
+    });
+  },
+
+  async receipts(addr) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr || '')) throw new Error('usage: mainstreet receipts 0x<addr>');
+    const d = await api('/api/agent/receipts?for=' + addr);
+    if (d.summary) {
+      console.log(`${BOLD}${shortAddr(addr)}${RESET} ${DIM}(${d.summary.total} receipt${d.summary.total === 1 ? '' : 's'})${RESET}`);
+      console.log(`  success rate: ${GREEN}${(d.summary.successRate*100).toFixed(0)}%${RESET}`);
+      if (d.summary.avgRating != null) console.log(`  avg rating:   ${d.summary.avgRating?.toFixed(1)}/100`);
+      if (d.summary.avgLatencyMs != null) console.log(`  avg latency:  ${d.summary.avgLatencyMs}ms`);
+    } else {
+      console.log(DIM + 'No receipts yet for ' + addr + RESET);
+    }
+  },
+
+  async watchlist(addr) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr || '')) throw new Error('usage: mainstreet watchlist 0x<subscriber-addr>');
+    const d = await api('/api/agent/watchlist?for=' + addr);
+    console.log(`${BOLD}Watchlist for ${shortAddr(addr)}${RESET} ${DIM}(${d.count} agents)${RESET}\n`);
+    (d.watching || []).forEach((w, i) => {
+      const c = color(w.current_score);
+      const delta = (w.current_score != null && w.last_score != null) ? (w.current_score - w.last_score) : null;
+      const d2 = delta == null ? '' : (delta > 0 ? GREEN+'+'+delta : delta < 0 ? RED+delta : DIM+'=')+RESET;
+      console.log(`${DIM}${i+1}.${RESET} ${c}${String(w.current_score ?? '—').padStart(3)}${RESET} ${d2.padEnd(8)} ${shortAddr(w.watch_addr)}  ${(w.label||w.last_description||'').slice(0,50)}`);
+    });
+  },
+
   help() {
     console.log(`MainStreet CLI
 
@@ -197,6 +245,10 @@ Commands:
   me                        Proof of life
   tags [N=20]               Top N tags across the ecosystem
   tagged <tag> [N=10]       Agents matching a tag, ranked by score
+  match <intent...> [--limit N] [--min S] [--max P]
+                            Intent-based routing — top agents for a task
+  receipts <addr>           Public buyer receipts for an agent
+  watchlist <addr>          Watched agents of a subscriber
 
 Shortcut: passing only an address runs 'score'.
 
