@@ -30,6 +30,36 @@ export interface Price {
   network: string;
 }
 
+export interface TagEntry { tag: string; count: number; }
+export interface TagsResponse { version: string; count: number; tags: TagEntry[]; }
+export interface TaggedAgent {
+  payTo: string;
+  description: string | null;
+  score: number | null;
+  jobCount: number | null;
+  tags: string[];
+}
+export interface TaggedResponse { version: string; tag: string; count: number; results: TaggedAgent[]; }
+
+export interface WebhookSubscribeOpts {
+  subscriberAddr: string;
+  watchAddr: string;
+  webhookUrl: string;
+  thresholdDelta?: number;
+}
+export interface WebhookSubscribeResponse { version: string; ok: boolean; message: string; checkUrl: string; }
+export interface WebhookSubscription {
+  id: number;
+  watch_addr: string;
+  webhook_url: string;
+  threshold_delta: number;
+  last_score: number | null;
+  last_notified_at: string | null;
+  paid_until: string | null;
+  created_at: string;
+}
+export interface WebhookListResponse { version: string; count: number; subscriptions: WebhookSubscription[]; }
+
 export interface ScoreResponse {
   agentAddress: string;
   score: number | null;
@@ -97,3 +127,7 @@ export function badges(): Promise<any>;
 export function random(network?: string): Promise<any>;
 export function claimBadge(payload: { address: string; message: string; signature: string; displayName?: string; website?: string }): Promise<{ ok: true; address: string; badgeUrl: string; embed: string }>;
 export function vet(address: string, opts?: { minScore?: number; requireAlive?: boolean }): Promise<ScoreResponse>;
+export function tags(): Promise<TagsResponse>;
+export function tagged(tag: string, limit?: number): Promise<TaggedResponse>;
+export function subscribeWebhook(opts: WebhookSubscribeOpts): Promise<WebhookSubscribeResponse>;
+export function listWebhooks(subscriberAddr: string): Promise<WebhookListResponse>;

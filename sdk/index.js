@@ -154,6 +154,36 @@ const sdk = {
     if (!d.resourcePath) throw new Error('no service URL published');
     return d; // safe to use
   },
+
+  /** GET /api/agent/tags — top 100 tags across all indexed agents */
+  async tags() { return call('/api/agent/tags'); },
+
+  /** GET /api/agent/tags/:tag — agents matching a tag */
+  async tagged(tag, limit = 50) {
+    if (!tag || typeof tag !== 'string') throw new Error('tag must be a non-empty string');
+    return call(`/api/agent/tags/${encodeURIComponent(tag)}?limit=${limit}`);
+  },
+
+  /**
+   * POST /api/agent/webhook/subscribe — subscribe to score-change alerts
+   * @param {{subscriberAddr: string, watchAddr: string, webhookUrl: string, thresholdDelta?: number}} opts
+   */
+  async subscribeWebhook(opts) {
+    if (!opts?.subscriberAddr || !opts?.watchAddr || !opts?.webhookUrl) {
+      throw new Error('subscribeWebhook requires { subscriberAddr, watchAddr, webhookUrl }');
+    }
+    return call('/api/agent/webhook/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opts),
+    });
+  },
+
+  /** GET /api/agent/webhook/list?for=0x... — list webhook subscriptions */
+  async listWebhooks(subscriberAddr) {
+    if (!subscriberAddr) throw new Error('subscriberAddr required');
+    return call(`/api/agent/webhook/list?for=${encodeURIComponent(subscriberAddr)}`);
+  },
 };
 
 module.exports = sdk;
