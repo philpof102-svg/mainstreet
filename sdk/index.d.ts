@@ -4,11 +4,18 @@ export interface ConfigureOpts {
   origin?: string;
 }
 
+export interface SettlementStats {
+  count: number;
+  volumeUsdc: number;
+}
+
 export interface ScoreMetrics {
   successRate: number | null;
   jobCount: number | null;
   usdcVolume: number | null;
   daysSinceLastJob: number | null;
+  /** Real on-chain USDC settlements aggregated for this address (when available). */
+  settlements?: SettlementStats | null;
 }
 
 export interface Health {
