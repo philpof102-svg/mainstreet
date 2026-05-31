@@ -23,7 +23,7 @@
 
 const ORIGIN = process.env.MAINSTREET_ORIGIN || 'https://avisradar-production.up.railway.app';
 const SERVER_NAME = 'mainstreet';
-const SERVER_VERSION = '0.4.0';
+const SERVER_VERSION = require('../package.json').version;
 
 const TOOLS = [
   {
