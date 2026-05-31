@@ -17,4 +17,8 @@ export const badges = sdk.badges.bind(sdk);
 export const random = sdk.random.bind(sdk);
 export const claimBadge = sdk.claimBadge.bind(sdk);
 export const vet = sdk.vet.bind(sdk);
+export const tags = sdk.tags.bind(sdk);
+export const tagged = sdk.tagged.bind(sdk);
+export const subscribeWebhook = sdk.subscribeWebhook.bind(sdk);
+export const listWebhooks = sdk.listWebhooks.bind(sdk);
 export default sdk;
