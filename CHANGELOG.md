@@ -1,5 +1,114 @@
 # Changelog
 
+## [0.7.6] — 2026-06-01 — MCP server live (no SDK install needed)
+
+MainStreet is now a hosted MCP server. Any Claude / Cursor / ChatGPT user can add the 6 tools natively in one command:
+
+```bash
+claude mcp add --transport http mainstreet https://avisradar-production.up.railway.app/mcp
+```
+
+No npm install. No keys. No setup. Same 6 tools (`mainstreet_match`, `_pick`, `_score`, `_compare`, `_leaderboard`, `_vet`) wired to live Base reputation data, available natively in any MCP-capable AI client. The npm SDK still works for buyer LLMs that prefer code-level integration.
+
+README now leads with the MCP install line.
+
+## [0.7.5] — 2026-06-01 — README hero + live demo link
+
+### Updated
+- README pitch is now a 30-second 5-line code example pointing to the LLM tool flow + peer-receipt loop.
+- Surface live demo (https://avisradar-production.up.railway.app/mainstreet-demo.html), per-agent profile URLs, and leaderboard from the top.
+
+No code changes.
+
+## [0.7.4] — 2026-06-01 — buildReceiptMessage marker fix
+
+### Fixed
+`buildReceiptMessage` was emitting "MainStreet peer receipt" but the server's anti-replay marker check expects "mainstreet receipt" as a substring. Now emits "MainStreet receipt" — verified end-to-end with EIP-191 signature round-trip on prod.
+
+## [0.7.3] — 2026-06-01 — Peer-receipt rating loop wired into scoring
+
+### Fixed (logic bug)
+Buyer-signed receipts posted via `POST /api/agent/receipt` were stored but NEVER affected agent scores — the "agents-rate-agents" loop was half-built. Now wired into `buildMetrics`: receipts feed `successRate` as a fallback when ERC-8004 onchain attestations are absent.
+
+### Added
+- **`buildReceiptMessage({buyerAddr, agentAddr, txHash, success, ...})`** — canonical message helper for buyer agents. Sign with viem/ethers locally, post via `postReceipt`.
+- `metrics.peerReceipts` field on `/score` and `/match` results (count, successRate, avgRating, lastReceiptAt).
+- New scoring source: `mainstreet-peer-receipts` shows up in `sources[]` when receipts exist for an agent.
+
+### Why this matters
+This is the core "GitHub stars + Reddit karma for AI agents" loop, finally closed. A buyer LLM that uses an agent → POSTs a signed receipt → the agent's score updates next snapshot (24h). Onchain when there's an ERC-8004 attestation, off-chain peer-signed otherwise.
+
+## [0.7.2] — 2026-06-01 — onlyRegistered / onlyVerified filters
+
+### Added
+- `match({ onlyRegistered: true })` — restrict to ERC-8004-registered agents (onchain identity).
+- `match({ onlyVerified: true })` — restrict to MainStreet badge claimants.
+- New result field `erc8004Registered: boolean` on every match.
+
+LLM buyer agents can now route 100% of traffic to onchain-verified agents — directly creating the incentive for operators to register.
+
+## [0.7.1] — 2026-06-01 — Examples for every major LLM framework
+
+### Added
+- `examples/openai-tools.js` — full tool-calling loop with `openai()` adapter.
+- `examples/anthropic-tools.js` — full tool-use loop with Claude.
+- `examples/llamaindex-tool.js` — LlamaIndex `FunctionTool` wrapper.
+- `examples/vercel-ai-sdk.js` — refactored to one-line `vercelAiSdk()`.
+- `examples/langchain-tool.js` — refactored to one-line `langchain()` wrapper.
+
+Drop-in PR templates for upstream integrations live in `UPSTREAM_PRS.md`
+(Bazaar/x402, LangChain community tools, LlamaIndex, Vercel AI examples,
+ERC-8004 ecosystem registry).
+
+## [0.7.0] — 2026-06-01 — LLM tool definitions
+
+### Added — `@raskhaaa/mainstreet-oracle/tools`
+One import, six LLM-ready tools, every major framework supported.
+
+```js
+import { openai, anthropic, vercelAiSdk, langchain, mastra } from '@raskhaaa/mainstreet-oracle/tools';
+```
+
+- **6 tools** out of the box: `mainstreet_match`, `mainstreet_pick`, `mainstreet_score`, `mainstreet_compare`, `mainstreet_leaderboard`, `mainstreet_vet`. Each ships with JSON Schema, description, and `execute()` bound to the live API.
+- **Adapter for every framework**:
+  - `openai()` → OpenAI Chat Completions / Assistants v2 tools array.
+  - `anthropic()` → Anthropic Claude tools (`{name, description, input_schema}`).
+  - `vercelAiSdk()` → Vercel AI SDK `tools` record (drop-in).
+  - `langchain()` → DynamicStructuredTool-compatible specs.
+  - `mastra()` → Mastra `createTool()` shape.
+  - `specs()` → bare JSON Schema dump for anything else.
+- **`execute(name, args)`** — direct exec by tool name for frameworks that route by string.
+- Full TypeScript types in `tools.d.ts`.
+
+### Why this matters
+LLM buyer agents (built with LangChain, Vercel AI, Mastra, raw OpenAI tools) can now discover, vet, and pick onchain agents on Base **in their normal tool-calling loop** — no MainStreet-specific glue code. `mainstreet_pick("translate French to English")` → `{payTo, serviceUrl, price, score, sla}` → x402 call.
+
+## [0.6.3] — 2026-06-01 — pick() one-call buyer flow
+
+### Added
+- **`ms.pick(intent)`** — one-call buyer flow. Returns the single best `MatchEntry` directly. Throws on no match. Throws on weak match unless `{allowWeak:true}`. Lets you `const a = await ms.pick('image gen'); fetch(a.serviceUrl, ...)`.
+- **`mainstreet pick <intent>`** CLI command. Outputs a clean JSON `{payTo, serviceUrl, price, score, sla, settlements}` ready to pipe into another tool.
+- **`mainstreet match`** now shows settlements + SLA p50/okRate per result, and prints `⚠ weak match` when `noStrongMatch`.
+- `SlaStats.note` typed (e.g. "few samples — wait for more probes").
+
+### Server-side (live)
+- SLA shape strictly unified across `/score`, `/match`, `/leaderboard`: `{samples, okRate, latencyP50ms, latencyP95ms, avgLatencyMs, note}`.
+- Health probe now runs every 6h (4/10/16/22 UTC) instead of daily — 4x SLA samples in 24h → meaningful p50/p95 the same day.
+
+## [0.6.2] — 2026-06-01 — TypeScript types complete, /match enriched
+
+### Added
+- TypeScript declarations for `match`, `postReceipt`, `receipts`, `addWatch`, `watchlist` (previously runtime-only).
+- `SlaStats` interface — `samples`, `okRate`, `avgLatencyMs` from health probe rolling window.
+- `MatchEntry` now declares `settlements` + `sla` per result (server enriches each match with on-chain volume + latency in 1 call).
+- `match()` signature accepts `string | MatchOpts`.
+
+### Server-side (live now)
+- `/api/agent/match` includes `settlements` + `sla` per result — LLM clients can compare candidates on real on-chain activity + endpoint latency without a follow-up call.
+- Light stemming on `/match` intent tokens (`generate` → `generat` matches "generation"; `image` → `imag` matches "images"). Stripped suffixes: `ation, tion, ing, ies, ied, ed, er, es, s, e`.
+- `/match` ordering: matchScore DESC first, then score (relevance > popularity).
+- `noStrongMatch: true` + explanatory `note` when top result matches less than full intent token count.
+
 ## [0.5.0] — 2026-05-31 — Tags, webhooks, on-chain settlements
 
 ### Added — discovery & alerts

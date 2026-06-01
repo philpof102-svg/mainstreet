@@ -200,6 +200,52 @@ const sdk = {
   },
 
   /**
+   * Convenience: returns the single best match for an intent.
+   * Throws if no agent matches (lets you `await ms.pick(...)` straight into a call).
+   * Pass options.allowWeak=true to accept noStrongMatch results.
+   * @param {string|object} intent
+   * @param {{ allowWeak?: boolean }} [options]
+   */
+  async pick(intent, options = {}) {
+    const body = typeof intent === 'string' ? { intent, limit: 1 } : { ...intent, limit: 1 };
+    const r = await this.match(body);
+    if (!r.matches?.length) throw new Error(`pick: no agent matched "${body.intent}"`);
+    if (r.noStrongMatch && !options.allowWeak) {
+      throw new Error(`pick: only weak match for "${body.intent}" (top matches ${r.matches[0].matchScore}/${r.tokens.length} tokens). Pass {allowWeak:true} to accept.`);
+    }
+    return r.matches[0];
+  },
+
+  /**
+   * Build the canonical message buyer agents must sign before posting a receipt.
+   * Sign locally with viem `account.signMessage({ message })` then pass to `postReceipt`.
+   *
+   *   const message = ms.buildReceiptMessage({ buyerAddr, agentAddr, txHash, success: true });
+   *   const signature = await account.signMessage({ message });
+   *   await ms.postReceipt({ buyerAddr, agentAddr, txHash, success: true, message, signature });
+   *
+   * @param {{buyerAddr: string, agentAddr: string, txHash?: string, success: boolean, latencyMs?: number, rating?: number, comment?: string}} opts
+   * @returns {string} canonical message
+   */
+  buildReceiptMessage(opts) {
+    if (!opts?.buyerAddr || !opts?.agentAddr || opts.success == null) {
+      throw new Error('buildReceiptMessage requires { buyerAddr, agentAddr, success }');
+    }
+    const lines = [
+      'MainStreet receipt',
+      'buyer: ' + opts.buyerAddr.toLowerCase(),
+      'agent: ' + opts.agentAddr.toLowerCase(),
+      'success: ' + (opts.success ? 'true' : 'false'),
+    ];
+    if (opts.txHash) lines.push('txHash: ' + opts.txHash);
+    if (opts.latencyMs != null) lines.push('latencyMs: ' + opts.latencyMs);
+    if (opts.rating != null) lines.push('rating: ' + opts.rating);
+    if (opts.comment) lines.push('comment: ' + String(opts.comment).slice(0, 280));
+    lines.push('timestamp=' + Date.now());
+    return lines.join('\n');
+  },
+
+  /**
    * POST /api/agent/receipt — post buyer-signed feedback after settlement.
    * @param {object} payload — { buyerAddr, agentAddr, success, message, signature, ...optional }
    */

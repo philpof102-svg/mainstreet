@@ -193,13 +193,37 @@ const commands = {
     if (!opts.intent || opts.intent.length < 3) throw new Error('usage: mainstreet match <intent...> [--limit 3] [--min 20] [--max 0.05]');
     const d = await api('/api/agent/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts) });
     console.log(`${BOLD}Match "${opts.intent}"${RESET} ${DIM}(${d.count} result${d.count === 1 ? '' : 's'})${RESET}\n`);
+    if (d.noStrongMatch) console.log(`${DIM}⚠  ${d.note}${RESET}\n`);
     (d.matches || []).forEach((m, i) => {
       const c = color(m.score);
       const price = m.price ? `${m.price.amountUsdc.toFixed(4)} USDC` : 'free';
       console.log(`${DIM}${i+1}.${RESET} ${c}${String(m.score ?? '—').padStart(3)}${RESET} match:${m.matchScore.toFixed(1)}  ${shortAddr(m.payTo)}  ${BLUE}${price}${RESET}`);
       console.log(`   ${DIM}${(m.description||'').slice(0, 70)}${RESET}`);
       if (m.serviceUrl) console.log(`   ${DIM}→${RESET} ${m.serviceUrl}`);
+      const extras = [];
+      if (m.settlements) extras.push(`${m.settlements.count} settle / $${m.settlements.volumeUsdc.toFixed(2)}`);
+      if (m.sla) extras.push(`p50:${m.sla.latencyP50ms ?? '—'}ms ok:${Math.round((m.sla.okRate ?? 0)*100)}%`);
+      if (extras.length) console.log(`   ${DIM}${extras.join(' · ')}${RESET}`);
     });
+  },
+
+  async pick(...words) {
+    // Like match, but returns 1 result formatted for piping into a buyer agent.
+    const skip = new Set();
+    const opts = {};
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      if (w === '--min') { opts.minScore = Number(words[i+1]); skip.add(i); skip.add(i+1); }
+      else if (w === '--max') { opts.maxPrice = words[i+1]; skip.add(i); skip.add(i+1); }
+    }
+    opts.intent = words.filter((_, i) => !skip.has(i)).join(' ');
+    opts.limit = 1;
+    if (!opts.intent || opts.intent.length < 3) throw new Error('usage: mainstreet pick <intent...> [--min S] [--max P]');
+    const d = await api('/api/agent/match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts) });
+    const m = d.matches?.[0];
+    if (!m) { console.error(`no match for "${opts.intent}"`); process.exit(1); }
+    if (d.noStrongMatch) console.error(`⚠  weak match: ${d.note}`);
+    console.log(JSON.stringify({ payTo: m.payTo, serviceUrl: m.serviceUrl, price: m.price, score: m.score, sla: m.sla, settlements: m.settlements }, null, 2));
   },
 
   async receipts(addr) {
@@ -246,6 +270,7 @@ Commands:
   tags [N=20]               Top N tags across the ecosystem
   tagged <tag> [N=10]       Agents matching a tag, ranked by score
   match <intent...> [--limit N] [--min S] [--max P]
+  pick <intent...> [--min S] [--max P]   1 best match as JSON, for piping
                             Intent-based routing — top agents for a task
   receipts <addr>           Public buyer receipts for an agent
   watchlist <addr>          Watched agents of a subscriber

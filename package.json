@@ -1,6 +1,6 @@
 {
   "name": "@raskhaaa/mainstreet-oracle",
-  "version": "0.6.1",
+  "version": "0.7.6",
   "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
@@ -10,6 +10,11 @@
       "import": "./sdk/index.mjs",
       "require": "./sdk/index.js",
       "types": "./sdk/index.d.ts"
+    },
+    "./tools": {
+      "import": "./sdk/tools.mjs",
+      "require": "./sdk/tools.js",
+      "types": "./sdk/tools.d.ts"
     },
     "./oracle": "./oracle.js"
   },

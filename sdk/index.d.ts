@@ -9,6 +9,15 @@ export interface SettlementStats {
   volumeUsdc: number;
 }
 
+export interface SlaStats {
+  samples: number;
+  okRate: number | null;
+  latencyP50ms: number | null;
+  latencyP95ms: number | null;
+  avgLatencyMs: number | null;
+  note: string | null;
+}
+
 export interface ScoreMetrics {
   successRate: number | null;
   jobCount: number | null;
@@ -16,6 +25,8 @@ export interface ScoreMetrics {
   daysSinceLastJob: number | null;
   /** Real on-chain USDC settlements aggregated for this address (when available). */
   settlements?: SettlementStats | null;
+  /** Endpoint SLA samples (health probe latency + ok rate). */
+  sla?: SlaStats | null;
 }
 
 export interface Health {
@@ -131,3 +142,60 @@ export function tags(): Promise<TagsResponse>;
 export function tagged(tag: string, limit?: number): Promise<TaggedResponse>;
 export function subscribeWebhook(opts: WebhookSubscribeOpts): Promise<WebhookSubscribeResponse>;
 export function listWebhooks(subscriberAddr: string): Promise<WebhookListResponse>;
+
+export interface MatchOpts {
+  intent: string;
+  maxPrice?: string | number;
+  minScore?: number;
+  limit?: number;
+}
+export interface MatchEntry {
+  payTo: string;
+  score: number | null;
+  matchScore: number;
+  description: string | null;
+  serviceUrl: string | null;
+  price: { amountRaw: string; amountUsdc: number; asset: string } | null;
+  jobCount: number | null;
+  successRate: number | null;
+  settlements: SettlementStats | null;
+  sla: SlaStats | null;
+  callExample: string;
+  verify: string;
+}
+export interface MatchResponse {
+  version: string;
+  intent: string;
+  tokens: string[];
+  stems: string[];
+  filters: { minScore: number; maxPrice: number | null; limit: number };
+  count: number;
+  matches: MatchEntry[];
+  noStrongMatch: boolean;
+  note: string | null;
+}
+export function match(opts: MatchOpts | string): Promise<MatchResponse>;
+export function pick(opts: MatchOpts | string, options?: { allowWeak?: boolean }): Promise<MatchEntry>;
+
+export interface ReceiptInput {
+  buyerAddr: string;
+  agentAddr: string;
+  txHash: string;
+  success: boolean;
+  message: string;
+  signature: string;
+  latencyMs?: number;
+  rating?: number;
+  comment?: string;
+}
+export function postReceipt(input: ReceiptInput): Promise<{ ok: true; id: number }>;
+export function receipts(forAddress: string, limit?: number): Promise<any>;
+
+export interface WatchInput {
+  subscriberAddr: string;
+  watchAddr: string;
+  message: string;
+  signature: string;
+}
+export function addWatch(input: WatchInput): Promise<{ ok: true }>;
+export function watchlist(subscriberAddr: string): Promise<{ count: number; addresses: string[] }>;
