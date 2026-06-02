@@ -7,13 +7,13 @@
     "url": "https://github.com/philpof102-svg/mainstreet",
     "source": "github"
   },
-  "version": "0.8.2",
+  "version": "0.8.3",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@raskhaaa/mainstreet-oracle",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "transport": {
         "type": "stdio"
       },

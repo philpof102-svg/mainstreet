@@ -94,6 +94,36 @@ const TOOLS = [
       required: ['address'],
     },
   },
+  {
+    name: 'mainstreet_catalog',
+    description: 'List all MainStreet API endpoints (free + paid with prices). Use to discover available capabilities.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'mainstreet_audit_info',
+    description: 'Get the URL + instructions to call the premium /audit endpoint ($0.25 USDC via x402). Returns 360-degree due-diligence: score + all proofs + launches + traders + settlements + SLA + ERC-8004 feedback. Use when you need deep due-diligence on a wallet before paying it onchain.',
+    inputSchema: {
+      type: 'object',
+      properties: { address: { type: 'string', description: 'Ethereum address to audit' } },
+      required: ['address'],
+    },
+  },
+  {
+    name: 'mainstreet_revenue',
+    description: 'Get live revenue stats for MainStreet itself (transparency — shows x402 settlements onchain).',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'mainstreet_agents_of_interest',
+    description: 'Curated shortlist of Base agents worth auditing. Filters: high-activity-low-trust (risky), recent-newcomers (fresh), top-by-proofs (safest). Each result includes a link to its premium audit URL.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        filter: { type: 'string', enum: ['high-activity-low-trust', 'recent-newcomers', 'top-by-proofs'], default: 'high-activity-low-trust' },
+        limit: { type: 'integer', default: 20 },
+      },
+    },
+  },
 ];
 
 async function callApi(path) {
@@ -120,6 +150,27 @@ async function execTool(name, args) {
       return await callApi(`/api/agent/recommend?for=${args.for}&limit=${args.limit || 5}`);
     case 'mainstreet_history':
       return await callApi(`/api/agent/history/${args.address}?days=${args.days || 30}`);
+    case 'mainstreet_catalog':
+      return await callApi('/api/agent/catalog');
+    case 'mainstreet_audit_info':
+      return {
+        endpoint: `${ORIGIN}/api/agent/audit/${args.address}`,
+        price: '$0.25 USDC',
+        chain: 'Base',
+        asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        payTo: '0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9',
+        purpose: '360-degree due-diligence: score + all proofs + launches + traders + settlements + SLA + ERC-8004 feedback. Replaces ~8 free /score calls.',
+        howToCall: 'Use x402-axios or @x402/axios v2 with your wallet, then GET ' + ORIGIN + '/api/agent/audit/' + args.address,
+        catalog: ORIGIN + '/api/agent/catalog',
+      };
+    case 'mainstreet_revenue':
+      return await callApi('/api/agent/revenue');
+    case 'mainstreet_agents_of_interest': {
+      const params = new URLSearchParams();
+      if (args.filter) params.set('filter', args.filter);
+      if (args.limit) params.set('limit', args.limit);
+      return await callApi('/api/agent/agents-of-interest?' + params);
+    }
     default:
       throw new Error('unknown tool: ' + name);
   }
