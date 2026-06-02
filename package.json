@@ -1,6 +1,7 @@
 {
   "name": "@raskhaaa/mainstreet-oracle",
-  "version": "0.7.6",
+  "version": "0.8.0",
+  "mcpName": "io.github.philpof102-svg/mainstreet",
   "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",

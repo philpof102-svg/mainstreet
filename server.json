@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-09/server.schema.json",
+  "name": "io.github.philpof102-svg/mainstreet",
+  "description": "Reputation oracle MCP server for AI agents on Base — score any onchain wallet against 17 multi-source identity proofs (Virtuals, Farcaster, CB1, Basenames, Aerodrome, Morpho, Clawd/PumpClaw, smart-wallet detection). ERC-8004 agentId 53953. 833+ Base AI agents indexed. Use to vet any wallet before paying it via x402.",
+  "status": "active",
+  "repository": {
+    "url": "https://github.com/philpof102-svg/mainstreet",
+    "source": "github"
+  },
+  "version": "0.8.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@raskhaaa/mainstreet-oracle",
+      "version": "0.8.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "npx",
+      "runtimeArguments": [
+        {
+          "type": "positional",
+          "value": "@raskhaaa/mainstreet-oracle",
+          "valueHint": "package-name"
+        },
+        {
+          "type": "positional",
+          "value": "mainstreet-mcp",
+          "valueHint": "bin-name"
+        }
+      ]
+    }
+  ],
+  "remotes": []
+}
