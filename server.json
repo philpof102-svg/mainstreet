@@ -1,5 +1,5 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-09/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.philpof102-svg/mainstreet",
   "description": "Reputation oracle for AI agents on Base. Vet any wallet via 17 identity proofs + x402 + ERC-8004.",
   "status": "active",
@@ -7,13 +7,13 @@
     "url": "https://github.com/philpof102-svg/mainstreet",
     "source": "github"
   },
-  "version": "0.8.1",
+  "version": "0.8.2",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@raskhaaa/mainstreet-oracle",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "transport": {
         "type": "stdio"
       },
