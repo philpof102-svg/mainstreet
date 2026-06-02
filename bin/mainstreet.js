@@ -6,7 +6,9 @@
  * Run:      npx @raskhaaa/mainstreet-oracle 0x...
  *
  * Commands:
- *   mainstreet score 0x<addr>             — get score for an agent
+ *   mainstreet score 0x<addr>             — get free score for an agent
+ *   mainstreet audit 0x<addr>             — premium 360 due-diligence ($0.25 USDC)
+ *   mainstreet catalog                    — list all free + paid endpoints
  *   mainstreet compare 0x<a> 0x<b>        — head-to-head
  *   mainstreet leaderboard [N]            — top N (default 10)
  *   mainstreet search <query>             — search by description
@@ -57,6 +59,32 @@ const commands = {
     if (d.resourcePath) console.log(`${DIM}serviceUrl:${RESET} ${d.resourcePath}`);
     if (d.price) console.log(`${DIM}price:${RESET} ${(Number(d.price.amount)/1e6).toFixed(4)} USDC on ${d.price.network}`);
     console.log(`${DIM}profile:${RESET} ${ORIGIN}/agent/${addr.toLowerCase()}`);
+    console.log(`\n${DIM}premium audit (proofs + launches + traders + SLA + ERC-8004):${RESET}`);
+    console.log(`  ${BOLD}mainstreet audit ${addr}${RESET} ${DIM}— $0.25 USDC via x402${RESET}`);
+  },
+
+  async audit(addr) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr || '')) throw new Error('usage: mainstreet audit 0x<addr>');
+    console.log(`${BOLD}MainStreet premium audit${RESET} ${DIM}(${BLUE}$0.25 USDC${RESET}${DIM} via x402)${RESET}`);
+    console.log(`${DIM}endpoint:${RESET} ${ORIGIN}/api/agent/audit/${addr}`);
+    console.log(`${DIM}returns:${RESET} score + proofs + launches + traders + settlements + SLA + ERC-8004 feedback`);
+    console.log(`\n${DIM}from your terminal:${RESET}`);
+    console.log(`  curl ${ORIGIN}/api/agent/audit/${addr}`);
+    console.log(`  → returns 402 with payment instructions; sign with x402-axios or AccountKit`);
+    console.log(`\n${DIM}from a Claude/Cursor agent via MCP:${RESET}`);
+    console.log(`  use the ${BOLD}mainstreet_audit${RESET} tool (npx @raskhaaa/mainstreet-oracle mainstreet-mcp)`);
+    console.log(`\n${DIM}catalog of all paid endpoints:${RESET} ${ORIGIN}/api/agent/catalog`);
+  },
+
+  async catalog() {
+    const d = await api('/api/agent/catalog');
+    console.log(`${BOLD}MainStreet catalog${RESET} ${DIM}(${d.free.length} free + ${d.paid.length} paid endpoints)${RESET}\n`);
+    console.log(`${BOLD}FREE${RESET}`);
+    d.free.forEach(e => console.log(`  ${e.route}\n    ${DIM}${e.purpose}${RESET}`));
+    console.log(`\n${BOLD}PAID${RESET}`);
+    d.paid.forEach(e => console.log(`  ${GREEN}$${e.price}${RESET} ${e.route}\n    ${DIM}${e.purpose}${RESET}`));
+    console.log(`\n${DIM}payTo:${RESET} ${d.agent.payTo}`);
+    console.log(`${DIM}asset:${RESET} ${d.agent.asset}`);
   },
 
   async leaderboard(n) {
