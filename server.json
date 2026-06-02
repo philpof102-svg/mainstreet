@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-09/server.schema.json",
   "name": "io.github.philpof102-svg/mainstreet",
-  "description": "Reputation oracle MCP server for AI agents on Base — score any onchain wallet against 17 multi-source identity proofs (Virtuals, Farcaster, CB1, Basenames, Aerodrome, Morpho, Clawd/PumpClaw, smart-wallet detection). ERC-8004 agentId 53953. 833+ Base AI agents indexed. Use to vet any wallet before paying it via x402.",
+  "description": "Reputation oracle for AI agents on Base. Vet any wallet via 17 identity proofs + x402 + ERC-8004.",
   "status": "active",
   "repository": {
     "url": "https://github.com/philpof102-svg/mainstreet",
