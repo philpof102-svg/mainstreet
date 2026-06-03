@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.8.3] — 2026-06-02 — full discovery network + 4 new MCP tools
+
+### Added — MCP server (4 new tools, now 10 total)
+- `mainstreet_catalog` — list all free + paid endpoints with prices
+- `mainstreet_audit_info` — URL + x402 instructions for premium $0.25 audit
+- `mainstreet_revenue` — live oracle revenue (transparency)
+- `mainstreet_agents_of_interest` — curated shortlist with filters
+
+### Added — CLI
+- `mainstreet audit <addr>` — show premium endpoint info
+- `mainstreet catalog` — print all endpoints
+
+### Added — registry presence
+- MCP Registry official listing (`io.github.philpof102-svg/mainstreet`)
+- `mcpName` field in package.json
+
+### Added — discovery surfaces (server-side)
+- CDP Bazaar: 5 paid endpoints listed
+- Basename `mainstreetxyz.base.eth` with 12 onchain text records (agent, x402.payTo, erc8004.agentId, mcp.npm, x402.catalog, etc.)
+- Reverse-ENS: operator wallet `0xAC3c...` → `mainstreetxyz.base.eth`
+- `/.well-known/agent.json`, `x402.json`, `ai-plugin.json`, `funding.json`, `security.txt`
+- `/integrations.html`, `/embed.html`, `/llms.txt`, `/opensearch.xml`, PWA `/manifest.json`
+- `/api/agent/catalog`, `/api/agent/bazaar-scored`, `/api/agent/top-buyers`, `/api/agent/agents-of-interest`, `/api/agent/revenue`, `/api/agent/match`
+- Per-address shield SVG endpoint + iframeable widget per agent
+
 ## [0.7.6] — 2026-06-01 — MCP server live (no SDK install needed)
 
 MainStreet is now a hosted MCP server. Any Claude / Cursor / ChatGPT user can add the 6 tools natively in one command:
