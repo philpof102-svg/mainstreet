@@ -2,7 +2,7 @@
   "name": "@raskhaaa/mainstreet-oracle",
   "version": "0.9.0",
   "mcpName": "io.github.philpof102-svg/mainstreet",
-  "description": "Reputation oracle for onchain AI agents on Base. ERC-8004 + x402, with activity, recency, reputation, health, longevity scoring.",
+  "description": "Reputation oracle for onchain AI agents on Base. Vet any wallet or ERC-20 token before payments, swaps, escrow releases via mainstreet_preflight → BLOCK/CAUTION/PROCEED in <100ms with EIP-712 signatures. Covers Virtuals agents, Clanker tokens, DEX launches (Aerodrome/UniV3/BaseSwap), DexScreener trending, sniper detection, allowlist + denylist, wallet cluster analysis. ERC-8004 registered (agentId 53953).",
   "main": "oracle.js",
   "types": "types/oracle.d.ts",
   "exports": {
@@ -48,17 +48,23 @@
     "cli": "node bin/mainstreet.js"
   },
   "keywords": [
-    "erc-8004",
+    "mcp",
+    "model-context-protocol",
     "reputation",
     "oracle",
     "base",
+    "base-mainnet",
+    "onchain",
+    "trust",
+    "anti-phishing",
+    "erc-8004",
     "x402",
-    "ai-agent",
-    "usdc",
-    "agent-trust",
-    "agent-discovery",
-    "leaderboard",
-    "onchain"
+    "virtuals",
+    "clanker",
+    "ai-agents",
+    "wallet-trust",
+    "rug-detection",
+    "sniper-detection"
   ],
   "license": "MIT",
   "engines": {
