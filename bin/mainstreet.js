@@ -115,10 +115,12 @@ const commands = {
     const q = words.join(' ');
     if (!q || q.length < 2) throw new Error('usage: mainstreet search <query>');
     const d = await api('/api/agent/search?q=' + encodeURIComponent(q) + '&limit=15');
-    console.log(`${BOLD}"${q}"${RESET} ${DIM}→ ${d.count} match${d.count === 1 ? '' : 'es'}${RESET}\n`);
-    (d.results || []).forEach((r, i) => {
-      const c = color(r.score);
-      console.log(`${DIM}${String(i+1).padStart(2)}.${RESET} ${c}${String(r.score ?? '—').padStart(3)}${RESET}  ${shortAddr(r.payTo)}  ${(r.description||'').slice(0, 70)}`);
+    const results = d.results || [];
+    const total = d.total ?? d.count ?? results.length;
+    console.log(`${BOLD}"${q}"${RESET} ${DIM}→ ${total} match${total === 1 ? '' : 'es'}${RESET}\n`);
+    results.forEach((r, i) => {
+      const addr = r.address || r.payTo;
+      console.log(`${DIM}${String(i+1).padStart(2)}.${RESET} ${shortAddr(addr)}  ${DIM}[${r.type || 'agent'}]${RESET}  ${(r.description||'').slice(0, 70)}`);
     });
   },
 

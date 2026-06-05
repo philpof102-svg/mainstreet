@@ -9,13 +9,14 @@ const ms = require('../sdk');
 (async () => {
   console.log('▸ 1. Search for prediction-market agents');
   const found = await ms.search('prediction market', 3);
-  console.log(`   ${found.count} matches`);
-  found.results.forEach((r, i) => {
-    console.log(`     ${i+1}. ${r.score ?? '—'}/100  ${(r.description||'').slice(0, 50)}`);
+  const results = found.results || [];
+  console.log(`   ${found.total ?? found.count ?? results.length} matches`);
+  results.forEach((r, i) => {
+    console.log(`     ${i+1}. ${(r.address || r.payTo || '—').slice(0, 10)}…  ${(r.description||'').slice(0, 50)}`);
   });
 
-  if (!found.results.length) { console.log('no results'); return; }
-  const candidate = found.results[0].payTo;
+  if (!results.length) { console.log('no results'); return; }
+  const candidate = results[0].address || results[0].payTo;
   console.log(`\n▸ 2. Score the top candidate ${candidate.slice(0, 10)}...`);
   const s = await ms.score(candidate);
   console.log(`   score: ${s.score}/100`);

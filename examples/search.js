@@ -16,11 +16,14 @@ async function main() {
   }
   const r = await fetch(`${ORIGIN}/api/agent/search?q=${encodeURIComponent(q)}&limit=${limit}`);
   const d = await r.json();
-  console.log(`▸ "${q}" → ${d.count} match${d.count === 1 ? '' : 'es'}\n`);
-  (d.results || []).forEach((m, i) => {
-    const tags = (m.tags || []).slice(0, 3).join(',');
-    console.log(`  ${i+1}. score=${m.score ?? '—'} svc=${m.jobCount ?? '—'}  ${m.payTo.slice(0,10)}...${tags ? '['+tags+']' : ''}`);
+  const results = d.results || [];
+  const total = d.total ?? d.count ?? results.length;
+  console.log(`▸ "${q}" → ${total} match${total === 1 ? '' : 'es'}\n`);
+  results.forEach((m, i) => {
+    const addr = m.address || m.payTo || '—';
+    console.log(`  ${i+1}. ${addr.slice(0, 10)}...  [${m.type || 'agent'}]`);
     console.log(`     ${(m.description || '—').slice(0, 80)}`);
+    if (m.resource) console.log(`     ↳ ${m.resource}`);
   });
   if (d.note) console.log(`\n  note: ${d.note}`);
 }

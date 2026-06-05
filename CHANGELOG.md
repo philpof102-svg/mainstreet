@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.1] — 2026-06-05 — Fix search clients for new API response shape
+
+### Fixed
+- **`search` clients broke on the new `/api/agent/search` response shape.** The endpoint now returns `{ total, results: [{ type, address, description, resource }] }` (was `{ count, results: [{ score, payTo, jobCount, tags }] }`). The CLI `search` command and `examples/search.js` crashed with `Cannot read properties of undefined (reading 'slice')` on the removed `payTo` field. Updated all three consumers (`bin/mainstreet.js`, `examples/search.js`, `examples/sdk-quickstart.js`) to read `total`/`address`, with a fallback to the legacy `count`/`payTo` fields for older mirrors.
+
 ## [0.8.3] — 2026-06-02 — full discovery network + 4 new MCP tools
 
 ### Added — MCP server (4 new tools, now 10 total)
