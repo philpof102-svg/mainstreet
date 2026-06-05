@@ -1,0 +1,80 @@
+version: 1
+type: http
+runtime: container
+
+startCommand:
+  type: http
+  url: https://avisradar.app/mcp
+
+metadata:
+  displayName: MainStreet Trust Oracle
+  description: |
+    Reputation oracle for Base wallets and AI agents. Vet any wallet, ERC-20 token,
+    or counterparty before routing USDC via x402. Returns SAFE / CAUTION / BLOCK
+    + 0-100 score + EIP-712 signed attestation in <100ms.
+
+    Tools:
+      - mainstreet_preflight  — fast verdict for a wallet/contract (free up to 1k/day/IP)
+      - mainstreet_check       — compact verdict, x402-paid ($0.005 instant, $0.025 full)
+      - mainstreet_attest      — signed attestation suitable for onchain verification
+      - mainstreet_balance     — credit pool balance for high-volume agents
+
+    Onchain verifier deployed at 0x7397adb9713934c36d22aa54b4dbbcd70263592b on Base.
+    requireMinScore() callable from any contract for ~$0.00003 gas. ERC-8004
+    agentId 53953. Indexed on CDP x402 Bazaar.
+  homepage: https://avisradar.app/mainstreet.html
+  repository: https://github.com/philpof102-svg/mainstreet
+  license: MIT
+  author: Phil (@rakshasar)
+  keywords:
+    - reputation
+    - oracle
+    - agent-trust
+    - x402
+    - erc-8004
+    - base
+    - usdc
+    - eip-712
+    - mcp
+  categories:
+    - security
+    - finance
+    - infrastructure
+
+  examples:
+    - name: Preflight a wallet before sending USDC
+      input:
+        tool: mainstreet_preflight
+        args:
+          address: "0xddfc1820e26e4d6d3ef3b2d9d8f1e0b0c0d0e0f0"
+      output:
+        verdict: "PROCEED"
+        score: 78
+        signals:
+          - "wallet has 12+ months of activity"
+          - "no sanction list hits"
+          - "no high-risk cluster overlap"
+    - name: Get a signed attestation for onchain verification
+      input:
+        tool: mainstreet_check
+        args:
+          address: "0xddfc1820e26e4d6d3ef3b2d9d8f1e0b0c0d0e0f0"
+          depth: "full"
+      output:
+        verdict: "PROCEED"
+        score: 78
+        attestation:
+          signature: "0x..."
+          deadline: 1717512345
+          verifierContract: "0x7397adb9713934c36d22aa54b4dbbcd70263592b"
+
+  payment:
+    protocol: x402
+    network: base
+    asset: USDC
+    facilitator: coinbase
+    freeTier:
+      requestsPerDayPerIp: 1000
+      tool: mainstreet_preflight
+
+icon: https://avisradar.app/mainstreet-logo-400.png
