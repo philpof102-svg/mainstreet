@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.2] — 2026-06-07 — configure({ headers }) for default request headers
+
+### Added
+- **`configure({ headers })`** — default headers merged into every SDK request (per-call headers still override). Primary use: internal/monitoring callers set `configure({ headers: { 'x-ms-monitor': '1' } })` so their own traffic is excluded from the public adoption metric at `/api/agent/usage`. Pass `{ headers: null }` to clear. No behavior change for existing callers (no headers sent unless configured).
+
 ## [0.9.1] — 2026-06-05 — Fix search clients for new API response shape
 
 ### Fixed

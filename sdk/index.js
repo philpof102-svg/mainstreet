@@ -15,19 +15,35 @@
  *
  * Configure base URL:
  *   ms.configure({ origin: 'https://your-mirror.example' });
+ *
+ * Configure default headers (merged into every request). Useful so internal /
+ * monitoring callers can exclude their own traffic from the public adoption
+ * metric (/api/agent/usage):
+ *   ms.configure({ headers: { 'x-ms-monitor': '1' } });
  */
 
 const DEFAULT_ORIGIN = 'https://avisradar-production.up.railway.app';
 let _origin = DEFAULT_ORIGIN;
+let _headers = {};
 
 function configure(opts) {
   if (opts?.origin) _origin = String(opts.origin).replace(/\/$/, '');
+  // Default headers merged into every request (e.g. { 'x-ms-monitor': '1' } so
+  // internal/monitoring traffic is excluded from /api/agent/usage). Pass
+  // { headers: null } to clear.
+  if (opts && 'headers' in opts) {
+    _headers = opts.headers && typeof opts.headers === 'object' ? { ..._headers, ...opts.headers } : {};
+  }
 }
 
 async function call(path, init) {
   if (typeof fetch !== 'function') throw new Error('fetch is not available — Node 18+ or polyfill required');
   const url = _origin + path;
-  const r = await fetch(url, init);
+  // Merge configured default headers under any per-call init.headers (per-call wins).
+  const merged = (Object.keys(_headers).length || (init && init.headers))
+    ? { ...init, headers: { ..._headers, ...(init && init.headers) } }
+    : init;
+  const r = await fetch(url, merged);
   if (!r.ok) {
     const text = await r.text().catch(() => '');
     const err = new Error(`MainStreet API ${r.status}: ${text.slice(0, 120)}`);

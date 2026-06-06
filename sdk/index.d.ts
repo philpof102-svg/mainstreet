@@ -2,6 +2,12 @@
 
 export interface ConfigureOpts {
   origin?: string;
+  /**
+   * Default headers merged into every request (per-call headers override). Pass
+   * null to clear. e.g. { 'x-ms-monitor': '1' } so internal/monitoring traffic
+   * is excluded from the public adoption metric (/api/agent/usage).
+   */
+  headers?: Record<string, string> | null;
 }
 
 export interface SettlementStats {
