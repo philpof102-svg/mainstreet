@@ -1,6 +1,6 @@
 # MainStreet API reference
 
-Live base URL: `https://avisradar.app`
+Live base URL: `https://avisradar-production.up.railway.app`
 
 ## `GET /api/agent/score/:agentAddress`
 
@@ -115,8 +115,8 @@ Capability discovery. Public, no auth.
     "reputationRegistry": "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
     "chain": "eip155:8453"
   },
-  "docs": "https://avisradar.app/mainstreet.html",
-  "agentCard": "https://avisradar.app/.well-known/agent-card.json"
+  "docs": "https://avisradar-production.up.railway.app/mainstreet.html",
+  "agentCard": "https://avisradar-production.up.railway.app/.well-known/agent-card.json"
 }
 ```
 

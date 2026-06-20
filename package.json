@@ -74,7 +74,7 @@
     "type": "git",
     "url": "https://github.com/philpof102-svg/mainstreet"
   },
-  "homepage": "https://avisradar.app/mainstreet.html",
+  "homepage": "https://avisradar-production.up.railway.app/mainstreet.html",
   "bugs": {
     "url": "https://github.com/philpof102-svg/mainstreet/issues"
   }

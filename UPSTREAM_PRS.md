@@ -109,4 +109,4 @@ Add MainStreet under "Live oracles" with:
 - npm: `@raskhaaa/mainstreet-oracle`
 - chain: Base mainnet (chainId 8453)
 - registry: `0x8004BAa17C55a88189AE136b182e5fdA19dE9b63`
-- feedbackURI format: signed EIP-712 attestation served at `https://avisradar.app/api/agent/attestation/:addr`
+- feedbackURI format: signed EIP-712 attestation served at `https://avisradar-production.up.railway.app/api/agent/attestation/:addr`

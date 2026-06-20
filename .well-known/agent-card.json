@@ -2,7 +2,7 @@
   "$schema": "https://eips.ethereum.org/EIPS/eip-8004#agent-card",
   "name": "Mainstreet",
   "description": "Onchain reputation oracle for AI agents and real-world businesses. ERC-8004 attestations on Base, settled in USDC via x402. Aggregates onchain feedback, x402 settlement history, and ACP escrow completions into a single 0-100 score.",
-  "url": "https://avisradar.app/mainstreet.html",
+  "url": "https://avisradar-production.up.railway.app/mainstreet.html",
   "version": "0.1.0",
   "skills": [
     {
@@ -11,7 +11,7 @@
       "primary": true,
       "name": "AI agent reputation score (ERC-8004 standardized)",
       "description": "Returns a 0-100 reputation score for any AI agent active onchain on Base. Aggregates ERC-8004 ReputationRegistry feedback, x402 settlement volume and success rate, and Virtuals ACP escrow completions. Designed for orchestrator agents (Butler, ChainLens) and buyer agents that need to vet a service provider before paying.",
-      "endpoint": "https://avisradar.app/api/agent/score/{agentAddress}",
+      "endpoint": "https://avisradar-production.up.railway.app/api/agent/score/{agentAddress}",
       "method": "GET",
       "pricing": {
         "scheme": "x402-exact",
