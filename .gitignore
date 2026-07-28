@@ -4,3 +4,21 @@ node_modules/
 *.log
 .DS_Store
 publish.ps1
+tako-cafe-assets/
+
+# --- artefacts LOCAUX, jamais du contenu de depot (ajoute 2026-07-28) -------------------------------
+# Ce depot est PUBLIC. Un seul `git add .` y publierait 762 fichiers non suivis, dont l etat
+# d execution de l agent Hermes (journaux + projects.db + state.db). Aucun secret n a ete trouve dedans
+# — 833 fichiers lus, 5 occurrences toutes identifiees comme des placeholders de documentation — MAIS
+# les 6 binaires (dont les deux .db) n ont PAS ete examines. La garde ne repose donc pas sur « c est
+# propre », elle repose sur « ca n a rien a faire ici ».
+#
+# ⚠️ La ligne ci-dessous contient U+F03A (zone privee), la substitution Windows du ":" interdit dans un
+# nom de fichier. Elle a ete ecrite par programme depuis readdir: retapee a la main, elle ne
+# correspondrait a rien et la garde serait muette en paraissant posee.
+D/
+.claude/settings.local.json
+.claude/worktrees/
+*.lnk
+bs1.json
+eth_dshares.txt
