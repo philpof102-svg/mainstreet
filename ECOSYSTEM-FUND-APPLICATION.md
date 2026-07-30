@@ -27,16 +27,26 @@ onchain-verifiable** score. The "is this counterparty safe to pay?" preflight be
   ecosystem (ecosystem-wide: ~163.7M settlements / ~$46.9M all-time, per x402.fuchss.app).
 - Surfaces: MCP server (agent-consumable), JS SDK, x402-priced endpoints, live site.
 
-> **Outage update — restored, not yet at chain head.** On 2026-07-18 we disclosed here that the settlement
-> indexer was frozen at Base block 47,505,595 since 2026-06-19 (the public RPC we used began requiring a
-> paid token for archive `eth_getLogs`). It is **indexing again**: the cursor has advanced **1,691,524
-> blocks** to **49,197,119**, adding **+253,492 settlements** and **+$80,579** USDC to the figures above
-> since that disclosure. It is **still ~70 hours behind the chain head**, so the API continues to return
-> `settlementsWindowStale: true` and a **null** 24h window on `/api/agent/me` rather than publish a
-> plausible-looking number over blocks it has not read. Cumulative figures are real and growing again;
-> the live window is not trustworthy until the lag reaches zero, and we say so in the response body
-> instead of in a footnote. A reputation oracle that hides its own outage has no business scoring anyone
-> else — so we report the recovery with the same precision as the failure.
+> **Outage update — partially recovered, then stalled again; root-caused 2026-07-30.** On 2026-07-18 we
+> disclosed here that the settlement indexer was frozen at Base block 47,505,595 since 2026-06-19. Since
+> then the scan cursor advanced to **48,884,011** and the table grew **+253,492 settlements / +$80,579**
+> USDC — but it is stalled again and sits **244 hours (10.2 days) behind the chain head**. The last
+> scheduled run scanned **0 transfers with 612 of 612 chunks failing**.
+>
+> The cause is ours, not the chain's. The scheduler killed the indexer at a 10-minute timeout, while one
+> 5,000-block chunk costs ~11 minutes of RPC work against a free public endpoint and a cold start needs
+> ~190 minutes: no chunk could ever complete, so the cursor could never advance. The child's stderr was
+> discarded, so 612 failures printed one cheerful "done" line — which is how a month-long freeze stayed
+> invisible. Fixed in code on 2026-07-30 (budgeted runs that commit partial progress, failures surfaced
+> and recorded per run); verified locally taking a test cursor from 15,000 blocks behind to 89. Pending
+> deploy at the time of writing.
+>
+> One number here got worse when we looked properly: we had been measuring staleness from the newest row
+> in the table rather than from the scan cursor, which reported **70h** when the truth was **244h** — an
+> error in the flattering direction. The API now measures the cursor, because that is the only block
+> height we can honestly claim to have read. Cumulative figures are real; the live window stays `null`
+> with `settlementsWindowStale: true` until the lag closes. A reputation oracle that hides its own outage
+> has no business scoring anyone else, and that includes hiding it from itself.
 
 Why it matters for *your* thesis: 24/7 agent finance at scale needs a safety rail. KYT tells an agent it's
 *allowed* to pay; MainStreet tells it whether it's *safe* to pay. Complementary to the Coinbase agentic
@@ -81,10 +91,11 @@ working slice to global scale.
 
 ## Honest risks (we name them, per our own rule)
 - MainStreet's settlement figures are an *indexed slice*, not the ecosystem — scaling coverage is real work.
-- That slice ran **frozen for a month** (2026-06-19 → restored, see above) on an RPC archive-access change.
-  It is growing again but still trails the chain head by ~70h, so our "live" settlement window is
-  deliberately published as null until it catches up. Closing that lag and then broadening the pipeline is
-  exactly what ask #3 below funds.
+- That slice froze for a month (2026-06-19), partially recovered, and **stalled again at 244h behind the
+  chain** — root-caused on 2026-07-30 to our own run-budget and swallowed error output, not to the chain
+  (see above). The fix is written and locally verified; sustained catch-up on a free public RPC is
+  marginal, and a funded RPC endpoint is what turns it from marginal into reliable. Closing that lag and
+  then broadening the pipeline is exactly what ask #3 below funds.
 - Loop has one real on-chain coin and no liquidity yet — traction, not features, is the gap.
 - RWA legal framing is unsettled; we gate mainnet on an opinion, not optimism.
 - Solo builder — the fund's "small team" line is the mitigation.
