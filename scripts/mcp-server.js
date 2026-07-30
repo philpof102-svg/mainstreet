@@ -11,7 +11,7 @@
  *     "mcpServers": {
  *       "mainstreet": {
  *         "command": "npx",
- *         "args": ["-y", "@raskhaaa/mainstreet-oracle", "mcp"]
+ *         "args": ["-y", "mainstreet-oracle", "mcp"]
  *       }
  *     }
  *   }

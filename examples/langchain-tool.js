@@ -3,12 +3,12 @@
  *
  * v0.7.0+: just import `tools.langchain()` and wrap with DynamicStructuredTool.
  *
- *   npm install @langchain/core @raskhaaa/mainstreet-oracle
+ *   npm install @langchain/core mainstreet-oracle
  *
  * Run: node examples/langchain-tool.js
  */
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { langchain } from '@raskhaaa/mainstreet-oracle/tools';
+import { langchain } from 'mainstreet-oracle/tools';
 
 // One line: 6 tools (match, pick, score, compare, leaderboard, vet) wired to live API.
 export const mainstreetTools = langchain().map(spec => new DynamicStructuredTool({

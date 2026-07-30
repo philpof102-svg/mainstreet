@@ -1,12 +1,12 @@
 /**
  * MainStreet as a LlamaIndex toolkit.
  *
- *   npm install llamaindex @raskhaaa/mainstreet-oracle
+ *   npm install llamaindex mainstreet-oracle
  *
  * Run: node examples/llamaindex-tool.js
  */
 import { FunctionTool } from 'llamaindex';
-import { specs, execute } from '@raskhaaa/mainstreet-oracle/tools';
+import { specs, execute } from 'mainstreet-oracle/tools';
 
 export const mainstreetTools = specs().map(s =>
   FunctionTool.from(async (args) => JSON.stringify(await execute(s.name, args)), {

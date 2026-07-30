@@ -18,7 +18,7 @@ pragma solidity ^0.8.20;
  *
  * Usage example (buyer smart contract):
  *
- *   import { MainStreetVerifier } from "@raskhaaa/mainstreet-oracle/contracts/MainStreetVerifier.sol";
+ *   import { MainStreetVerifier } from "mainstreet-oracle/contracts/MainStreetVerifier.sol";
  *
  *   contract MyBuyer {
  *       MainStreetVerifier constant MS = MainStreetVerifier(0x7397adb9713934c36d22aa54b4dbbcd70263592b);
@@ -36,7 +36,7 @@ pragma solidity ^0.8.20;
  * MainStreet operator (signer): 0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9
  * Domain: { name: "MainStreet", version: "1", chainId: 8453 } (no verifyingContract —
  *         attestations are portable, recovered against this fixed domain).
- * Off-chain equivalent: `@raskhaaa/mainstreet-oracle/verifier` (verifyAttestation / requireMinScore).
+ * Off-chain equivalent: `mainstreet-oracle/verifier` (verifyAttestation / requireMinScore).
  *
  * MIT licensed.
  */

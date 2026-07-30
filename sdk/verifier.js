@@ -1,7 +1,7 @@
 /**
  * MainStreet verifier helpers — off-chain + on-chain.
  *
- * Off-chain (Node/browser): import { verifyAttestation } from '@raskhaaa/mainstreet-oracle/verifier'
+ * Off-chain (Node/browser): import { verifyAttestation } from 'mainstreet-oracle/verifier'
  * On-chain: contract at 0x7397adb9713934c36d22aa54b4dbbcd70263592b on Base mainnet.
  */
 

@@ -1,12 +1,12 @@
 /**
  * MainStreet as Anthropic Claude tools.
  *
- *   npm install @anthropic-ai/sdk @raskhaaa/mainstreet-oracle
+ *   npm install @anthropic-ai/sdk mainstreet-oracle
  *
  * Run: node examples/anthropic-tools.js
  */
 import Anthropic from '@anthropic-ai/sdk';
-import { anthropic as msTools, execute } from '@raskhaaa/mainstreet-oracle/tools';
+import { anthropic as msTools, execute } from 'mainstreet-oracle/tools';
 
 const client = new Anthropic();
 

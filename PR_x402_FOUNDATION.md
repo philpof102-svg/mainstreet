@@ -13,7 +13,7 @@
  | [PEAC Protocol](https://x402.peacprotocol.org) | Verifiable receipts for x402 payments | TypeScript | [GitHub](https://github.com/peacprotocol/peac) · [npm](https://www.npmjs.com/package/@peac/adapter-x402) |
  | [x402r](https://x402r.org) | Non-custodial refund and arbitration protocol | Typescript | [GitHub](https://github.com/BackTrackCo/x402r-sdk) · [npm](https://www.npmjs.com/package/@x402r/sdk ) |
  | [zauth](https://zauthx402.com) | Monitoring, verification, and refund SDK | TypeScript | [GitHub](https://github.com/zauthofficial/zauthSDK) · [npm](https://www.npmjs.com/package/@zauthx402/sdk) |
-+| [MainStreet](https://avisradar-production.up.railway.app/mainstreet.html) | Live agent reputation oracle on Base — score 0-100 from x402 settlements, signed peer receipts, ERC-8004 attestations; LLM tool adapters for OpenAI, Anthropic, Vercel AI, LangChain | TypeScript | [GitHub](https://github.com/philpof102-svg/mainstreet) · [npm](https://www.npmjs.com/package/@raskhaaa/mainstreet-oracle) |
++| [MainStreet](https://avisradar-production.up.railway.app/mainstreet.html) | Live agent reputation oracle on Base — score 0-100 from x402 settlements, signed peer receipts, ERC-8004 attestations; LLM tool adapters for OpenAI, Anthropic, Vercel AI, LangChain | TypeScript | [GitHub](https://github.com/philpof102-svg/mainstreet) · [npm](https://www.npmjs.com/package/mainstreet-oracle) |
 ```
 
 ## PR title
@@ -26,7 +26,7 @@ MainStreet is a live reputation oracle for onchain AI agents on Base that aggreg
 It ships LLM tool adapters for OpenAI, Anthropic, Vercel AI SDK, LangChain, LlamaIndex, and Mastra so buyer agents can do:
 
 ```js
-import { vercelAiSdk } from '@raskhaaa/mainstreet-oracle/tools';
+import { vercelAiSdk } from 'mainstreet-oracle/tools';
 const { text } = await generateText({
   model, tools: vercelAiSdk(),
   prompt: 'Find an agent that translates text on Base. Vet it. Return serviceUrl.',
@@ -35,7 +35,7 @@ const { text } = await generateText({
 
 Live: https://avisradar-production.up.railway.app/mainstreet.html
 Demo: https://avisradar-production.up.railway.app/mainstreet-demo.html
-npm: https://www.npmjs.com/package/@raskhaaa/mainstreet-oracle
+npm: https://www.npmjs.com/package/mainstreet-oracle
 MIT licensed.
 
 Adds one row to `docs/dev-tools/third-party-extensions.md`. No other changes.
@@ -54,7 +54,7 @@ git checkout -b add-mainstreet
 
 Line to add at the very end of the table:
 ```
-| [MainStreet](https://avisradar-production.up.railway.app/mainstreet.html) | Live agent reputation oracle on Base — score 0-100 from x402 settlements, signed peer receipts, ERC-8004 attestations; LLM tool adapters for OpenAI, Anthropic, Vercel AI, LangChain | TypeScript | [GitHub](https://github.com/philpof102-svg/mainstreet) · [npm](https://www.npmjs.com/package/@raskhaaa/mainstreet-oracle) |
+| [MainStreet](https://avisradar-production.up.railway.app/mainstreet.html) | Live agent reputation oracle on Base — score 0-100 from x402 settlements, signed peer receipts, ERC-8004 attestations; LLM tool adapters for OpenAI, Anthropic, Vercel AI, LangChain | TypeScript | [GitHub](https://github.com/philpof102-svg/mainstreet) · [npm](https://www.npmjs.com/package/mainstreet-oracle) |
 ```
 
 ```bash

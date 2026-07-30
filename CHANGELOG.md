@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased — package renamed to `mainstreet-oracle`
+
+### Changed
+- **npm package is now unscoped: `mainstreet-oracle`.** `0.9.2` was published under the new name on
+  2026-07-20; the old scoped `@raskhaaa/mainstreet-oracle` stopped at `0.9.0` (2026-06-03) and is two
+  versions behind. Every install command, import specifier, `npx` invocation, badge and registry entry in
+  this repo now points at `mainstreet-oracle`. Historical changelog entries below keep the old name on
+  purpose — that is what those versions actually shipped as.
+  - Migration: `npm i mainstreet-oracle` and rewrite imports `@raskhaaa/mainstreet-oracle/*` →
+    `mainstreet-oracle/*`. Subpaths (`/sdk`, `/tools`, `/verifier`), the three bins and the API are identical.
+
+### Fixed
+- **`contracts/MainStreetVerifier.sol` was documented as importable from the package but never shipped in
+  the tarball** (`files` listed only `Main.sol` + its compiled JSON), so
+  `import ".../contracts/MainStreetVerifier.sol"` could not resolve for any consumer. Added to `files`.
+
 ## [0.9.2] — 2026-06-07 — configure({ headers }) for default request headers
 
 ### Added

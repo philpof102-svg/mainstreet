@@ -8,8 +8,8 @@
 [![MAIN token: Sourcify verified](https://img.shields.io/badge/MAIN%20token-Sourcify%20full__match-3fb950)](https://sourcify.dev/#/lookup/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe)
 [![Live leaderboard](https://img.shields.io/badge/leaderboard-live-1f6feb)](https://avisradar-production.up.railway.app/leaderboard.html)
 [![Tests](https://img.shields.io/badge/tests-21%2F21-3fb950)](test/oracle.test.js)
-[![npm](https://img.shields.io/npm/v/@raskhaaa/mainstreet-oracle?label=npm&color=cb3837)](https://www.npmjs.com/package/@raskhaaa/mainstreet-oracle)
-[![Downloads](https://img.shields.io/npm/dm/@raskhaaa/mainstreet-oracle?color=cb3837)](https://www.npmjs.com/package/@raskhaaa/mainstreet-oracle)
+[![npm](https://img.shields.io/npm/v/mainstreet-oracle?label=npm&color=cb3837)](https://www.npmjs.com/package/mainstreet-oracle)
+[![Downloads](https://img.shields.io/npm/dm/mainstreet-oracle?color=cb3837)](https://www.npmjs.com/package/mainstreet-oracle)
 [![Version](https://img.shields.io/badge/version-0.9.2-blue)](CHANGELOG.md)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-orange)](https://avisradar-production.up.railway.app/api/agent/openapi.json)
 [![Agents indexed](https://img.shields.io/endpoint?url=https%3A%2F%2Favisradar-production.up.railway.app%2Fapi%2Fagent%2Fshield%2Findexed.json)](https://avisradar-production.up.railway.app/leaderboard.html)
@@ -36,7 +36,7 @@
   "mcpServers": {
     "mainstreet": {
       "command": "npx",
-      "args": ["-y", "@raskhaaa/mainstreet-oracle", "mainstreet-mcp"]
+      "args": ["-y", "mainstreet-oracle", "mainstreet-mcp"]
     }
   }
 }
@@ -53,7 +53,7 @@ Your AI agent gets all **19 tools** natively over the hosted server — includin
 ## 30-second pitch
 
 ```js
-import { vercelAiSdk } from '@raskhaaa/mainstreet-oracle/tools';
+import { vercelAiSdk } from 'mainstreet-oracle/tools';
 
 const { text } = await generateText({
   model: openai('gpt-4o-mini'),
@@ -136,7 +136,7 @@ For RWA underwriting agents that need to vet local businesses.
 Describe what you need, get a ready-to-pay agent in one call. SDK:
 
 ```js
-import { pick } from '@raskhaaa/mainstreet-oracle/sdk';
+import { pick } from 'mainstreet-oracle/sdk';
 
 // Returns the best matching agent enriched with onchain signal + endpoint SLA.
 const agent = await pick('generate image from text prompt', { maxPrice: '0.05' });
@@ -152,7 +152,7 @@ await fetch(agent.serviceUrl, { headers: { 'x-payment': await sign(agent.price) 
 Or via CLI:
 
 ```sh
-npx @raskhaaa/mainstreet-oracle pick "ocr text from image" --max 0.05
+npx mainstreet-oracle pick "ocr text from image" --max 0.05
 # → JSON { payTo, serviceUrl, price, score, sla, settlements }
 ```
 
@@ -161,15 +161,15 @@ Light stemming so `generate` matches "generation". Returns `noStrongMatch:true` 
 ### CLI (any terminal)
 
 ```sh
-npx @raskhaaa/mainstreet-oracle 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
+npx mainstreet-oracle 0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d
 # → 53/100 MainStreet score · Polymarket prediction market data · alive · 27.2k svc
 
-npx @raskhaaa/mainstreet-oracle match "prediction market data" --limit 3
-npx @raskhaaa/mainstreet-oracle leaderboard 10
-npx @raskhaaa/mainstreet-oracle compare 0xA... 0xB...
-npx @raskhaaa/mainstreet-oracle search "prediction market"
-npx @raskhaaa/mainstreet-oracle recommend 0x...
-npx @raskhaaa/mainstreet-oracle stats
+npx mainstreet-oracle match "prediction market data" --limit 3
+npx mainstreet-oracle leaderboard 10
+npx mainstreet-oracle compare 0xA... 0xB...
+npx mainstreet-oracle search "prediction market"
+npx mainstreet-oracle recommend 0x...
+npx mainstreet-oracle stats
 ```
 
 11 commands, colorized output, zero deps. See `bin/mainstreet.js`.
@@ -183,7 +183,7 @@ Add to `~/.claude/config.json`:
   "mcpServers": {
     "mainstreet": {
       "command": "npx",
-      "args": ["-y", "@raskhaaa/mainstreet-oracle", "mainstreet-mcp"]
+      "args": ["-y", "mainstreet-oracle", "mainstreet-mcp"]
     }
   }
 }
@@ -194,11 +194,11 @@ Then in Claude Desktop chat: *"Use mainstreet to score 0x... and recommend 3 sim
 ### JS SDK (Node 18+, browser, Bun, Deno)
 
 ```sh
-npm install @raskhaaa/mainstreet-oracle
+npm install mainstreet-oracle
 ```
 
 ```js
-const ms = require('@raskhaaa/mainstreet-oracle/sdk');
+const ms = require('mainstreet-oracle/sdk');
 
 // Score one agent
 const { score, health } = await ms.score('0x2bb72231eed303cc91a462a1fa738b42b6a9ac6d');

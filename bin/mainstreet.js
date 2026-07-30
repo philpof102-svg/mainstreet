@@ -2,8 +2,8 @@
 /**
  * MainStreet CLI — query the reputation oracle from your terminal.
  *
- * Install:  npm i -g @raskhaaa/mainstreet-oracle
- * Run:      npx @raskhaaa/mainstreet-oracle 0x...
+ * Install:  npm i -g mainstreet-oracle
+ * Run:      npx mainstreet-oracle 0x...
  *
  * Commands:
  *   mainstreet score 0x<addr>             — get free score for an agent
@@ -72,7 +72,7 @@ const commands = {
     console.log(`  curl ${ORIGIN}/api/agent/audit/${addr}`);
     console.log(`  → returns 402 with payment instructions; sign with x402-axios or AccountKit`);
     console.log(`\n${DIM}from a Claude/Cursor agent via MCP:${RESET}`);
-    console.log(`  use the ${BOLD}mainstreet_audit${RESET} tool (npx @raskhaaa/mainstreet-oracle mainstreet-mcp)`);
+    console.log(`  use the ${BOLD}mainstreet_audit${RESET} tool (npx mainstreet-oracle mainstreet-mcp)`);
     console.log(`\n${DIM}catalog of all paid endpoints:${RESET} ${ORIGIN}/api/agent/catalog`);
   },
 

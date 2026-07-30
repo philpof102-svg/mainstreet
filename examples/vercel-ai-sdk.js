@@ -1,10 +1,10 @@
 /**
  * MainStreet as Vercel AI SDK tools — one line.
  *
- *   npm install ai @ai-sdk/openai @raskhaaa/mainstreet-oracle
+ *   npm install ai @ai-sdk/openai mainstreet-oracle
  *
  * Then in your route handler:
- *   import { vercelAiSdk } from '@raskhaaa/mainstreet-oracle/tools';
+ *   import { vercelAiSdk } from 'mainstreet-oracle/tools';
  *   const result = await generateText({
  *     model: openai('gpt-4o-mini'),
  *     tools: vercelAiSdk(),
@@ -13,7 +13,7 @@
  *
  * Run as standalone demo: node examples/vercel-ai-sdk.js
  */
-import { vercelAiSdk } from '@raskhaaa/mainstreet-oracle/tools';
+import { vercelAiSdk } from 'mainstreet-oracle/tools';
 
 // 6 tools: match, pick, score, compare, leaderboard, vet — all wired to live API.
 export const mainstreetTools = vercelAiSdk();

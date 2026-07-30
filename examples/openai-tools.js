@@ -1,12 +1,12 @@
 /**
  * MainStreet as OpenAI function-calling tools.
  *
- *   npm install openai @raskhaaa/mainstreet-oracle
+ *   npm install openai mainstreet-oracle
  *
  * Run: node examples/openai-tools.js
  */
 import OpenAI from 'openai';
-import { openai as msTools, execute } from '@raskhaaa/mainstreet-oracle/tools';
+import { openai as msTools, execute } from 'mainstreet-oracle/tools';
 
 const client = new OpenAI();
 

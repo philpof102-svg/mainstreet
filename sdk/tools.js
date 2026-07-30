@@ -8,21 +8,21 @@
  * `execute(args)` function bound to the SDK. Wrap as needed for your framework.
  *
  * Usage (Vercel AI SDK):
- *   import { tools } from '@raskhaaa/mainstreet-oracle/tools';
+ *   import { tools } from 'mainstreet-oracle/tools';
  *   const result = await generateText({ model, tools: tools.vercelAiSdk() });
  *
  * Usage (OpenAI function calling):
- *   import { tools } from '@raskhaaa/mainstreet-oracle/tools';
+ *   import { tools } from 'mainstreet-oracle/tools';
  *   const openaiTools = tools.openai();
  *   // openaiTools is [{ type: 'function', function: { name, description, parameters } }, ...]
  *
  * Usage (Anthropic tools):
- *   import { tools } from '@raskhaaa/mainstreet-oracle/tools';
+ *   import { tools } from 'mainstreet-oracle/tools';
  *   const anthropicTools = tools.anthropic();
  *   // [{ name, description, input_schema }, ...]
  *
  * Usage (LangChain DynamicStructuredTool):
- *   import { tools } from '@raskhaaa/mainstreet-oracle/tools';
+ *   import { tools } from 'mainstreet-oracle/tools';
  *   const lcTools = tools.langchain(); // returns class-less plain objects, wrap with new DynamicStructuredTool(...)
  *
  * Each tool's `execute()` returns plain JSON the LLM can ingest directly.

@@ -1,5 +1,5 @@
 {
-  "name": "@raskhaaa/mainstreet-oracle",
+  "name": "mainstreet-oracle",
   "version": "0.9.2",
   "mcpName": "io.github.philpof102-svg/mainstreet",
   "description": "Reputation oracle for onchain AI agents on Base. Vet any wallet or ERC-20 token before payments, swaps, escrow releases via mainstreet_preflight → BLOCK/CAUTION/PROCEED in <100ms with EIP-712 signatures. Covers Virtuals agents, Clanker tokens, DEX launches (Aerodrome/UniV3/BaseSwap), DexScreener trending, sniper detection, allowlist + denylist, wallet cluster analysis. ERC-8004 registered (agentId 53953).",
@@ -31,6 +31,7 @@
     "sdk/",
     "contracts/Main.sol",
     "contracts/Main.compiled.json",
+    "contracts/MainStreetVerifier.sol",
     "scripts/compile.js",
     "scripts/deploy-token.js",
     "scripts/mcp-server.js",
@@ -74,7 +75,7 @@
     "type": "git",
     "url": "https://github.com/philpof102-svg/mainstreet"
   },
-  "homepage": "https://avisradar.app/mainstreet.html",
+  "homepage": "https://avisradar-production.up.railway.app/mainstreet.html",
   "bugs": {
     "url": "https://github.com/philpof102-svg/mainstreet/issues"
   }
