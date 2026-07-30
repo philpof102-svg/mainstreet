@@ -1,15 +1,21 @@
 # Changelog
 
-## Unreleased — package renamed to `mainstreet-oracle`
+## [0.9.3] — 2026-07-30 — the published README still pointed at the dead package
 
 ### Changed
 - **npm package is now unscoped: `mainstreet-oracle`.** `0.9.2` was published under the new name on
-  2026-07-20; the old scoped `@raskhaaa/mainstreet-oracle` stopped at `0.9.0` (2026-06-03) and is two
-  versions behind. Every install command, import specifier, `npx` invocation, badge and registry entry in
-  this repo now points at `mainstreet-oracle`. Historical changelog entries below keep the old name on
-  purpose — that is what those versions actually shipped as.
+  2026-07-20 — but with the OLD README, so the new package's own npm page told readers 16 times to
+  install `@raskhaaa/mainstreet-oracle`. That scoped package is frozen at `0.9.0` (2026-06-03) and
+  **cannot be updated or deprecated**: its sole owner is the `raskhaaa` npm account, which is lost.
+  Nothing we control points at it anymore. This release exists mainly to put a correct README on the
+  package page. Every install command, import specifier, `npx` invocation, badge and registry entry now
+  names `mainstreet-oracle`. Historical changelog entries below keep the old name on purpose — that is
+  what those versions actually shipped as.
   - Migration: `npm i mainstreet-oracle` and rewrite imports `@raskhaaa/mainstreet-oracle/*` →
     `mainstreet-oracle/*`. Subpaths (`/sdk`, `/tools`, `/verifier`), the three bins and the API are identical.
+- `server.json` → `0.9.3` and `mainstreet-oracle`. The live MCP registry entry
+  (`io.github.philpof102-svg/mainstreet`) still resolves to `@raskhaaa/mainstreet-oracle@0.9.0`, so any
+  MCP client installing from the registry gets the dead package until this is re-published.
 
 ### Fixed
 - **`contracts/MainStreetVerifier.sol` was documented as importable from the package but never shipped in
