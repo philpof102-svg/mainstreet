@@ -147,11 +147,15 @@ working slice to global scale.
     skipped, 0 sent, deliberately, because a backfill must not fire six weeks of side effects at once.
   All three now report `lag 0` and `status: ok` on `/api/agent/status`, each publishing its own cursor
   and last-run outcome. That endpoint is the check; it does not require trusting this document.
-  Nine jobs now share one RPC module with failover, a cursor that refuses to advance past a gap, a
-  per-run deadline and a published run outcome. One endpoint change can no longer take down a pipeline
-  while it stays silent about it. **This is a dent, not a finish: 13 copies of the old endpoint string
-  are still in the repo**, and we are stating that rather than claiming the class of bug is closed. The
-  three still on a schedule use `eth_call`, which that provider does serve — probed, not assumed.
+  Every job that reads Base now goes through one RPC module with failover, a cursor that refuses to
+  advance past a gap, a per-run deadline and a published run outcome. **Live copies of the old endpoint
+  string in the repo: 0**, down from 23 at the start of the day — the last eleven files were migrated
+  the same evening. Four mentions survive on purpose: two forensic comments, the module header quoting
+  the literal it replaced, and the test asserting we recognise that provider's refusal.
+  A correction to this document's own arithmetic: an earlier revision today said "13 copies still in
+  the repo". That number was wrong when written — a file-level count where the real figure was 15
+  assignment sites across 11 files, because several files held two. It is stated here rather than
+  quietly overwritten, for the same reason the outage is.
 - We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
   favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
   API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
@@ -173,9 +177,10 @@ indexer's cursor and last-run outcome, plus a `jobs` block naming any scheduled 
 failed — so anyone can check whether we are frozen without taking our word for it, and that block is
 currently not empty.
 
-This document has been revised four times in one day, each time in the uncomfortable direction, and
-two of those were corrections to our own claims: we published a staleness figure 3.5x in our favour
-because it was measured from the newest stored row rather than the scan cursor, and we published a
-catch-up estimate of ~3.6 days from a laptop measurement when production did it in 293 seconds. Both
-are corrected above rather than quietly replaced. The rule that made us disclose the freeze applies to
-our own bad numbers too.*
+This document has been revised five times in one day, each time in the uncomfortable direction, and
+three of those were corrections to our own claims: a staleness figure published 3.5x in our favour
+because it was measured from the newest stored row rather than the scan cursor; a catch-up estimate of
+~3.6 days taken from a laptop when production did it in 293 seconds; and a count of "13 remaining
+copies" that was a file count where the real figure was 15 sites across 11 files. All three are
+corrected above rather than quietly replaced. The rule that made us disclose the freeze applies to our
+own bad numbers too — including the ones nobody would have checked.*
