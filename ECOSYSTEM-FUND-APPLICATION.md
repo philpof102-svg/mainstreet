@@ -164,8 +164,9 @@ working slice to global scale.
 - **The outage did not stay inside the plumbing — it reached the paid verdict.** `/api/agent/audit`
   raises a medium-severity `no-identity-proofs` flag ("No multi-source identity proofs — unverified
   provenance") when a wallet's proof count is **zero**. Four of the pipelines that fill that count were
-  producing nothing for six weeks, and they are **6,110 of our 13,898 proofs — 44% of the evidence
-  surface**. A single catch-up run yesterday added ~870. So a wallet that started supplying Morpho or
+  producing nothing for six weeks, and they account for **44% of the evidence surface** (6,110 proofs
+  against the ~13,900 total above; both read from `/api/agent/coverage`, a few minutes apart, which is
+  why the totals differ by three). A single catch-up run yesterday added ~870. So a wallet that started supplying Morpho or
   trading agent tokens during the freeze read as zero-proof, and a paying caller could have been told
   its provenance was unverified when what was unverified was our own collection. We are naming the
   mechanism and the exposure; we did **not** verify the caller-visible effect at runtime, because that
