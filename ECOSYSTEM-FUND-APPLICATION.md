@@ -161,6 +161,17 @@ working slice to global scale.
   the repo". That number was wrong when written — a file-level count where the real figure was 15
   assignment sites across 11 files, because several files held two. It is stated here rather than
   quietly overwritten, for the same reason the outage is.
+- **The outage did not stay inside the plumbing — it reached the paid verdict.** `/api/agent/audit`
+  raises a medium-severity `no-identity-proofs` flag ("No multi-source identity proofs — unverified
+  provenance") when a wallet's proof count is **zero**. Four of the pipelines that fill that count were
+  producing nothing for six weeks, and they are **6,110 of our 13,898 proofs — 44% of the evidence
+  surface**. A single catch-up run yesterday added ~870. So a wallet that started supplying Morpho or
+  trading agent tokens during the freeze read as zero-proof, and a paying caller could have been told
+  its provenance was unverified when what was unverified was our own collection. We are naming the
+  mechanism and the exposure; we did **not** verify the caller-visible effect at runtime, because that
+  endpoint is x402-paid and we were not going to spend to produce a nicer sentence. Read in the
+  deployed source, not exercised. The lesson is the one worth paying for: an oracle must distinguish
+  "no evidence exists" from "we failed to look", and ours could not.
 - We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
   favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
   API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
@@ -182,7 +193,7 @@ indexer's cursor and last-run outcome, plus a `jobs` block naming any scheduled 
 failed — so anyone can check whether we are frozen without taking our word for it, and that block is
 currently not empty.
 
-This document has been revised six times in one day, each time in the uncomfortable direction, and
+This document has been revised seven times in one day, each time in the uncomfortable direction, and
 three of those were corrections to our own claims: a staleness figure published 3.5x in our favour
 because it was measured from the newest stored row rather than the scan cursor; a catch-up estimate of
 ~3.6 days taken from a laptop when production did it in 293 seconds; and a count of "13 remaining
