@@ -171,8 +171,19 @@ working slice to global scale.
   its provenance was unverified when what was unverified was our own collection. We are naming the
   mechanism and the exposure; we did **not** verify the caller-visible effect at runtime, because that
   endpoint is x402-paid and we were not going to spend to produce a nicer sentence. Read in the
-  deployed source, not exercised. The lesson is the one worth paying for: an oracle must distinguish
-  "no evidence exists" from "we failed to look", and ours could not.
+  deployed source, not exercised.
+  **Fixed 2026-08-01, and it is the fix we would want a funder to judge us on.** A zero proof count is
+  only a statement about the wallet if our collectors actually ran, so the verdict now checks that
+  first. Healthy collectors → the hard claim stands, unchanged. Otherwise the flag becomes
+  `proof-coverage-degraded` at **low** severity and says it in words: *provenance unknown, not absent —
+  we did not finish looking*. Low on purpose: an unknown is not a risk signal and must not be priced
+  as one. The check reads what the scheduler **recorded** the collectors doing, not what they were
+  scheduled to do, because a job that never fires looks exactly like a job that succeeds — that is the
+  whole reason six weeks went unnoticed — and a six-week-old success counts as stale, not as healthy.
+  `/api/agent/status` publishes `jobs.proofCoverage` and it currently reads **6 of 14 collectors
+  healthy**, so the endpoint is downgrading its own claim right now, in public, and will keep doing so
+  until each collector's cron has proven itself. An oracle must distinguish "no evidence exists" from
+  "we failed to look". Ours could not. Now it can, and it says which one it is looking at.
 - We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
   favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
   API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
@@ -194,7 +205,7 @@ indexer's cursor and last-run outcome, plus a `jobs` block naming any scheduled 
 failed — so anyone can check whether we are frozen without taking our word for it, and that block is
 currently not empty.
 
-This document has been revised seven times in one day, each time in the uncomfortable direction, and
+This document has been revised eight times across 2026-07-31 and 2026-08-01, each time in the uncomfortable direction, and
 three of those were corrections to our own claims: a staleness figure published 3.5x in our favour
 because it was measured from the newest stored row rather than the scan cursor; a catch-up estimate of
 ~3.6 days taken from a laptop when production did it in 293 seconds; and a count of "13 remaining
