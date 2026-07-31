@@ -54,10 +54,16 @@ onchain-verifiable** score. The "is this counterparty safe to pay?" preflight be
 > oracle that hides its own outage has no business scoring anyone else, and that includes hiding it
 > from itself.
 >
-> **What is still fragile, stated plainly.** This runs on free public RPC endpoints with automatic
-> failover, not on funded infrastructure. The configured provider is on a free tier that caps
-> `eth_getLogs` at a 10-block range; the splitter absorbs it, but at a cost of ~1,462 wasted calls per
-> run. The failover keeps a dead provider from freezing us silently — it does not buy headroom. Ask #3
+> **What is still fragile, stated plainly.** This runs on a free public RPC endpoint, not on funded
+> infrastructure. Until 2026-07-31 the configured provider was a free tier capping `eth_getLogs` at a
+> 10-block range, so every run paid a wasted call before failing over; that variable now points
+> straight at the public Base endpoint and the wasted hop is gone. What replaced it is not redundancy:
+> six free public Base endpoints were probed the same day with a 5,000-block `eth_getLogs` and exactly
+> **one** is usable — two return HTTP 521, one times out on its free plan, one caps at 50 blocks, one
+> does not implement the method, one demands a token. So there is currently no second free endpoint to
+> fall back to, and we would rather say that than describe a failover chain of length one as resilience.
+> The client takes a comma-separated list, so a paid endpoint is a config change the day there is one.
+> Ask #3
 > below is exactly this: turn a recovery that works into a pipeline that scales.
 
 Why it matters for *your* thesis: 24/7 agent finance at scale needs a safety rail. KYT tells an agent it's
@@ -105,9 +111,9 @@ working slice to global scale.
 - MainStreet's settlement figures are an *indexed slice*, not the ecosystem — scaling coverage is real work.
 - That slice froze for six weeks (2026-06-19 → 2026-07-30) on defects that were entirely ours, and it is
   fixed and back at the chain head (see above). We keep it in the risk list rather than the win column
-  because the mitigation is honest reporting plus failover between **free** RPC endpoints — the pipeline
-  has no funded headroom, and the provider currently in front caps `eth_getLogs` at 10 blocks. It works;
-  it is not yet robust. That is ask #3.
+  because the mitigation is honest reporting on top of a **single free** RPC endpoint — the pipeline has
+  no funded headroom, and measurement says there is no second free endpoint worth failing over to. It
+  works; it is not yet robust. That is ask #3.
 - **It was not one indexer. By the end of 2026-07-31 it was nine jobs, and we went looking for eight of
   them.** The same RPC endpoint string was copy-pasted across the repo — 23 copies, counted — so one
   provider change silently disabled every job that read event logs, and the July repair fixed exactly
@@ -177,7 +183,7 @@ indexer's cursor and last-run outcome, plus a `jobs` block naming any scheduled 
 failed — so anyone can check whether we are frozen without taking our word for it, and that block is
 currently not empty.
 
-This document has been revised five times in one day, each time in the uncomfortable direction, and
+This document has been revised six times in one day, each time in the uncomfortable direction, and
 three of those were corrections to our own claims: a staleness figure published 3.5x in our favour
 because it was measured from the newest stored row rather than the scan cursor; a catch-up estimate of
 ~3.6 days taken from a laptop when production did it in 293 seconds; and a count of "13 remaining
