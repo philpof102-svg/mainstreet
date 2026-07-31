@@ -19,10 +19,10 @@ a 0–100 reputation score for any Base wallet, agent or token — folding ERC-8
 feedback, x402 facilitator settlements, and Virtuals ACP completions into a single **EIP-712 signed,
 onchain-verifiable** score. The "is this counterparty safe to pay?" preflight before an agent routes USDC.
 
-**Real coverage (live API `/api/agent/coverage`, read 2026-07-31 16:49 UTC):**
+**Real coverage (live API `/api/agent/coverage`, read 2026-07-31 17:07 UTC):**
 - **1,956** Base agents indexed · **1,423** scored · **448** attestations EIP-712 signed, of which
   **19** are additionally published onchain via EAS
-- **14,591** ERC-8004 identities · **9,797** Virtuals agents catalogued · **7,295** unique buyers seen
+- **15,200** ERC-8004 identities · **9,797** Virtuals agents catalogued · **7,295** unique buyers seen
 - **2,096,868** x402 settlements / **$394,666** USDC volume *captured by our indexer* — our slice, not the
   ecosystem (ecosystem-wide: ~163.8M settlements / ~$46.9M all-time, per x402.fuchss.app).
 - Live window, republished after six weeks dark: **213,921** settlements / **$25,150** in the last 24h,
@@ -115,9 +115,13 @@ working slice to global scale.
     **260 chunks, 0 failed, 293 seconds, 90,169 feedback events recovered** (129,149 → 219,318 stored).
     Lag now 0. Mid-run it hit the free-tier `eth_getLogs` cap, failed over to a public endpoint by
     itself and finished — the failover is load-bearing, not decorative.
-  - *ERC-8004 identity* — same cause, repaired and closing its backlog. Its **14,591** figure above is a
-    count that stopped growing in mid-June; it will rise as that backlog closes. We are publishing it as
-    what we actually hold, not as current ecosystem coverage.
+  - *ERC-8004 identity* — same cause, ~42.5 days behind, caught up 17:03 UTC: **368 chunks, 0 failed,
+    120 seconds, 609 identities recovered**. That is why the figure above reads **15,200** and not the
+    **14,591** we published earlier today — the count had stopped growing in mid-June, we said so, and
+    then it moved the moment the pipeline did. Rewards stayed disabled through the catch-up: 23 payouts
+    skipped, 0 sent, deliberately, because a backfill must not fire six weeks of side effects at once.
+  All three now report `lag 0` and `status: ok` on `/api/agent/status`, each publishing its own cursor
+  and last-run outcome. That endpoint is the check; it does not require trusting this document.
   The three now share one RPC module with a cursor that refuses to advance past a gap, a per-run budget,
   and a published run outcome each. The structural fix is the deduplication: one endpoint change can no
   longer take down three pipelines while two of them stay silent about it.
@@ -135,7 +139,7 @@ working slice to global scale.
 (marketplace repo), RugRace (rugrace-production.up.railway.app). Wallet: rakshasar.base.eth.
 *Prepared 2026-07-17; outage-audited 2026-07-18; settlement indexer root-caused and fixed 2026-07-30;
 two further frozen indexers found, shared-cause traced and deduplicated 2026-07-31; figures re-read live
-2026-07-31 16:49 UTC. All figures verifiable at the cited endpoints on that date — including
+2026-07-31 17:07 UTC. All figures verifiable at the cited endpoints on that date — including
 `/api/agent/status`, which publishes each indexer's last run outcome so anyone can check whether we are
 frozen without taking our word for it. The freeze is reported above with the same precision as the
 recovery, including the part we had not found yet when we last updated this document — and including one
