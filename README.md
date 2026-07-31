@@ -25,7 +25,7 @@
 - **Basename** — [mainstreetxyz.base.eth](https://www.base.org/name/mainstreetxyz) with 12 onchain text records (agent, x402.payTo, erc8004.agentId, mcp.npm, x402.catalog…)
 - **ERC-8004 IdentityRegistry** — agentId `53953` on Base
 - **.well-known/agent.json** — A2A discovery card with full identity block + 9 paid endpoints
-- **Integration snippets** — [avisradar.app/integrations.html](https://avisradar-production.up.railway.app/integrations.html) (Claude / Cursor / LangChain / Vercel AI / AccountKit / curl / npm)
+- **Integration snippets** — [avisradar-production.up.railway.app/integrations.html](https://avisradar-production.up.railway.app/integrations.html) (Claude / Cursor / LangChain / Vercel AI / AccountKit / curl / npm)
 
 ## Use it from Claude / Cursor / Windsurf in 1 line
 
@@ -48,7 +48,7 @@
 claude mcp add --transport http mainstreet https://avisradar-production.up.railway.app/mcp
 ```
 
-Your AI agent gets all **19 tools** natively over the hosted server — including `mainstreet_preflight`, `mainstreet_score`, `mainstreet_verify`, `mainstreet_attestation`, `mainstreet_vet`, `mainstreet_deployer`, `mainstreet_compare`, `mainstreet_leaderboard`, `mainstreet_scores_batch`, `mainstreet_find_verified` and more. No SDK install, no auth.
+Your AI agent gets all **42 tools** natively over the hosted server — including `mainstreet_preflight`, `mainstreet_score`, `mainstreet_verify`, `mainstreet_attestation`, `mainstreet_vet`, `mainstreet_deployer`, `mainstreet_compare`, `mainstreet_leaderboard`, `mainstreet_scores_batch`, `mainstreet_find_verified` and more. No SDK install, no auth.
 
 ## 30-second pitch
 
@@ -77,8 +77,8 @@ Onchain reputation oracle for AI agents and real-world businesses, settled in US
 - **Settlement**: USDC via [x402](https://www.x402.org/)
 - **Operator wallet**: [`0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9`](https://basescan.org/address/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9) on Base
 - **MAIN token**: [`0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe`](https://basescan.org/address/0xb3f9760f1f1e75ba01574d98b52e4455f19e93fe) — 1M supply, immutable
-- **Live agent card**: [`https://avisradar.app/.well-known/agent-card.json`](https://avisradar.app/.well-known/agent-card.json)
-- **Live landing**: [`https://avisradar.app/mainstreet.html`](https://avisradar.app/mainstreet.html)
+- **Live agent card**: [`https://avisradar-production.up.railway.app/.well-known/agent-card.json`](https://avisradar-production.up.railway.app/.well-known/agent-card.json)
+- **Live landing**: [`https://avisradar-production.up.railway.app/mainstreet.html`](https://avisradar-production.up.railway.app/mainstreet.html)
 - **Coinbase x402 Bazaar**: [indexed](https://api.cdp.coinbase.com/platform/v2/x402/discovery/merchant?payTo=0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9) (v2 protocol)
 - **Agent Arena ERC-8004**: agentId [`53953`](https://agentarena.site/api/agent/8453/53953)
 
@@ -220,7 +220,7 @@ await ms.vet(addrA, { minScore: 30, requireAlive: true });
 ### From an agent (via x402)
 
 ```
-GET https://avisradar.app/api/agent/score/0x<address>
+GET https://avisradar-production.up.railway.app/api/agent/score/0x<address>
 X-Payment: <x402 signature>  # max $0.05 USDC on Base
 ```
 
@@ -263,7 +263,7 @@ Source: [github.com/erc-8004/erc-8004-contracts](https://github.com/erc-8004/erc
 
 ```
 oracle.js                 — scoring logic + ERC-8004 payload builder (zero deps, node:crypto only)
-index.html                — landing page (deployed at avisradar.app/mainstreet.html)
+index.html                — landing page (deployed at avisradar-production.up.railway.app/mainstreet.html)
 SPEC.md                   — full design spec
 DISTRIBUTION.md           — go-to-market playbook (x402 Bazaar, agentic.market, Virtuals ACP)
 .well-known/
@@ -304,3 +304,5 @@ The contract is intentionally inert at deploy. No initial LP, no airdrop, no sta
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+- [JMT x402 Agent Tools](https://jmt-x402-proxy.jmthomasofficial.workers.dev) — 25 paid x402 endpoints on Base mainnet: web search, AI analysis, crypto/stock data, SEC filings, company intel, news, sentiment, macro dashboard. $0.001-$0.15/call USDC. Local LLM-powered.

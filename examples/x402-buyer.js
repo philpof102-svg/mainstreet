@@ -6,7 +6,7 @@
 //
 // Usage:
 //   npm i x402-axios viem dotenv
-//   BUYER_PRIVATE_KEY=0x... ENDPOINT=https://avisradar.app/api/agent/score/0xSomeAgent node examples/x402-buyer.js
+//   BUYER_PRIVATE_KEY=0x... ENDPOINT=https://avisradar-production.up.railway.app/api/agent/score/0xSomeAgent node examples/x402-buyer.js
 
 require('dotenv').config();
 const { withPaymentInterceptor } = require('x402-axios');
@@ -15,7 +15,7 @@ const axios = require('axios');
 
 const PK = process.env.BUYER_PRIVATE_KEY;
 const ENDPOINT = process.env.ENDPOINT
-  || 'https://avisradar.app/api/agent/score/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9';
+  || 'https://avisradar-production.up.railway.app/api/agent/score/0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9';
 
 if (!PK) {
   console.error('Set BUYER_PRIVATE_KEY env var to a wallet with USDC on Base.');
