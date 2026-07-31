@@ -19,14 +19,16 @@ a 0–100 reputation score for any Base wallet, agent or token — folding ERC-8
 feedback, x402 facilitator settlements, and Virtuals ACP completions into a single **EIP-712 signed,
 onchain-verifiable** score. The "is this counterparty safe to pay?" preflight before an agent routes USDC.
 
-**Real coverage (live API `/api/agent/coverage`, read 2026-07-31 17:07 UTC):**
+**Real coverage (live API `/api/agent/coverage`, read 2026-07-31 19:23 UTC):**
 - **1,956** Base agents indexed · **1,423** scored · **448** attestations EIP-712 signed, of which
   **19** are additionally published onchain via EAS
-- **15,200** ERC-8004 identities · **9,797** Virtuals agents catalogued · **7,295** unique buyers seen
-- **2,096,868** x402 settlements / **$394,666** USDC volume *captured by our indexer* — our slice, not the
+- **15,200** ERC-8004 identities · **9,804** Virtuals agents catalogued · **7,328** unique buyers seen
+- **13,895** onchain-behaviour proofs attached to wallets across **16** proof types (DeFi lending, DEX
+  trading, basenames, smart wallets, shipping history) — the evidence a score is computed from.
+- **2,113,240** x402 settlements / **$395,924** USDC volume *captured by our indexer* — our slice, not the
   ecosystem (ecosystem-wide: ~163.8M settlements / ~$46.9M all-time, per x402.fuchss.app).
-- Live window, republished after six weeks dark: **213,921** settlements / **$25,150** in the last 24h,
-  indexer lag **0 hours** at time of reading.
+- Live window, republished after six weeks dark: **181,748** settlements / **$23,869** in the last 24h,
+  indexer lag **0.2 hours** at time of reading.
 - Surfaces: MCP server (agent-consumable), JS SDK, x402-priced endpoints, live site.
 
 > **Outage closed 2026-07-30 — the six-week freeze disclosed above is over.** The settlement indexer is
@@ -106,10 +108,33 @@ working slice to global scale.
   because the mitigation is honest reporting plus failover between **free** RPC endpoints — the pipeline
   has no funded headroom, and the provider currently in front caps `eth_getLogs` at 10 blocks. It works;
   it is not yet robust. That is ask #3.
-- **It was not one indexer, it was three, and we only found that out on 2026-07-31.** All three on-chain
-  indexers carried the same copy-pasted RPC endpoint, so one provider change froze all three within
-  ~23,000 blocks of each other, and the July repair fixed exactly the one we happened to be looking at.
-  Status at the time of this reading, deliberately not rounded up:
+- **It was not one indexer. By the end of 2026-07-31 it was nine jobs, and we went looking for eight of
+  them.** The same RPC endpoint string was copy-pasted across the repo — 23 copies, counted — so one
+  provider change silently disabled every job that read event logs, and the July repair fixed exactly
+  the one we happened to be looking at. What each of them printed while broken is the point: not an
+  error, but a confident zero. `indexed 0 new token launches across 3 factories`. `done — 0 new proofs,
+  0 eligible wallets`. Sentences that assert something about Base, when what had happened is that we
+  could not read Base.
+  The tally, all measured on production rather than inferred:
+  - *three on-chain indexers* — settlements (six weeks), ERC-8004 feedback (43.6 days), identity
+    (~42.5 days). Detail below.
+  - *the Virtuals catalog indexer* — every page rejected for months by two independent upstream
+    changes: a now-required chain filter, and a field that stopped being a scalar. 6 rows held against
+    54,728 agents available.
+  - *the deployer indexer* — every block range refused, 3 factories, 0 events read.
+  - *four proof jobs* (Morpho lending, Aerodrome trading, Clawd and Virtuals token buyers) — all four
+    asked for 4,999-block ranges against a 10-block cap and swallowed every refusal without a log or a
+    counter. Repaired and re-run on production the same day: **1,207 ranges read, 0 failed, 871 new
+    proofs**, where all four had been reading nothing. Two of the four still report zero — and now say
+    `status=ok, 540 ranges ok / 0 failed` beside it, so a real zero is distinguishable from a silent one.
+  - *one more we did not go looking for*: the new fleet recorder caught an X-agent cron failing on an
+    expired API credential within minutes of being deployed. That is the instrument working.
+  **The structural answer is not 36 more hand-written status lines** — thirty-six copies of the same
+  reporting block is the mistake that caused this. Every child the scheduler spawns is now recorded at
+  the one place they all pass through: exit code, whether its own timeout killed it, duration, both
+  stream tails. `/api/agent/status` publishes a `jobs` block that names failures, not successes. A
+  healthy fleet shows an empty array there; ours currently shows one, and we have left it showing.
+  Status of the three original indexers at the time of this reading, deliberately not rounded up:
   - *settlements* — repaired, lag **0 hours**, verifiable on `/api/agent/status`.
   - *ERC-8004 feedback* — was **43.6 days** stale. Caught up 2026-07-31 17:00 UTC in a single run:
     **260 chunks, 0 failed, 293 seconds, 90,169 feedback events recovered** (129,149 → 219,318 stored).
@@ -122,9 +147,11 @@ working slice to global scale.
     skipped, 0 sent, deliberately, because a backfill must not fire six weeks of side effects at once.
   All three now report `lag 0` and `status: ok` on `/api/agent/status`, each publishing its own cursor
   and last-run outcome. That endpoint is the check; it does not require trusting this document.
-  The three now share one RPC module with a cursor that refuses to advance past a gap, a per-run budget,
-  and a published run outcome each. The structural fix is the deduplication: one endpoint change can no
-  longer take down three pipelines while two of them stay silent about it.
+  Nine jobs now share one RPC module with failover, a cursor that refuses to advance past a gap, a
+  per-run deadline and a published run outcome. One endpoint change can no longer take down a pipeline
+  while it stays silent about it. **This is a dent, not a finish: 13 copies of the old endpoint string
+  are still in the repo**, and we are stating that rather than claiming the class of bug is closed. The
+  three still on a schedule use `eth_call`, which that provider does serve — probed, not assumed.
 - We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
   favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
   API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
@@ -137,12 +164,18 @@ working slice to global scale.
 
 **Contact / links:** MainStreet live site + MCP + SDK (avisradar-production.up.railway.app), Loop
 (marketplace repo), RugRace (rugrace-production.up.railway.app). Wallet: rakshasar.base.eth.
-*Prepared 2026-07-17; outage-audited 2026-07-18; settlement indexer root-caused and fixed 2026-07-30;
-two further frozen indexers found, shared-cause traced and deduplicated 2026-07-31; figures re-read live
-2026-07-31 17:07 UTC. All figures verifiable at the cited endpoints on that date — including
-`/api/agent/status`, which publishes each indexer's last run outcome so anyone can check whether we are
-frozen without taking our word for it. The freeze is reported above with the same precision as the
-recovery, including the part we had not found yet when we last updated this document — and including one
-figure we published too pessimistically and then corrected: we estimated the ERC-8004 catch-up at ~3.6
-days from a local measurement; production did it in 293 seconds, and the corrected number is the one
-above.*
+*Prepared 2026-07-17; outage-audited 2026-07-18; settlement indexer root-caused and fixed 2026-07-30; on
+2026-07-31 eight further jobs were found reading nothing, the shared cause traced, the RPC layer
+deduplicated and the whole scheduled fleet instrumented; figures re-read live 2026-07-31 19:23 UTC.
+
+All figures are verifiable at the cited endpoints on that date. `/api/agent/status` publishes each
+indexer's cursor and last-run outcome, plus a `jobs` block naming any scheduled job whose last run
+failed — so anyone can check whether we are frozen without taking our word for it, and that block is
+currently not empty.
+
+This document has been revised four times in one day, each time in the uncomfortable direction, and
+two of those were corrections to our own claims: we published a staleness figure 3.5x in our favour
+because it was measured from the newest stored row rather than the scan cursor, and we published a
+catch-up estimate of ~3.6 days from a laptop measurement when production did it in 293 seconds. Both
+are corrected above rather than quietly replaced. The rule that made us disclose the freeze applies to
+our own bad numbers too.*
