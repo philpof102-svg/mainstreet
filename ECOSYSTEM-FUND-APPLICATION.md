@@ -19,34 +19,43 @@ a 0–100 reputation score for any Base wallet, agent or token — folding ERC-8
 feedback, x402 facilitator settlements, and Virtuals ACP completions into a single **EIP-712 signed,
 onchain-verifiable** score. The "is this counterparty safe to pay?" preflight before an agent routes USDC.
 
-**Real coverage (live API `/api/agent/coverage`, read 2026-07-30):**
-- **1,924** Base agents indexed · **1,413** scored · **436** attestations EIP-712 signed, of which
+**Real coverage (live API `/api/agent/coverage`, read 2026-07-31 07:25 UTC):**
+- **1,956** Base agents indexed · **1,423** scored · **448** attestations EIP-712 signed, of which
   **19** are additionally published onchain via EAS
-- **14,591** ERC-8004 identities · **9,766** Virtuals agents catalogued · **5,140** unique buyers seen
-- **1,187,405** x402 settlements / **$278,947** USDC volume *captured by our indexer* — our slice, not the
-  ecosystem (ecosystem-wide: ~163.7M settlements / ~$46.9M all-time, per x402.fuchss.app).
+- **14,591** ERC-8004 identities · **9,783** Virtuals agents catalogued · **7,097** unique buyers seen
+- **2,027,386** x402 settlements / **$385,320** USDC volume *captured by our indexer* — our slice, not the
+  ecosystem (ecosystem-wide: ~163.8M settlements / ~$46.9M all-time, per x402.fuchss.app).
+- Live window, republished after six weeks dark: **215,499** settlements / **$24,583** in the last 24h.
 - Surfaces: MCP server (agent-consumable), JS SDK, x402-priced endpoints, live site.
 
-> **Outage update — partially recovered, then stalled again; root-caused 2026-07-30.** On 2026-07-18 we
-> disclosed here that the settlement indexer was frozen at Base block 47,505,595 since 2026-06-19. Since
-> then the scan cursor advanced to **48,884,011** and the table grew **+253,492 settlements / +$80,579**
-> USDC — but it is stalled again and sits **244 hours (10.2 days) behind the chain head**. The last
-> scheduled run scanned **0 transfers with 612 of 612 chunks failing**.
+> **Outage closed 2026-07-30 — the six-week freeze disclosed above is over.** The settlement indexer is
+> back at the Base chain head. The cursor moved from **48,884,011** (frozen since 2026-06-19, 244 hours
+> behind) to the live head, and the 24h window is being published again after six weeks of returning
+> `null`. Since the fix: **+840,000 settlements** and **+$106,000** USDC captured. The 06:21 UTC
+> scheduled run — unattended, not a boot run — reported `status: ok`, 3 of 3 chunks succeeded, lag 0.
 >
-> The cause is ours, not the chain's. The scheduler killed the indexer at a 10-minute timeout, while one
-> 5,000-block chunk costs ~11 minutes of RPC work against a free public endpoint and a cold start needs
-> ~190 minutes: no chunk could ever complete, so the cursor could never advance. The child's stderr was
-> discarded, so 612 failures printed one cheerful "done" line — which is how a month-long freeze stayed
-> invisible. Fixed in code on 2026-07-30 (budgeted runs that commit partial progress, failures surfaced
-> and recorded per run); verified locally taking a test cursor from 15,000 blocks behind to 89. Pending
-> deploy at the time of writing.
+> **The cause was ours, and none of it was on-chain.** Six defects, each hidden by the one before it:
+> the scheduler killed the job at a 10-minute timeout while a single 5,000-block chunk costs ~11 minutes
+> of RPC work, so no chunk ever completed and the cursor could never advance; the child's stderr was
+> discarded, so 612 consecutive failures printed one cheerful "done" line — that is how a month-long
+> freeze stayed invisible; `JSON.parse` on a cut-off response body threw straight past the adaptive
+> range-splitter, so the one error the splitter existed to handle was the one it never saw; an *empty*
+> body was then treated as a size problem, turning 612 doomed calls into 8,492; a run that scanned
+> nothing reported `status: ok`; and one flaky topic batch out of ~34 discarded the other 33, which is
+> why rows kept landing while the cursor sat frozen for ten days.
 >
-> One number here got worse when we looked properly: we had been measuring staleness from the newest row
-> in the table rather than from the scan cursor, which reported **70h** when the truth was **244h** — an
-> error in the flattering direction. The API now measures the cursor, because that is the only block
-> height we can honestly claim to have read. Cumulative figures are real; the live window stays `null`
-> with `settlementsWindowStale: true` until the lag closes. A reputation oracle that hides its own outage
-> has no business scoring anyone else, and that includes hiding it from itself.
+> **We also corrected a number in our own favour.** Staleness had been measured from the newest row in
+> the table rather than from the scan cursor — it reported **70h** when the truth was **244h**. Rows can
+> run ahead of the cursor because a partly-successful chunk still inserts them. The API now measures the
+> cursor, because that is the only block height we can honestly claim to have *read*. A reputation
+> oracle that hides its own outage has no business scoring anyone else, and that includes hiding it
+> from itself.
+>
+> **What is still fragile, stated plainly.** This runs on free public RPC endpoints with automatic
+> failover, not on funded infrastructure. The configured provider is on a free tier that caps
+> `eth_getLogs` at a 10-block range; the splitter absorbs it, but at a cost of ~1,462 wasted calls per
+> run. The failover keeps a dead provider from freezing us silently — it does not buy headroom. Ask #3
+> below is exactly this: turn a recovery that works into a pipeline that scales.
 
 Why it matters for *your* thesis: 24/7 agent finance at scale needs a safety rail. KYT tells an agent it's
 *allowed* to pay; MainStreet tells it whether it's *safe* to pay. Complementary to the Coinbase agentic
@@ -91,11 +100,15 @@ working slice to global scale.
 
 ## Honest risks (we name them, per our own rule)
 - MainStreet's settlement figures are an *indexed slice*, not the ecosystem — scaling coverage is real work.
-- That slice froze for a month (2026-06-19), partially recovered, and **stalled again at 244h behind the
-  chain** — root-caused on 2026-07-30 to our own run-budget and swallowed error output, not to the chain
-  (see above). The fix is written and locally verified; sustained catch-up on a free public RPC is
-  marginal, and a funded RPC endpoint is what turns it from marginal into reliable. Closing that lag and
-  then broadening the pipeline is exactly what ask #3 below funds.
+- That slice froze for six weeks (2026-06-19 → 2026-07-30) on defects that were entirely ours, and it is
+  fixed and back at the chain head (see above). We keep it in the risk list rather than the win column
+  because the mitigation is honest reporting plus failover between **free** RPC endpoints — the pipeline
+  has no funded headroom, and the provider currently in front caps `eth_getLogs` at 10 blocks. It works;
+  it is not yet robust. That is ask #3.
+- We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
+  favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
+  API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
+  endpoint rather than in a log line nobody reads.
 - Loop has one real on-chain coin and no liquidity yet — traction, not features, is the gap.
 - RWA legal framing is unsettled; we gate mainnet on an opinion, not optimism.
 - Solo builder — the fund's "small team" line is the mitigation.
@@ -104,6 +117,8 @@ working slice to global scale.
 
 **Contact / links:** MainStreet live site + MCP + SDK (avisradar-production.up.railway.app), Loop
 (marketplace repo), RugRace (rugrace-production.up.railway.app). Wallet: rakshasar.base.eth.
-*Prepared 2026-07-17; outage-audited 2026-07-18; figures re-read live and outage status updated 2026-07-30.
-All figures verifiable at the cited endpoints on that date. The settlement-indexer freeze — and its partial
-recovery, lag included — is disclosed above rather than papered over.*
+*Prepared 2026-07-17; outage-audited 2026-07-18; root-caused and fixed 2026-07-30; figures re-read live
+2026-07-31 07:25 UTC. All figures verifiable at the cited endpoints on that date — including
+`/api/agent/status`, which now publishes the settlement indexer's last run outcome so anyone can check
+whether we are frozen without taking our word for it. The six-week freeze is reported above with the same
+precision as the recovery.*
