@@ -111,10 +111,12 @@ working slice to global scale.
   ~23,000 blocks of each other, and the July repair fixed exactly the one we happened to be looking at.
   Status at the time of this reading, deliberately not rounded up:
   - *settlements* — repaired, lag **0 hours**, verifiable on `/api/agent/status`.
-  - *ERC-8004 feedback* — was **43.6 days** stale. The fix is deployed but runs on a 03:30 UTC cron, so
-    at time of writing this pipeline is still behind; measured catch-up is about **3.6 days**, not a night.
-  - *ERC-8004 identity* — same cause, repaired and resuming. Its **14,591** figure above is therefore a
-    count that stopped growing in mid-June; it will rise as the backlog closes. We are publishing it as
+  - *ERC-8004 feedback* — was **43.6 days** stale. Caught up 2026-07-31 17:00 UTC in a single run:
+    **260 chunks, 0 failed, 293 seconds, 90,169 feedback events recovered** (129,149 → 219,318 stored).
+    Lag now 0. Mid-run it hit the free-tier `eth_getLogs` cap, failed over to a public endpoint by
+    itself and finished — the failover is load-bearing, not decorative.
+  - *ERC-8004 identity* — same cause, repaired and closing its backlog. Its **14,591** figure above is a
+    count that stopped growing in mid-June; it will rise as that backlog closes. We are publishing it as
     what we actually hold, not as current ecosystem coverage.
   The three now share one RPC module with a cursor that refuses to advance past a gap, a per-run budget,
   and a published run outcome each. The structural fix is the deduplication: one endpoint change can no
@@ -135,6 +137,8 @@ working slice to global scale.
 two further frozen indexers found, shared-cause traced and deduplicated 2026-07-31; figures re-read live
 2026-07-31 16:49 UTC. All figures verifiable at the cited endpoints on that date — including
 `/api/agent/status`, which publishes each indexer's last run outcome so anyone can check whether we are
-frozen without taking our word for it. That endpoint currently reports one of our three pipelines as
-`stale: true`, and we have left it saying so. The freeze is reported above with the same precision as the
-recovery, including the part we had not found yet when we last updated this document.*
+frozen without taking our word for it. The freeze is reported above with the same precision as the
+recovery, including the part we had not found yet when we last updated this document — and including one
+figure we published too pessimistically and then corrected: we estimated the ERC-8004 catch-up at ~3.6
+days from a local measurement; production did it in 293 seconds, and the corrected number is the one
+above.*
