@@ -62,9 +62,8 @@ onchain-verifiable** score. The "is this counterparty safe to pay?" preflight be
 > **one** is usable — two return HTTP 521, one times out on its free plan, one caps at 50 blocks, one
 > does not implement the method, one demands a token. So there is currently no second free endpoint to
 > fall back to, and we would rather say that than describe a failover chain of length one as resilience.
-> The client takes a comma-separated list, so a paid endpoint is a config change the day there is one.
-> Ask #3
-> below is exactly this: turn a recovery that works into a pipeline that scales.
+> The client takes a comma-separated list, so a paid endpoint is a config change the day there is one —
+> and ask #3 below is exactly that: turn a recovery that works into a pipeline that scales.
 
 Why it matters for *your* thesis: 24/7 agent finance at scale needs a safety rail. KYT tells an agent it's
 *allowed* to pay; MainStreet tells it whether it's *safe* to pay. Complementary to the Coinbase agentic
