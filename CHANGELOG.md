@@ -1,6 +1,38 @@
 # Changelog
 
-## [0.9.3] — 2026-07-30 — the published README still pointed at the dead package
+## [0.9.3] — 2026-07-30 → 2026-08-01 — the dead package link, and a score that stops pretending
+
+### Changed — API contract, affects every SDK consumer (2026-08-01)
+
+- **`score` can now be `null`, and that is the point.** The hosted API used to return a number in
+  every case. Where it had no measurement it returned a neutral-looking one — on the paid verdict
+  path, a hardcoded `50`. Driving the pre-fix function returns that `50` on four separate failure
+  paths: no leaderboard row, a NULL score column, an unreadable score table, and a run where the
+  denylist lens itself threw. On the wire a fabricated 50 was byte-identical to a measured 50.
+
+  Now `score: null` travels with **`score_basis`**, one of:
+  - `measured` — a real snapshot row. `scored_at` carries the snapshot date it came from.
+  - `not-indexed` — we looked, this subject has no score. **Not a low score.**
+  - `degraded` — we could not look. The verdict fails closed and the caller is not charged.
+
+  **If you gate payments on this, handle `null` first.** `null < 60` is `true` in JavaScript, so a
+  naive threshold check treats it as low — conservative, but by accident rather than by design.
+
+- **`/score?live=1` now reports which data sources failed on that call** (`sourceErrors`,
+  `recencyObserved`). Previously a source that timed out was silently dropped and the note blamed
+  our roadmap. It is not cosmetic: recency is worth up to 20 of the 100 points and only one source
+  supplies it, so an upstream timeout used to price a subject as a year inactive. Readings with a
+  failed source are also no longer cached, so a transient failure can no longer be served as that
+  agent's score for an hour.
+
+- **Badges no longer render stale or dead data as healthy.** A scoring cron that had stopped used to
+  publish `0` in green; a six-month-old score rendered in the same green as today's. Stale now reads
+  grey with its age in the label. Grey rather than amber on purpose — amber would flatter a stale
+  low score exactly as much as it demoted a stale high one.
+
+- README: corrected the hosted MCP tool count to **43** (measured live against `/mcp` on 2026-08-01;
+  it said 42). The `mainstreet-mcp` bin shipped in this package exposes **10** tools locally — the
+  43 is the hosted server, as the README states.
 
 ### Changed
 - **npm package is now unscoped: `mainstreet-oracle`.** `0.9.2` was published under the new name on

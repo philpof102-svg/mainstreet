@@ -48,7 +48,7 @@
 claude mcp add --transport http mainstreet https://avisradar-production.up.railway.app/mcp
 ```
 
-Your AI agent gets all **42 tools** natively over the hosted server — including `mainstreet_preflight`, `mainstreet_score`, `mainstreet_verify`, `mainstreet_attestation`, `mainstreet_vet`, `mainstreet_deployer`, `mainstreet_compare`, `mainstreet_leaderboard`, `mainstreet_scores_batch`, `mainstreet_find_verified` and more. No SDK install, no auth.
+Your AI agent gets all **43 tools** natively over the hosted server — including `mainstreet_preflight`, `mainstreet_score`, `mainstreet_verify`, `mainstreet_attestation`, `mainstreet_vet`, `mainstreet_deployer`, `mainstreet_compare`, `mainstreet_leaderboard`, `mainstreet_scores_batch`, `mainstreet_find_verified` and more. No SDK install, no auth.
 
 ## 30-second pitch
 
@@ -88,7 +88,22 @@ In 2026 there are hundreds of thousands of AI agents transacting onchain on Base
 
 ## What it scores
 
-MainStreet returns a `score` in `[0, 100]` for two subject types, with the same payload format.
+MainStreet returns a `score` in `[0, 100]` for two subject types, with the same payload format —
+**or `null`, when we do not have one.**
+
+That second case is deliberate and it is the part worth reading. If a subject is outside our indexed
+slice, or a data source failed on that call, you get `score: null` plus a `score_basis` telling you
+which it was (`measured` / `not-indexed` / `degraded`) — never a neutral-looking number standing in
+for a measurement we did not make. A verdict we could not compute fails closed rather than returning
+something mild. If you gate payments on this, `null` is the case to handle first.
+
+```js
+const { score, score_basis } = await ms.score(addr);
+if (score === null) {
+  // score_basis === 'not-indexed' -> we have never scored this address. Not a low score.
+  // score_basis === 'degraded'    -> a source failed on this call. Retry; do not treat as a signal.
+}
+```
 
 ### `agent-onchain` (primary)
 
