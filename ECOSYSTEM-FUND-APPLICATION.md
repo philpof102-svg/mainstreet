@@ -14,10 +14,16 @@ of shipping money-handling contracts on Base mainnet with discipline (RugRace).
 ## The fit — two of your six categories, already live
 
 ### 1. MainStreet → "commercial applications for AI Agents"
-The trust layer agent-to-agent finance is missing. One call returns a **SAFE / CAUTION / BLOCK** verdict +
-a 0–100 reputation score for any Base wallet, agent or token — folding ERC-8004 ReputationRegistry
-feedback, x402 facilitator settlements, and Virtuals ACP completions into a single **EIP-712 signed,
-onchain-verifiable** score. The "is this counterparty safe to pay?" preflight before an agent routes USDC.
+The trust layer agent-to-agent finance is missing. One call returns a **SAFE / CAUTION / BLOCK** verdict
+for any Base wallet, agent or token, plus a 0–100 reputation score **when we have one** — folding
+ERC-8004 ReputationRegistry feedback, x402 facilitator settlements, and Virtuals ACP completions into a
+single **EIP-712 signed, onchain-verifiable** score. The "is this counterparty safe to pay?" preflight
+before an agent routes USDC.
+
+When we have no score for a subject the response says so — `score: null`, `score_basis: not-indexed` —
+rather than returning a neutral-looking number. That distinction is not decoration: until 2026-08-01
+this endpoint returned a fabricated 50 in exactly that case, and it is written up in the risks section
+below rather than left for a reader to find.
 
 **Real coverage (live API `/api/agent/coverage`, read 2026-07-31 19:23 UTC):**
 - **1,956** Base agents indexed · **1,423** scored · **448** attestations EIP-712 signed, of which
@@ -184,6 +190,29 @@ working slice to global scale.
   healthy**, so the endpoint is downgrading its own claim right now, in public, and will keep doing so
   until each collector's cron has proven itself. An oracle must distinguish "no evidence exists" from
   "we failed to look". Ours could not. Now it can, and it says which one it is looking at.
+- **The paid verdict was publishing a score nobody had measured. Found and fixed 2026-08-01, and it is
+  the worst thing in this document.** `POST /api/agent/check` — the x402 endpoint at the top of this
+  page, the one whose output is EIP-712 signed — computed its verdict from `let score = 50`, and that
+  50 survived every failure path. Driving the pre-fix function with injected fakes returns it four
+  times over: for a subject with no leaderboard row, for a NULL score column, for an unreadable score
+  table, and — the serious one — for a run in which the denylist lens itself threw and silently
+  disappeared. All four came back `verdict: CAUTION, score: 50`, signed, to a caller who had already
+  paid. On the wire a fabricated 50 was byte-identical to a measured 50.
+  The exposure was never bounded by our catalogue: `/check` accepts any `0x` address, so every subject
+  outside the snapshot got one. Of **1,956** indexed agents, **1,000** are in today's snapshot; every
+  address that has never been scored, in our index or out of it, received the default.
+  Two things make this worse than the entry above and we would rather state them than have a funder
+  find them. First, our **free** `/preflight` route has always been honest about exactly this —
+  it emits `score: null` when there is no row. The surface that charged money was the dishonest one.
+  Second, our own gated proxy carries the rule in a comment: *"A trust gate that fails open is not a
+  trust gate."* The paid path failed open.
+  Fixed: `score` is `null` when unmeasured and carries a `score_basis` of `measured` / `not-indexed`
+  / `degraded`, plus the `scored_at` snapshot date it came from. A verdict we could not compute now
+  returns BLOCK with HTTP 503 **and does not charge** — the credit used to be burned and the x402
+  payment settled before the verdict was ever computed, with no refund path. Verified by 18 assertions
+  against the shipped module, and separately by confirming that 4 of those assertions **fail** against
+  the pre-fix code, so the test discriminates rather than merely passing. The endpoint had no test at
+  all before today; that is how this lasted.
 - We shipped a green status on a run that had read nothing, and measured our own staleness 3.5x in our
   favour, before catching both. The lesson we drew is structural, not a resolution to be careful: the
   API now records and publishes each indexer run's outcome, so the next freeze is visible on a public
