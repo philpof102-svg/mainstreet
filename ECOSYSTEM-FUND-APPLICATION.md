@@ -21,9 +21,15 @@ single **EIP-712 signed, onchain-verifiable** score. The "is this counterparty s
 before an agent routes USDC.
 
 When we have no score for a subject the response says so — `score: null`, `score_basis: not-indexed` —
-rather than returning a neutral-looking number. That distinction is not decoration: until 2026-08-01
-this endpoint returned a fabricated 50 in exactly that case, and it is written up in the risks section
-below rather than left for a reader to find.
+rather than returning a neutral-looking number, and that verdict is deliberately left **unsigned**:
+the signer coerces a missing score to `0`, so signing one would put the operator key behind a "score
+0" nobody measured. `attestation_status` distinguishes `signed` / `unsigned:no-score` /
+`unsigned:disabled` / `unsigned:error`, because a bare `null` cannot tell you which.
+
+That distinction is not decoration. Until 2026-08-01 this endpoint returned a fabricated 50 in exactly
+that case, and — found the same day, by an adversarial review of the fix itself — it had never
+produced a signature at all. Both are written up in the risks section below rather than left for a
+reader to find.
 
 **Real coverage (live API `/api/agent/coverage`, read 2026-07-31 19:23 UTC):**
 - **1,956** Base agents indexed · **1,423** scored · **448** attestations EIP-712 signed, of which
@@ -192,12 +198,23 @@ working slice to global scale.
   "we failed to look". Ours could not. Now it can, and it says which one it is looking at.
 - **The paid verdict was publishing a score nobody had measured. Found and fixed 2026-08-01, and it is
   the worst thing in this document.** `POST /api/agent/check` — the x402 endpoint at the top of this
-  page, the one whose output is EIP-712 signed — computed its verdict from `let score = 50`, and that
-  50 survived every failure path. Driving the pre-fix function with injected fakes returns it four
-  times over: for a subject with no leaderboard row, for a NULL score column, for an unreadable score
-  table, and — the serious one — for a run in which the denylist lens itself threw and silently
-  disappeared. All four came back `verdict: CAUTION, score: 50`, signed, to a caller who had already
-  paid. On the wire a fabricated 50 was byte-identical to a measured 50.
+  page — computed its verdict from `let score = 50`, and that 50 survived every failure path. Driving
+  the pre-fix function with injected fakes returns it four times over: for a subject with no
+  leaderboard row, for a NULL score column, for an unreadable score table, and — the serious one —
+  for a run in which the denylist lens itself threw and silently disappeared. All four came back
+  `verdict: CAUTION, score: 50` to a caller who had already paid. On the wire a fabricated 50 was
+  byte-identical to a measured 50.
+  **A correction to an earlier revision of this paragraph, made hours after writing it.** It said the
+  fabricated verdict was "EIP-712 signed". It was not. An adversarial review of our own fix found
+  that this endpoint has *never* produced a signature: it passed the raw verdict object to the
+  signer, whose EIP-712 type declares `subject` as `bytes32` while a verdict carries a 20-byte
+  address, so every call threw `BytesSizeMismatchError` into a bare `catch` and returned the same
+  `null` that "signing is disabled" returns. A total failure was indistinguishable from a config
+  choice — the very defect this section is about, sitting in the error handling of the fix for it.
+  So the fabricated score was real and was paid for, but nothing was signed over it. Both are now
+  true: the score is honest, and the signature works and is published with its payload, because a
+  signature over fields the caller cannot see is not verifiable. The 448 signed attestations counted
+  above are a different, working pipeline and were never affected.
   The exposure was never bounded by our catalogue: `/check` accepts any `0x` address, so every subject
   outside the snapshot got one. Of **1,956** indexed agents, **1,000** are in today's snapshot; every
   address that has never been scored, in our index or out of it, received the default.
