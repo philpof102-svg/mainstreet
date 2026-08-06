@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --version
-      - name: Run oracle tests
-        run: node --test test/oracle.test.js
+      - name: Run the test suite (single source of truth = package.json)
+        run: npm test
       - name: Run example
         run: node examples/basic-usage.js
