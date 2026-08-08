@@ -22,3 +22,6 @@ D/
 *.lnk
 bs1.json
 eth_dshares.txt
+
+# Verrou local de l ordonnanceur: etat de CETTE machine, jamais partageable.
+.claude/scheduled_tasks.lock

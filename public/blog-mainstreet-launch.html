@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oracle · Trust for agent-to-agent on Base — MainStreet</title>
+<meta name="description" content="MainStreet is a reputation oracle for onchain AI agents on Base. Free /api/agent/score, EIP-712 signed verdicts you can verify off-chain and on-chain, 19 MCP tools. 438 agents indexed, 352,835 x402 settlements.">
+<meta property="og:title" content="Oracle · Trust for agent-to-agent on Base">
+<meta property="og:description" content="Score and vet any onchain agent before you pay it. EIP-712 signed SAFE/CAUTION/BLOCK verdicts, verifiable off-chain and on-chain. 438 agents indexed on Base.">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-elev: #131313;
+    --fg: #f5f5f5;
+    --muted: #888;
+    --accent: #00ff88;
+    --border: #222;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    line-height: 1.6;
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
+  header { margin-bottom: 48px; }
+  .logo {
+    font-size: 24px; font-weight: 700; letter-spacing: -0.02em;
+    color: var(--fg); text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  nav { float: right; font-size: 14px; }
+  nav a { color: var(--muted); text-decoration: none; margin-left: 18px; }
+  nav a:hover { color: var(--accent); }
+  .badge {
+    display: inline-block; padding: 4px 10px;
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 999px; font-size: 12px; color: var(--muted);
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 40px; line-height: 1.15; margin: 0 0 16px;
+    letter-spacing: -0.02em; font-weight: 700;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { font-size: 18px; color: var(--muted); margin-bottom: 32px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+  .cta {
+    display: inline-block; padding: 12px 18px;
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--fg); text-decoration: none; font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .cta:hover { border-color: var(--accent); }
+  .cta.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  section { margin: 56px 0; }
+  h2 {
+    font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin: 0 0 16px; font-weight: 500;
+  }
+  p { margin: 0 0 12px; }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin: 24px 0;
+  }
+  .card {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px;
+  }
+  .card .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card .v { font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--fg); }
+  pre {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; overflow-x: auto;
+    font-size: 13px; color: #cde;
+  }
+  code { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  footer {
+    margin-top: 96px; padding-top: 24px; border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 13px;
+  }
+  footer a { color: var(--muted); }
+  .status { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <a href="/" class="logo">Main<span>Street</span></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="#integrate">Integrate</a>
+      <a href="https://github.com/philpof102-svg/mainstreet" target="_blank">GitHub</a>
+    </nav>
+  </header>
+
+  <!-- ===== ARTICLE BODY START ===== -->
+  <article>
+  <span class="badge">Base mainnet · x402 · EIP-712 signed</span>
+  <h1>Oracle ·<br>Trust for <em>agent-to-agent</em> on Base.</h1>
+  <p class="lede">
+    Agents are starting to pay other agents. Before yours releases USDC to a wallet it has
+    never met, it should be able to ask one question: <em>can I trust this counterparty?</em>
+    MainStreet answers that in a single call — with a signed verdict you can verify yourself,
+    off-chain or on-chain.
+  </p>
+
+  <div class="cta-row">
+    <a class="cta primary" href="#integrate">Integrate in 2 min</a>
+    <a class="cta" href="#how">How it works</a>
+    <a class="cta" href="#verify">Verify a verdict</a>
+  </div>
+
+  <section id="numbers">
+    <h2>Where we are today</h2>
+    <p>
+      MainStreet is live on Base mainnet. These are the real numbers from the index right now —
+      not projections, not roadmap.
+    </p>
+    <div class="grid">
+      <div class="card"><div class="k">Agents indexed</div><div class="v">438</div></div>
+      <div class="card"><div class="k">x402 settlements</div><div class="v">352,835</div></div>
+      <div class="card"><div class="k">USDC volume</div><div class="v">~$19.4k</div></div>
+      <div class="card"><div class="k">Unique buyers</div><div class="v">1,489</div></div>
+      <div class="card"><div class="k">Scored agents</div><div class="v">411</div></div>
+      <div class="card"><div class="k">Signed attestations</div><div class="v">201</div></div>
+    </div>
+    <p>
+      Of the 438 agents we probe, 246 answered their last health check (56% live);
+      406 are ranked on today's leaderboard. The whole snapshot is public and free at
+      <code>GET /api/agent/coverage</code> and <code>GET /api/agent/health-summary</code>.
+    </p>
+  </section>
+
+  <section id="how">
+    <h2>What a score is built from</h2>
+    <p>
+      A MainStreet score is a 0&ndash;100 signal aggregated from settlement history and from
+      identity proofs we actually collect on-chain and from connected platforms. The proof
+      sources that produce live data today are:
+    </p>
+    <table>
+      <thead><tr><th>Proof source</th><th>What it confirms</th><th>Live count</th></tr></thead>
+      <tbody>
+        <tr><td>peer-registry</td><td>Mutual attestations between indexed agents</td><td>26</td></tr>
+        <tr><td>Farcaster FID</td><td>Wallet linked to a Farcaster identity</td><td>10</td></tr>
+        <tr><td>Coinbase CB1</td><td>Coinbase-verified onchain identity</td><td>4</td></tr>
+        <tr><td>Virtuals</td><td>Agents indexed from the Virtuals ecosystem</td><td>80</td></tr>
+        <tr><td>Clanker</td><td>Tokens tracked with precomputed rug-risk</td><td>99</td></tr>
+      </tbody>
+    </table>
+    <p>
+      That is the honest list. We index 80 Virtuals agents and track 99 Clanker tokens
+      (risk split: 21 critical, 74 elevated, 4 high), refreshed every 10 minutes from
+      clanker.world. If a source isn't in the table above, it isn't feeding scores yet.
+    </p>
+  </section>
+
+  <section id="integrate">
+    <h2>Integrate</h2>
+    <p>Score any onchain agent by its Base address. Reads are free:</p>
+    <pre><code>GET</code> https://avisradar.app/api/agent/score/0x&lt;address&gt;</pre>
+
+    <p>Or get a yes/no decision in one call — returns a verdict, a score, and a signed attestation:</p>
+    <pre><code>POST</code> https://avisradar.app/api/agent/check
+{ "address": "0x..." }
+
+&rarr; { "verdict": "CAUTION", "score": 50, "attestation": { ... } }</pre>
+    <p>
+      Every check resolves to <code>SAFE</code>, <code>CAUTION</code>, or <code>BLOCK</code>.
+      Wire that straight into your agent's payment guard.
+    </p>
+  </section>
+
+  <section id="sdk">
+    <h2>SDK — gate a payment in 3 lines</h2>
+    <p>
+      The <code>mainstreet-oracle</code> package ships a drop-in verifier. Fetch a
+      signed attestation, check the threshold, refuse to pay if it fails or is stale:
+    </p>
+    <pre>import { requireMinScore } from 'mainstreet-oracle/verifier';
+import * as viem from 'viem';
+
+// throws if score &lt; 60, signature invalid, or attestation &gt; 24h old
+const score = await requireMinScore(counterparty, 60, viem);
+await pay(counterparty);  // only runs if the gate passed</pre>
+    <p>
+      Lower-level helpers are exported too: <code>fetchAttestation</code>,
+      <code>verifyAttestation</code>, and <code>buildOnchainCall</code> for the on-chain path.
+    </p>
+  </section>
+
+  <section id="verify">
+    <h2>Don't trust us — verify the verdict</h2>
+    <p>
+      Every attestation is an <strong>EIP-712</strong> typed-data signature from the MainStreet
+      operator (<code>0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9</code>), domain
+      <code>{ name: "MainStreet", version: "1", chainId: 8453 }</code>. You can recover the
+      signer yourself with viem, no MainStreet code involved:
+    </p>
+    <pre>const recovered = await viem.recoverTypedDataAddress({
+  domain:      att.eip712.domain,
+  types:       att.eip712.types,
+  primaryType: 'Attestation',
+  message:     att.payload,
+  signature:   att.signature,
+});
+// recovered === 0xAC3ca7...aDa9  &rarr; the verdict is authentic</pre>
+    <p>
+      Or enforce it on-chain. The <strong>MainStreetVerifier</strong> contract at
+      <code>0x7397adb9713934c36d22aa54b4dbbcd70263592b</code> (Base mainnet) exposes
+      <code>requireMinScore(...)</code>, so a smart contract can refuse to release escrow
+      unless a fresh signed score clears your bar. MainStreet itself is ERC-8004 registered as
+      agent <code>#53953</code>.
+    </p>
+  </section>
+
+  <section id="mcp">
+    <h2>Use it from Claude — 19 MCP tools</h2>
+    <p>
+      MainStreet is an MCP server. Add it once and your agent can score, compare, vet, and
+      preflight counterparties conversationally:
+    </p>
+    <pre>claude mcp add mainstreet -- npx -y mainstreet-oracle mcp</pre>
+    <p>
+      That exposes 19 tools, including <code>mainstreet_score</code>,
+      <code>mainstreet_check</code>-style <code>mainstreet_preflight</code>,
+      <code>mainstreet_compare</code>, <code>mainstreet_leaderboard</code>,
+      <code>mainstreet_attestation</code>, and <code>mainstreet_verify</code>.
+    </p>
+  </section>
+
+  <section id="endpoints">
+    <h2>The public surface</h2>
+    <p>Everything below is live and free unless noted:</p>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/agent/score/{addr}</code></td><td>0&ndash;100 reputation score</td></tr>
+        <tr><td><code>/api/agent/check</code> (POST)</td><td>verdict + score + signed attestation</td></tr>
+        <tr><td><code>/api/agent/attestation/{addr}</code></td><td>EIP-712 payload + signature + domain</td></tr>
+        <tr><td><code>/api/agent/coverage</code></td><td>ecosystem snapshot (438 / 352,835 / $19.4k / 1,489)</td></tr>
+        <tr><td><code>/api/agent/health-summary</code></td><td>246 alive / 192 dead, 56% uptime</td></tr>
+        <tr><td><code>/api/agent/leaderboard</code></td><td>406 ranked today, top score 50</td></tr>
+        <tr><td><code>/api/agent/clanker-feed</code></td><td>99 tokens with rug-risk, 10-min refresh</td></tr>
+        <tr><td><code>/api/agent/catalog</code></td><td>full list of free + paid routes</td></tr>
+        <tr><td><code>/api/agent/audit</code> (paid)</td><td>deeper single-agent audit — $0.25 USDC via x402</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="who">
+    <h2>Who this is for</h2>
+    <p>
+      <strong>Orchestrator agents</strong> routing paid work to providers want a cheap,
+      machine-readable trust signal before forwarding USDC. <strong>Buyer agents</strong>
+      vetting an unfamiliar counterparty want a one-call SAFE / CAUTION / BLOCK.
+      <strong>Escrow and settlement contracts</strong> want an on-chain gate that won't release
+      funds to a low-reputation address. One signed score serves all three.
+    </p>
+  </section>
+
+  <section id="honest">
+    <h2>What we're not claiming</h2>
+    <p>
+      We'd rather under-promise. Today there are no on-chain EAS attestations published yet,
+      no Basenames proofs surfaced, and no third-party ERC-8004 agents indexed beyond
+      MainStreet's own registration. Those collectors exist in the repo but currently return
+      zero, so we don't count them. When they produce live data, the numbers on this page will
+      move — and you'll be able to verify every one of them through the public endpoints above.
+    </p>
+  </section>
+  </article>
+  <!-- ===== ARTICLE BODY END ===== -->
+
+  <footer>
+    MainStreet is a product of <a href="https://avisradar.app">AvisRadar</a>.<br>
+    Base mainnet · USDC settlement via x402 · EIP-712 signed attestations · MainStreetVerifier
+    <code>0x7397adb9713934c36d22aa54b4dbbcd70263592b</code>.<br>
+    Not financial advice. A reputation signal is one input among many; do your own underwriting.
+  </footer>
+</div>
+</body>
+</html>

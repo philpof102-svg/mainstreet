@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "avisradar-autofix",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["D:\\Users\\VolKov\\veilleIA\\avisradar\\_autofix_server.js"],
+      "port": 8799
+    },
+    {
+      "name": "momentmint",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["D:\\Users\\VolKov\\veilleIA\\momentmint\\app.js"],
+      "port": 4505
+    },
+    {
+      "name": "lawbor-orggraph",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["D:\\Users\\VolKov\\veilleIA\\lawbor\\demo-orggraph.cjs"],
+      "port": 4830
+    },
+    {
+      "name": "biii-app",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const {build}=require('D:/Users/VolKov/veilleIA/biii/lib/server'); build({merchant:'0x1111111111111111111111111111111111111111'}).listen(4700,()=>console.log('biii-app up on http://127.0.0.1:4700'))"
+      ],
+      "port": 4700
+    }
+  ]
+}
