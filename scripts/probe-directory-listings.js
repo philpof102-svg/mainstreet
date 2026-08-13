@@ -98,6 +98,20 @@ async function main() {
         : 'toutes les entrees nomment ' + CANON });
   } catch (e) { releve.push({ ou: 'MCP Registry', n: null, erreur: String((e && e.message) || e) }); }
 
+  /* mcp.so ne publie AUCUN compte d outils, donc il n y a rien de numerique a comparer — mais un annuaire
+   * MODERE peut DE-lister, et ca, ca se mesure en une requete. Mesure du 2026-08-14: la fiche est propre
+   * (elle pointe l endpoint vivant, sans compte fige ni paquet abandonne), et l enumeration par sitemap
+   * (18472 serveurs, 19 pages, temoin `firecrawl` trouve) confirme `mainstreet` present, `biii` et `lawbor`
+   * absents. ⛔ Etre LISTE ou non est une decision de distribution: on ne juge pas ici, on constate. Etre
+   * DE-liste, en revanche, est un changement d etat qu il vaut mieux ne pas apprendre par hasard.
+   * ⛔ robots.txt de mcp.so interdit /api/ et /search — on ne les touche pas. */
+  try {
+    const r = await fetch('https://mcp.so/servers/mainstreet', borne(20000));
+    releve.push({ ou: 'mcp.so (presence)', n: null,
+      note: r.status === 200 ? 'listee (HTTP 200)' : 'HTTP ' + r.status + ' — DE-LISTEE ou deplacee ?',
+      mauvais: r.status === 200 ? [] : ['mcp.so HTTP ' + r.status] });
+  } catch (e) { releve.push({ ou: 'mcp.so (presence)', n: null, erreur: String((e && e.message) || e) }); }
+
   let ecarts = 0, illisibles = 0;
   for (const l of releve) {
     if (l.erreur) { console.log('  ' + l.ou.padEnd(26) + 'NON LU  ' + l.erreur); illisibles++; continue; }
