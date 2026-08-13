@@ -62,3 +62,19 @@ shows on every install and leaves working installs working. With no version rang
 
 And `0.9.3` still is not on npm. It is the release that fixes the README naming the dead scope sixteen
 times on the package page, so publishing it and deprecating the scope are the same job done from both ends.
+
+## The dead scope is also in the directories
+
+Measured 2026-08-14 by `scripts/probe-directory-listings.js`, which reports this on every run.
+
+The MCP registry holds four entries for `io.github.philpof102-svg/mainstreet`. **Three of them — 0.8.2,
+0.8.3, 0.9.0 — name `@raskhaaa/mainstreet-oracle`.** The newest, 0.9.1, declares no package and routes to
+the hosted remote, which answers `tools/list` with 43 tools, so it is healthy; but a client that pins a
+version, or lists them, is pointed at the abandoned package. Deprecating on npm helps here too: the notice
+travels with the package wherever it is resolved from.
+
+Smithery is stale rather than wrong: 17 tools indexed, "19 MCP tools" in its own description, against 43
+served — its two fields already disagree. That listing was created 2026-06-05 from `add-smithery-config`,
+whose `smithery.yaml` names four tools and was never merged to main. Refreshing it is a gesture on the
+Smithery account. Note that bringing a `smithery.yaml` to main means writing what to advertise and how,
+which is sales copy, not a measurement — so this document does not propose one.
