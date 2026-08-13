@@ -25,8 +25,32 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
+      # `npm test` runs three files; this step used to run one of them. The gate that decides whether
+      # something reaches users was weaker than the gate a developer runs locally, which is the wrong way
+      # round. No install step is needed: the suite is dependency-free (38 tests, ~220ms, measured).
       - name: Run tests
-        run: node --test test/oracle.test.js
+        run: npm test
+
+      # The sibling repo shipped 0.1.0 under a tag announcing v0.2.0, because nothing compared the two.
+      # A pushed tag cannot be re-pointed without rewriting public history, so that mistake cost a version
+      # number. This refuses before publishing rather than after.
+      - name: Refuse to publish when the tag and package.json disagree
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./package.json').version")
+          echo "tag=${TAG}  package.json=${PKG}"
+          if [ "${TAG}" != "${PKG}" ]; then
+            echo "::error::the tag says ${TAG} and package.json says ${PKG}. Publishing here would put ${PKG} on npm under a tag announcing ${TAG}."
+            exit 1
+          fi
+
+      # A manual run has no tag to compare against, so the step above cannot protect it. Saying so is the
+      # point: mainstreet-oracle@0.9.2 reached npm this way, untagged, and the 0.9.3 release commit of
+      # 2026-07-30 then sat unpublished for 14 days because no tag was ever pushed to trigger this workflow.
+      - name: Say plainly that a manual run is unguarded
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        run: echo "::warning::workflow_dispatch — no tag to compare against, so nothing here checks that package.json's version is the intended one."
 
       - name: npm publish
         if: ${{ inputs.dry_run != 'true' }}
