@@ -52,6 +52,27 @@ jobs:
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: echo "::warning::workflow_dispatch — no tag to compare against, so nothing here checks that package.json's version is the intended one."
 
+      # NO `if:` HERE, deliberately: this one guards BOTH paths. The step above proves the tag and the
+      # version agree; it says nothing about WHICH PACKAGE gets published, and that is the hole measured on
+      # 2026-08-13. Five branches of this repo still declare @raskhaaa/mainstreet-oracle -- the scope
+      # abandoned by the rename -- and none of them carries any guard at all. A tag pushed onto one of them
+      # would publish the dead package, and the version check would PASS, because 0.9.2 there does match a
+      # tag saying v0.9.2. npm already serves @raskhaaa/mainstreet-oracle@0.9.0, which is exactly the
+      # version add-smithery-config declares. The dispatch path needs this just as much: an untagged manual
+      # run is how mainstreet-oracle@0.9.2 reached npm in the first place.
+      #
+      # If the package is ever renamed on purpose, this fails loudly and the new name is written here. That
+      # is the intended behaviour -- a release guard is the one place a rename must be restated by hand.
+      - name: Refuse to publish anything but the canonical package
+        run: |
+          CANON="mainstreet-oracle"
+          NAME=$(node -p "require('./package.json').name")
+          echo "package name=${NAME}  canonical=${CANON}"
+          if [ "${NAME}" != "${CANON}" ]; then
+            echo "::error::this ref declares ${NAME}, not ${CANON}. Publishing would resurrect an abandoned package name from a stale branch."
+            exit 1
+          fi
+
       - name: npm publish
         if: ${{ inputs.dry_run != 'true' }}
         run: npm publish --access public
