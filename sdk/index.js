@@ -58,6 +58,29 @@ function requireAddr(addr) {
   return addr.toLowerCase();
 }
 
+/**
+ * Tout ce qu'un appelant fournit et qui finit dans une query string passe par ici.
+ *
+ * `leaderboard` construisait deja la sienne avec URLSearchParams; les autres concatenaient. Le
+ * piege n'etait pas l'ignorance de l'encodage: dans `search`, `recommend`, `tagged` et `history`,
+ * l'argument qui AVAIT L'AIR dangereux etait bien assaini — encodeURIComponent(query),
+ * requireAddr(forAddress), encodeURIComponent(tag) — et celui qui AVAIT L'AIR d'un nombre (`limit`,
+ * `days`) restait brut DANS LA MEME EXPRESSION. Un parametre n'est pas assaini par son NOM ni par
+ * sa valeur par defaut: `limit = 5` ne promet rien sur ce qu'un appelant passera, et
+ * `ms.movers(req.query.limit)` est une ligne que n'importe quelle application ecrit.
+ * Mesure du 2026-08-15: `ms.movers('x&limit=999&admin=1')` demandait
+ * `/api/agent/movers?limit=x&limit=999&admin=1`.
+ */
+function qs(pairs) {
+  const p = new URLSearchParams();
+  for (const [k, v] of pairs) {
+    if (v === undefined || v === null || v === '') continue;
+    p.set(k, String(v));
+  }
+  const s = p.toString();
+  return s ? '?' + s : '';
+}
+
 const sdk = {
   configure,
   origin: () => _origin,
@@ -95,7 +118,7 @@ const sdk = {
 
   /** GET /api/agent/movers?limit= */
   async movers(limit = 5) {
-    return call('/api/agent/movers?limit=' + limit);
+    return call('/api/agent/movers' + qs([['limit', limit]]));
   },
 
   /** GET /api/agent/featured — Selection of the Week */
@@ -105,23 +128,23 @@ const sdk = {
 
   /** GET /api/agent/trending?limit= — 7d gainers */
   async trending(limit = 10) {
-    return call('/api/agent/trending?limit=' + limit);
+    return call('/api/agent/trending' + qs([['limit', limit]]));
   },
 
   /** GET /api/agent/search?q=&limit= */
   async search(query, limit = 10) {
     if (!query || query.length < 2) throw new Error('query must be at least 2 chars');
-    return call('/api/agent/search?q=' + encodeURIComponent(query) + '&limit=' + limit);
+    return call('/api/agent/search' + qs([['q', query], ['limit', limit]]));
   },
 
   /** GET /api/agent/recommend?for=&limit= */
   async recommend(forAddress, limit = 5) {
-    return call('/api/agent/recommend?for=' + requireAddr(forAddress) + '&limit=' + limit);
+    return call('/api/agent/recommend' + qs([['for', requireAddr(forAddress)], ['limit', limit]]));
   },
 
   /** GET /api/agent/history/{address}?days= */
   async history(address, days = 30) {
-    return call(`/api/agent/history/${requireAddr(address)}?days=${days}`);
+    return call(`/api/agent/history/${requireAddr(address)}` + qs([['days', days]]));
   },
 
   /** GET /api/agent/health-summary */
@@ -141,7 +164,7 @@ const sdk = {
 
   /** GET /api/agent/random?network= */
   async random(network) {
-    return call('/api/agent/random' + (network ? '?network=' + network : ''));
+    return call('/api/agent/random' + qs([['network', network]]));
   },
 
   /**
@@ -177,7 +200,7 @@ const sdk = {
   /** GET /api/agent/tags/:tag — agents matching a tag */
   async tagged(tag, limit = 50) {
     if (!tag || typeof tag !== 'string') throw new Error('tag must be a non-empty string');
-    return call(`/api/agent/tags/${encodeURIComponent(tag)}?limit=${limit}`);
+    return call(`/api/agent/tags/${encodeURIComponent(tag)}` + qs([['limit', limit]]));
   },
 
   /**
