@@ -29,6 +29,9 @@ const BLUE = '\x1b[34m';
 const AMBER = '\x1b[33m';
 const DIM = '\x1b[2m';
 const BOLD = '\x1b[1m';
+// `watchlist` s'en sert pour une baisse de score. Il manquait: la commande mourait sur
+// `RED is not defined` des qu'un agent surveille perdait des points — voir test/cli.test.js.
+const RED = '\x1b[31m';
 
 function color(score) {
   if (score == null) return DIM;
