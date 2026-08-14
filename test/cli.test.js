@@ -118,6 +118,12 @@ const SCENARIOS = new Map([
   ['pick', ['find', 'a', 'data', 'agent']], ['receipts', [A1]], ['watchlist', [A1]], ['help', []],
 ]);
 
+/* Commandes qu'on ne peut PAS lancer ici. Liste explicite: chaque ligne se justifie. */
+const SANS_SCENARIO = new Map([
+  ['mcp', 'demarre un serveur stdio qui n a pas vocation a rendre la main — il est lance et interroge'
+    + ' en JSON-RPC par test/mcp-server.test.js, qui verifie qu il sert la meme liste d outils'],
+]);
+
 /* `help()` n'annonce pas tout ce que le CLI sait faire. Liste EXPLICITE, chaque ligne se justifie. */
 const ABSENTES_DU_HELP = new Map([
   ['audit', 'commande PAYANTE ($0.25) — presente dans l en-tete du fichier, absente de `mainstreet help`'],
@@ -158,10 +164,14 @@ test('chaque commande du CLI a un scenario', () => {
   assert.ok(declarees.length >= 15, 'succes vide: ' + declarees.length + ' commande(s) lue(s) dans la source');
   assert.ok(declarees.includes('score') && declarees.includes('watchlist'),
     'temoin: `score` et `watchlist` doivent etre lues — sinon le parseur lit autre chose');
-  const sansScenario = declarees.filter((c) => !SCENARIOS.has(c));
+  const sansScenario = declarees.filter((c) => !SCENARIOS.has(c) && !SANS_SCENARIO.has(c));
   assert.deepEqual(sansScenario, [],
     'commande(s) du CLI que cette porte ne lance jamais: ' + JSON.stringify(sansScenario)
-    + '\n  Une commande publiee que rien ne rend est exactement la situation qui a laisse passer `RED`.');
+    + '\n  Une commande publiee que rien ne rend est exactement la situation qui a laisse passer `RED`.'
+    + '\n  Soit lui donner un scenario, soit l inscrire dans SANS_SCENARIO avec sa raison.');
+  /* Et la liste d exceptions ne doit pas survivre a la commande qu elle excuse. */
+  const excusesMortes = [...SANS_SCENARIO.keys()].filter((c) => !declarees.includes(c));
+  assert.deepEqual(excusesMortes, [], 'SANS_SCENARIO excuse une commande qui n existe plus: ' + JSON.stringify(excusesMortes));
 });
 
 test('aucune commande ne reference une variable non declaree', async () => {

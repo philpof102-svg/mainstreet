@@ -75,7 +75,7 @@ const commands = {
     console.log(`  curl ${ORIGIN}/api/agent/audit/${addr}`);
     console.log(`  → returns 402 with payment instructions; sign with x402-axios or AccountKit`);
     console.log(`\n${DIM}from a Claude/Cursor agent via MCP:${RESET}`);
-    console.log(`  use the ${BOLD}mainstreet_audit${RESET} tool (npx mainstreet-oracle mainstreet-mcp)`);
+    console.log(`  use the ${BOLD}mainstreet_audit_info${RESET} tool (npx mainstreet-oracle mcp)`);
     console.log(`\n${DIM}catalog of all paid endpoints:${RESET} ${ORIGIN}/api/agent/catalog`);
   },
 
@@ -284,6 +284,16 @@ const commands = {
     });
   },
 
+  /**
+   * Demarre le serveur MCP (stdio). `scripts/mcp-server.js` imprime en tete la config Claude
+   * Desktop `npx -y mainstreet-oracle mcp` — et cet argument tombait sur « Unknown command: mcp »
+   * (mesure: exit 1), parce que ce nom de paquet resout vers CE fichier et pas vers le serveur.
+   * Plutot que de parier sur la regle de resolution de npx, on rend les deux chemins vrais.
+   */
+  async mcp() {
+    require('../scripts/mcp-server.js');
+  },
+
   help() {
     console.log(`MainStreet CLI
 
@@ -307,6 +317,7 @@ Commands:
                             Intent-based routing — top agents for a task
   receipts <addr>           Public buyer receipts for an agent
   watchlist <addr>          Watched agents of a subscriber
+  mcp                       Start the MCP server on stdio (for Claude Desktop / MCP hosts)
 
 Shortcut: passing only an address runs 'score'.
 

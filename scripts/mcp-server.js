@@ -132,10 +132,26 @@ async function callApi(path) {
   return r.json();
 }
 
+/**
+ * Les arguments arrivent d'un LLM et finissent dans une URL : ils doivent TOUS passer par ici.
+ *
+ * Mesure du 2026-08-15, en parlant JSON-RPC au vrai serveur : `mainstreet_score` appele avec
+ * `../../../api/agent/audit/0x...` demandait reellement `/api/agent/audit/0x...`, c'est-a-dire la
+ * route PAYANTE, sous le nom de l'outil gratuit ; `mainstreet_compare` avec `a = "x&b=INJECTE"`
+ * envoyait `?a=x&b=INJECTE&b=y`, ou le `b` injecte precede le vrai. `mainstreet_search` etait le
+ * seul appel encode, et son temoin le prouve : `q=..%2F..%2Frevenue` ne remonte nulle part.
+ *
+ * ⚖️ BORNE MESUREE : l'origine, elle, ne pouvait PAS etre quittee — `//peer.invalid/x` reste un
+ * CHEMIN (`/api/agent/score///peer.invalid/x`) parce que ORIGIN prefixe la chaine, et les 5 requetes
+ * du test sont bien arrivees sur le stub local. Le rayon etait donc borne aux routes GET de notre
+ * propre origine, pas a un hote tiers.
+ */
+const enc = (v) => encodeURIComponent(v === undefined || v === null ? '' : v);
+
 async function execTool(name, args) {
   switch (name) {
     case 'mainstreet_score':
-      return await callApi('/api/agent/score/' + args.address);
+      return await callApi('/api/agent/score/' + enc(args.address));
     case 'mainstreet_leaderboard': {
       const params = new URLSearchParams();
       if (args.limit) params.set('limit', args.limit);
@@ -143,24 +159,26 @@ async function execTool(name, args) {
       return await callApi('/api/agent/leaderboard?' + params);
     }
     case 'mainstreet_compare':
-      return await callApi(`/api/agent/compare?a=${args.a}&b=${args.b}`);
+      return await callApi(`/api/agent/compare?a=${enc(args.a)}&b=${enc(args.b)}`);
     case 'mainstreet_search':
-      return await callApi(`/api/agent/search?q=${encodeURIComponent(args.q)}&limit=${args.limit || 10}`);
+      return await callApi(`/api/agent/search?q=${enc(args.q)}&limit=${enc(args.limit || 10)}`);
     case 'mainstreet_recommend':
-      return await callApi(`/api/agent/recommend?for=${args.for}&limit=${args.limit || 5}`);
+      return await callApi(`/api/agent/recommend?for=${enc(args.for)}&limit=${enc(args.limit || 5)}`);
     case 'mainstreet_history':
-      return await callApi(`/api/agent/history/${args.address}?days=${args.days || 30}`);
+      return await callApi(`/api/agent/history/${enc(args.address)}?days=${enc(args.days || 30)}`);
     case 'mainstreet_catalog':
       return await callApi('/api/agent/catalog');
     case 'mainstreet_audit_info':
       return {
-        endpoint: `${ORIGIN}/api/agent/audit/${args.address}`,
+        /* Cette URL est rendue a l'agent POUR QU'IL LA PAIE : elle ne doit pas pouvoir designer
+         * une autre route que celle qu'elle annonce. */
+        endpoint: `${ORIGIN}/api/agent/audit/${enc(args.address)}`,
         price: '$0.25 USDC',
         chain: 'Base',
         asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         payTo: '0xAC3ca7c5d3cDD7702fd08F9C4C28dAA22296aDa9',
         purpose: '360-degree due-diligence: score + all proofs + launches + traders + settlements + SLA + ERC-8004 feedback. Replaces ~8 free /score calls.',
-        howToCall: 'Use x402-axios or @x402/axios v2 with your wallet, then GET ' + ORIGIN + '/api/agent/audit/' + args.address,
+        howToCall: 'Use x402-axios or @x402/axios v2 with your wallet, then GET ' + ORIGIN + '/api/agent/audit/' + enc(args.address),
         catalog: ORIGIN + '/api/agent/catalog',
       };
     case 'mainstreet_revenue':
