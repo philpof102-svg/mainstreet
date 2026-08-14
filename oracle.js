@@ -156,10 +156,17 @@ function computeActivityScore(metrics) {
 
 // ─── Dispatcher ────────────────────────────────────────────────
 function computeScore(subject) {
-  if (subject?.subjectType === SUBJECT_TYPES.AGENT_ONCHAIN) {
-    return computeScoreAgent(subject);
-  }
-  return computeScoreBusiness(subject);
+  /* ⛔ Deux branches pour trois cas: tout ce qui n'etait pas exactement `agent-onchain` tombait sur
+   * la formule « business ». Mesure du 2026-08-15, sur un agent qui vaut 96: une faute de frappe
+   * dans le subjectType (`agent_onchain`), un espace en trop, ou un type futur (`agent-onchain-
+   * solana`) rendaient 0 — un chiffre parfaitement publiable, produit par la mauvaise formule.
+   * Un type inconnu n'est pas un commerce: c'est un cas dont personne n'a ecrit la branche. */
+  const type = subject?.subjectType;
+  if (type === SUBJECT_TYPES.AGENT_ONCHAIN) return computeScoreAgent(subject);
+  if (type === SUBJECT_TYPES.BUSINESS_GOOGLE) return computeScoreBusiness(subject);
+  throw new Error('computeScore: subjectType inconnu ' + JSON.stringify(type)
+    + ' — attendu ' + Object.values(SUBJECT_TYPES).map((t) => JSON.stringify(t)).join(' ou ')
+    + '. Ajouter sa branche plutot que de le faire scorer par une autre formule.');
 }
 
 /**
@@ -169,6 +176,20 @@ function computeScore(subject) {
  * quand on branchera viem/ethers (le contrat ERC-8004 attend keccak256).
  */
 function hashSubject(identifier) {
+  /* ⛔ `String(identifier)` acceptait TOUT. `String(undefined)` vaut "undefined", donc
+   * `hashSubject(undefined)` rendait sha256("undefined") — un hash de 32 octets parfaitement bien
+   * forme, indiscernable d'un vrai sujet, et LE MEME a chaque fois. `null`, `''`, `0`, `false`,
+   * `NaN`, `{}` et `[]` en donnaient un aussi ; `''` et `[]` donnaient l'identique.
+   * Mesure du 2026-08-15: deux agents DIFFERENTS dont le subjectType n'etait pas reconnu
+   * partageaient ce meme `payload.subject`, c'est-a-dire le champ qui les identifie on-chain.
+   * Une absence d'identifiant doit faire echouer la construction, jamais produire un identifiant. */
+  const utilisable = (typeof identifier === 'string' && identifier.trim() !== '')
+    || (typeof identifier === 'number' && Number.isFinite(identifier));
+  if (!utilisable) {
+    throw new Error('hashSubject: refus — identifiant absent ou non scalaire ('
+      + Object.prototype.toString.call(identifier) + '). Hacher une absence produirait un sujet'
+      + ' bien forme et partage par tous les appels.');
+  }
   return '0x' + crypto.createHash('sha256').update(String(identifier)).digest('hex');
 }
 
