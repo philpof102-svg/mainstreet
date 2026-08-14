@@ -7,6 +7,7 @@
  *
  * Run: node examples/langchain-tool.js
  */
+import { pathToFileURL } from 'node:url';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { langchain } from 'mainstreet-oracle/tools';
 
@@ -21,7 +22,9 @@ export const mainstreetTools = langchain().map(spec => new DynamicStructuredTool
 // Bind into your agent:
 //   const agent = await createOpenAIToolsAgent({ llm, tools: mainstreetTools, prompt });
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// `file://` + argv[1] n'est une URL valide que si le chemin commence par « / » : sur Windows
+// argv[1] vaut `D:\...`, la garde etait FAUSSE et cette demo ne tournait pas (exit 0, rien affiche).
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const picker = mainstreetTools.find(t => t.name === 'mainstreet_pick');
   const result = await picker.invoke({ intent: 'translate text', allowWeak: true });
   console.log('mainstreet_pick("translate text") →');
