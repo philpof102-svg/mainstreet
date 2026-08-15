@@ -4,7 +4,14 @@ const fs = require('fs');
 const path = require('path');
 const solc = require('solc');
 
-const SOURCE_PATH = path.join(__dirname, '..', '..', 'mainstreet', 'contracts', 'Main.sol');
+// ⚠️ CHEMIN RELATIF AU DEPOT, PAS A SON NOM DE DOSSIER. `__dirname` est `<repo>/scripts`, donc le
+// contrat vit a `../contracts/Main.sol`. L'ancien chemin remontait DEUX niveaux puis redescendait dans
+// un dossier litteralement nomme `mainstreet` — ca ne resout qu'en checkout canonique. Un « Download
+// ZIP » de GitHub donne `mainstreet-main/`, un `git clone <url> ms` donne `ms/`: dans les deux cas
+// l'ancien chemin SORT du depot et vise un dossier voisin qui n'existe pas. Mesure du 2026-08-15: les
+// deux formes resolvent au MEME fichier quand le dossier s'appelle `mainstreet`, la nouvelle survit au
+// renommage. (`scripts/compile.js` part dans le tarball, donc le chemin doit tenir hors de ce checkout.)
+const SOURCE_PATH = path.join(__dirname, '..', 'contracts', 'Main.sol');
 const OUT_PATH = path.join(__dirname, 'main-token.compiled.json');
 
 const source = fs.readFileSync(SOURCE_PATH, 'utf8');
