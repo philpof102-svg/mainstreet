@@ -37,6 +37,31 @@ const isAddr = (a) => ADDR_RE.test(norm(a));
 // (scammer/attacker, the exploited token/contract, funding source) + any nested
 // address-looking string. Fail-open on shape (extract what we can), fail-closed
 // on validity (only keep well-formed 0x addresses).
+//
+// ⚠️ SOURCE UNIQUE DE VERITE, mesure du 2026-08-15. extractRows lisait SIX champs
+// (scammer/attacker/token/contract/funder + addresses[]) tandis que la requete GraphQL live n'en
+// selectionnait que TROIS (scammerAddress, tokenAddress, addresses). Le MOCK du --dry-run porte un
+// `attacker`, donc le self-test prouvait l'extraction de `attacker` EN VERT sur un champ que la requete
+// reelle ne demande jamais: chaque incident reel voyait son adresse d'attaquant/contrat/financeur
+// silencieusement DROP d'une denylist known-bad, sans un mot. La requete est desormais CONSTRUITE a
+// partir de cette liste — les deux ne peuvent plus deriver, et le self-test l'asserte en plus.
+const SCALAR_ADDR_FIELDS = [
+  ['scammerAddress', 'scammer'],
+  ['attacker', 'attacker'],
+  ['tokenAddress', 'token'],
+  ['contract', 'contract'],
+  ['fundedBy', 'funder'],
+];
+const ARRAY_ADDR_FIELD = 'addresses';   // a list of already-implicated addresses on the incident
+
+/** The `rekts` selection set, BUILT from the fields extractRows reads so the two cannot drift.
+ *  Field NAMES may still need tuning against docs.de.fi/api/api.md — but a wrong name now fails loud
+ *  (fetchRektsPage throws on an unexpected shape), never silently drops half the addresses. */
+function buildRektsQuery() {
+  const fields = [...SCALAR_ADDR_FIELDS.map(([f]) => f), ARRAY_ADDR_FIELD].join(' ');
+  return `query Rekts($page:Int!,$size:Int!){ rekts(page:$page,pageSize:$size){ items{ project category chain ${fields} } pageInfo{ hasNextPage } } }`;
+}
+
 function extractRows(rekt) {
   const out = [];
   const category = rekt.category || rekt.type || 'defi-exploit';
@@ -45,12 +70,8 @@ function extractRows(rekt) {
   const push = (addr, role) => {
     if (isAddr(addr)) out.push({ address: norm(addr), source: 'de.fi/rekt', category: `${category}:${role}`, incident, chain });
   };
-  push(rekt.scammerAddress, 'scammer');
-  push(rekt.attacker, 'attacker');
-  push(rekt.tokenAddress, 'token');
-  push(rekt.contract, 'contract');
-  push(rekt.fundedBy, 'funder');
-  for (const a of (rekt.addresses || [])) push(a, 'listed');
+  for (const [field, role] of SCALAR_ADDR_FIELDS) push(rekt[field], role);
+  for (const a of (rekt[ARRAY_ADDR_FIELD] || [])) push(a, 'listed');
   return out;
 }
 
@@ -72,7 +93,7 @@ function dedupe(rows) {
 async function fetchRektsPage(page, pageSize = 50) {
   // de.fi API is GraphQL + credit-metered. Endpoint/field names may need tuning
   // against docs.de.fi/api/api.md (the `rekts` query). Kept configurable + isolated.
-  const query = `query Rekts($page:Int!,$size:Int!){ rekts(page:$page,pageSize:$size){ items{ project category chain scammerAddress tokenAddress addresses } pageInfo{ hasNextPage } } }`;
+  const query = buildRektsQuery();
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': API_KEY },
@@ -114,6 +135,14 @@ function selfTest() {
   t('merges roles on dedupe', rows.find((r) => r.address === '0xabcdef0000000000000000000000000000000001')?.category.includes('scammer') );
   t('stamps addedAt', rows.every((r) => typeof r.addedAt === 'string'));
   t('tags source', rows.every((r) => r.source === 'de.fi/rekt'));
+  /* ⛔ LA DERIVE QUI DROPPAIT LA MOITIE DES ADRESSES. Le self-test prouvait l'extraction de champs que
+   * la requete live ne demandait pas. On asserte desormais que la requete NOMME chaque champ que
+   * l'extracteur lit — sinon un incident reel perdrait cette adresse en silence, sur une DENYLIST. */
+  const q = buildRektsQuery();
+  for (const [field] of SCALAR_ADDR_FIELDS) {
+    t(`live query requests the ${field} the extractor reads (no silent drop)`, q.includes(field));
+  }
+  t('live query requests the addresses[] field', q.includes(ARRAY_ADDR_FIELD));
   console.log(`\n[self-test] ${ok}/${n} checks passed`);
   return ok === n;
 }
