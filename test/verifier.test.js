@@ -154,3 +154,22 @@ test('CAS OPPOSE: une attestation perimee est toujours refusee', async () => {
   await assert.rejects(() => V.requireMinScore(A, 50, viemStub), /stale/,
     'la borne de fraicheur qui marchait deja ne doit pas avoir ete perdue');
 });
+
+test('la borne de fraicheur ferme les DEUX cotes — un horodatage FUTUR ne passe pas', async () => {
+  /* ⛔ `ageSec > 86400` ne refusait que le PERIME. Un timestamp futur donne un age negatif, qui passait
+   * — et passera toujours: la fenetre de 24 h, posee pour borner le rejeu, est defaite entierement par
+   * une seule attestation signee dans le futur (bug d'horloge du signeur, ou cle compromise). Mesure
+   * avant correctif: +1 h dans le futur => resolvait avec le score, sans un mot. */
+  corps = attestationValide({ payload: { score: 99, timestamp: Math.floor(Date.now() / 1000) + 3600, subject: SUJET, nonce: 1 } });
+  await assert.rejects(() => V.requireMinScore(A, 50, viemStub), /future/,
+    'une attestation datee du futur doit etre refusee, pas eternellement fraiche');
+
+  // TEMOIN de tolerance: 60 s de derive d'horloge (deux machines NTP) ne doivent PAS faire battre la porte.
+  corps = attestationValide({ payload: { score: 99, timestamp: Math.floor(Date.now() / 1000) + 60, subject: SUJET, nonce: 1 } });
+  assert.equal(await V.requireMinScore(A, 50, viemStub), 99,
+    'une derive de quelques secondes est du skew, pas une attaque — la refuser rendrait la porte inutilisable');
+
+  // et le cas NOMINAL reste nominal — le correctif n'avale rien.
+  corps = attestationValide({ payload: { score: 99, timestamp: Math.floor(Date.now() / 1000), subject: SUJET, nonce: 1 } });
+  assert.equal(await V.requireMinScore(A, 50, viemStub), 99);
+});

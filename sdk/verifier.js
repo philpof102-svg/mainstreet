@@ -127,6 +127,14 @@ async function requireMinScore(address, minScore, viem) {
   };
 
   const ageSec = Math.floor(Date.now() / 1000) - finiOuRefus(att.payload.timestamp, 'timestamp');
+  /* ⛔ LA BORNE NE FERMAIT QU'UN COTE. `ageSec > 86400` refuse le perime; un horodatage FUTUR donne un
+   * age negatif et passait — et passera TOUJOURS: la fenetre de 24 h, qui existe pour borner le rejeu,
+   * est defaite entierement par un seul timestamp signe dans le futur. La signature couvre le payload,
+   * donc seul l'operateur peut en produire un — mais une attestation eternellement fraiche emise par
+   * bug d'horloge ou par compromission de la cle est exactement ce qu'une borne de fraicheur doit
+   * empecher de survivre. 300 s de tolerance: deux machines NTP derivent de secondes, pas de minutes;
+   * refuser tout negatif ferait battre la porte au moindre ecart d'horloge. */
+  if (ageSec < -300) throw new Error('MainStreet: attestation timestamp is in the future');
   if (ageSec > 86400) throw new Error('MainStreet: attestation stale (>24h)');
   const score = finiOuRefus(att.payload.score, 'score');
   if (score < minScore) throw new Error(`MainStreet: score ${score} < ${minScore}`);
