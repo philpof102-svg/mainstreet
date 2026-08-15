@@ -153,8 +153,33 @@ async function main() {
   const dryRun = argv.includes('--dry-run');
   const outIdx = argv.indexOf('--out');
   const out = outIdx > -1 ? argv[outIdx + 1] : null;
+  /* ⛔ `--max-pages` BORNE LA BOUCLE, ET UNE BORNE ILLISIBLE VIDAIT LA DENYLIST EN SILENCE.
+   * `parseInt(undefined)` vaut NaN, et `page <= NaN` est FAUX: la boucle de pullAll ne tournait pas
+   * une seule fois, aucun appel API n'etait emis, et le script ECRIVAIT quand meme son fichier avec
+   * `count: 0` avant de conclure « Next: merge into the MainStreet known-bad loader ». Exit 0.
+   * MESURE DU 2026-08-15, endpoint pointe sur un port mort pour prouver qu'aucun appel ne part:
+   *     --max-pages 2      -> « Pulling de.fi rekts (max 2 pages) », echec reseau, exit 1, RIEN d'ecrit
+   *     --max-pages        -> exit 0, fichier ecrit, count=0
+   *     --max-pages abc    -> exit 0, fichier ecrit, count=0
+   *     --max-pages 0      -> exit 0, fichier ecrit, count=0
+   *     --max-pages -5     -> exit 0, fichier ecrit, count=0
+   * Sur une DENYLIST, le vide echoue OUVERT: plus rien n'est bloque. Et « 0 unique known-bad
+   * addresses extracted » est une affirmation sur la SOURCE, alors que la source n'a pas ete
+   * interrogee. Ce fichier annonce deux gardes fail-closed en tete; en voici la troisieme. */
   const mpIdx = argv.indexOf('--max-pages');
-  const maxPages = mpIdx > -1 ? parseInt(argv[mpIdx + 1]) : 20;
+  let maxPages = 20;
+  if (mpIdx > -1) {
+    const brut = argv[mpIdx + 1];
+    maxPages = Number(brut);
+    if (!Number.isInteger(maxPages) || maxPages < 1) {
+      console.error('REFUSED: --max-pages ' + JSON.stringify(brut === undefined ? null : brut)
+        + ' is not a positive integer.');
+      console.error('  A bound this loop cannot read is a bound of ZERO: pullAll would never run, no API');
+      console.error('  call would be made, and an EMPTY denylist would be written as a successful pull.');
+      console.error('  On a known-bad list, empty fails OPEN -- nothing gets blocked.');
+      process.exit(2);
+    }
+  }
 
   if (dryRun) {
     const rows = dedupe(MOCK.flatMap(extractRows));
@@ -178,6 +203,18 @@ async function main() {
   console.error(`Pulling de.fi rekts (max ${maxPages} pages) from ${API_URL} ...`);
   const rows = await pullAll(maxPages);
   console.error(`\n${rows.length} unique known-bad addresses extracted.`);
+  /* ⛔ ZERO N'EST PAS UNE DENYLIST. Meme avec une borne valide, un pull qui ne rend rien ne doit pas
+   * repartir en artefact: un fichier `addresses: []` merge dans le known-bad loader ne bloque plus
+   * personne, et rien dans sa forme ne le distingue d'une extraction reussie. On refuse de l'ecrire
+   * plutot que de laisser le lecteur decider s'il doit s'inquieter — meme doctrine fail-closed que
+   * les deux gardes annoncees en tete de ce fichier. */
+  if (!rows.length) {
+    console.error('REFUSED to write: 0 addresses. An empty denylist is not a small denylist, it is an');
+    console.error('  ABSENT one -- merged into the known-bad loader it blocks nobody, and its shape looks');
+    console.error('  exactly like a successful pull. Check the API key, the credits and the `rekts` field');
+    console.error('  names against docs.de.fi/api/api.md, then re-run.');
+    process.exit(3);
+  }
   const payload = { source: 'de.fi/rekt', generatedAt: new Date().toISOString(), count: rows.length, addresses: rows };
   if (out) { fs.writeFileSync(out, JSON.stringify(payload, null, 2)); console.error(`-> ${out}`); }
   else { console.log(JSON.stringify(payload, null, 2)); }
