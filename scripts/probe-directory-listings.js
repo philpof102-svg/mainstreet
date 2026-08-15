@@ -47,7 +47,17 @@ async function outilsServis() {
   const texte = await r.text();
   const i = texte.indexOf('{');                       // une reponse SSE prefixe le JSON
   const j = JSON.parse(i > 0 ? texte.slice(i) : texte);
-  return ((j.result || {}).tools || []).length;
+  /* ⛔ UNE ERREUR JSON-RPC EST UN HTTP 200. `((j.result||{}).tools||[]).length` rendait 0 sur une
+   * reponse `{error:{...}}` (ou un `result` sans `tools`), et 0 est une MESURE, pas une panne: avec
+   * servis=0, CHAQUE annuaire (17/19/43) ressort en « ECART de -17 », et ce fichier accuse les annuaires
+   * pour NOTRE propre source errornee — exactement le collapse que son en-tete interdit (« il ne faut
+   * surtout pas accuser un annuaire sur notre propre incapacite a lire »). Mesure du 2026-08-15.
+   * Une liste PRESENTE, meme vide, est un compte legitime (un vrai serveur a 0 outil rend `tools:[]`);
+   * son absence est illisible et doit JETER (-> le catch de main met exitCode 2 « NON LU »). */
+  if (j.error) throw new Error('JSON-RPC error ' + (j.error.code != null ? j.error.code + ' ' : '') + String(j.error.message || ''));
+  const tools = j.result && j.result.tools;
+  if (!Array.isArray(tools)) throw new Error('reponse sans result.tools — forme inattendue de tools/list');
+  return tools.length;
 }
 
 async function main() {
