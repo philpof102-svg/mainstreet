@@ -31,8 +31,12 @@
 'use strict';
 
 const ENDPOINT = process.env.MAINSTREET_URL || 'https://avisradar-production.up.railway.app';
-const SMITHERY = 'https://registry.smithery.ai/servers/philpof102/mainstreet';
-const REGISTRE = 'https://registry.modelcontextprotocol.io/v0/servers?search=mainstreet';
+/* Les trois annuaires sont surchargeables comme l'ENDPOINT l'est deja: c'est ce qui rend cette sonde
+ * verifiable hors ligne, contre un stub local, sans emettre une requete vers un tiers. Les valeurs
+ * par defaut restent les vraies fiches — surcharger est un geste explicite. */
+const SMITHERY = process.env.SMITHERY_URL || 'https://registry.smithery.ai/servers/philpof102/mainstreet';
+const REGISTRE = process.env.MCP_REGISTRY_URL || 'https://registry.modelcontextprotocol.io/v0/servers?search=mainstreet';
+const MCPSO = process.env.MCPSO_URL || 'https://mcp.so/servers/mainstreet';
 
 const borne = (ms) => ({ signal: AbortSignal.timeout(ms), headers: { 'x-ms-monitor': '1' } });
 
@@ -76,9 +80,27 @@ async function main() {
 
   const releve = [];
 
+  /* ⛔ UN 404 AVEC UN CORPS JSON EST UN `r.json()` PARFAITEMENT REUSSI. Sans tester `r.ok`, l objet
+   * d erreur passe pour une fiche: `d.tools` est absent -> `n: null`, `d.description` est absente ->
+   * pas de prose, et la ligne ne compte NI comme ecart NI comme illisible. Elle s affiche « pas de
+   * compte publie » et le bilan peut conclure « ✅ Les annuaires mesures annoncent ce que le serveur
+   * sert ». C est exactement le collapse que ce fichier corrige pour NOTRE source vingt lignes plus
+   * haut (« UNE ERREUR JSON-RPC EST UN HTTP 200 ») — il n avait simplement jamais traverse jusqu aux
+   * annuaires. Des trois lectures, seule mcp.so testait son status.
+   * MESURE DU 2026-08-15 contre un stub local rendant 404 sur les trois:
+   *     Smithery x2              « pas de compte publie »
+   *     MCP Registry (versions)  « aucune entree »                          <- affirme qu on n est pas liste
+   *     MCP Registry (paquets)   « toutes les entrees nomment <canon> »     <- SATISFECIT tire du vide
+   *     mcp.so                   « ECART HTTP 404 »                          <- la seule qui voyait
+   * et quand mcp.so repondait 200, le run se terminait sur ✅ exit 0, sur quatre lignes fabriquees. */
+  const lisible = async (url, quoi) => {
+    const r = await fetch(url, borne(20000));
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' — ' + quoi + ' n a pas repondu une fiche');
+    return r.json();
+  };
+
   try {
-    const r = await fetch(SMITHERY, borne(20000));
-    const d = await r.json();
+    const d = await lisible(SMITHERY, 'Smithery');
     const indexes = Array.isArray(d.tools) ? d.tools.length : null;
     const prose = (String(d.description || '').match(/(\d+)\s+MCP tools/i) || [])[1];
     releve.push({ ou: 'Smithery (liste indexee)', n: indexes, usages: d.useCount });
@@ -86,8 +108,7 @@ async function main() {
   } catch (e) { releve.push({ ou: 'Smithery', n: null, erreur: String((e && e.message) || e) }); }
 
   try {
-    const r = await fetch(REGISTRE, borne(20000));
-    const d = await r.json();
+    const d = await lisible(REGISTRE, 'le MCP Registry');
     const e = (d.servers || []).map((x) => x.server || x).filter((x) => /mainstreet/i.test(x.name || ''));
     // Le registre officiel ne publie pas de compte d outils: on releve ce qu il annonce VRAIMENT.
     releve.push({ ou: 'MCP Registry (versions)', n: null,
@@ -103,9 +124,13 @@ async function main() {
     for (const x of e) for (const p of (x.packages || [])) {
       if (p.identifier && p.identifier !== CANON) morts.push('v' + x.version + ' -> ' + p.identifier);
     }
+    /* ⛔ « TOUTES » SUR UN ENSEMBLE VIDE EST UN SATISFECIT, PAS UNE MESURE. Zero entree rendait
+     * « toutes les entrees nomment <canon> » — vrai par vacuite, rassurant a la lecture, et il ne
+     * reste rien pour distinguer « tout est propre » de « il n y avait rien a verifier ». */
     releve.push({ ou: 'MCP Registry (paquets)', n: null, mauvais: morts,
       note: morts.length ? morts.length + ' entree(s) nomment un paquet AUTRE que ' + CANON + ': ' + morts.join(' | ')
-        : 'toutes les entrees nomment ' + CANON });
+        : e.length ? 'les ' + e.length + ' entree(s) nomment ' + CANON
+          : 'aucune entree a verifier — ce n est pas « toutes propres »' });
   } catch (e) { releve.push({ ou: 'MCP Registry', n: null, erreur: String((e && e.message) || e) }); }
 
   /* mcp.so ne publie AUCUN compte d outils, donc il n y a rien de numerique a comparer — mais un annuaire
@@ -116,7 +141,7 @@ async function main() {
    * DE-liste, en revanche, est un changement d etat qu il vaut mieux ne pas apprendre par hasard.
    * ⛔ robots.txt de mcp.so interdit /api/ et /search — on ne les touche pas. */
   try {
-    const r = await fetch('https://mcp.so/servers/mainstreet', borne(20000));
+    const r = await fetch(MCPSO, borne(20000));
     releve.push({ ou: 'mcp.so (presence)', n: null,
       note: r.status === 200 ? 'listee (HTTP 200)' : 'HTTP ' + r.status + ' — DE-LISTEE ou deplacee ?',
       mauvais: r.status === 200 ? [] : ['mcp.so HTTP ' + r.status] });
@@ -139,6 +164,13 @@ async function main() {
       + (l.usages != null ? '   (' + l.usages + ' usages)' : ''));
   }
 
+  /* ⛔ LES DEUX LIGNES SORTENT, TOUJOURS. La version precedente rendait la main sur la premiere:
+   * un run avec 1 ecart ET 2 annuaires illisibles n imprimait QUE l ecart, et l incomplétude
+   * disparaissait du bilan — la seule ligne qu un humain lit. Le code de sortie, lui, garde sa
+   * priorite: un ecart est actionnable, donc il reste 1; l illisible seul reste 2. */
+  if (illisibles) {
+    console.log('\n  ⚠️ NON CONCLU : ' + illisibles + ' annuaire(s) illisible(s). Ce n est pas « tout concorde ».');
+  }
   if (ecarts) {
     console.log('\n  ⛔ ' + ecarts + ' annonce(s) ne correspondent pas a ce que le serveur sert.');
     console.log('     Un lecteur d annuaire voit le chiffre annonce avec la meme confiance que le vrai.');
@@ -146,11 +178,7 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  if (illisibles) {
-    console.log('\n  ⚠️ NON CONCLU : ' + illisibles + ' annuaire(s) illisible(s). Ce n est pas « tout concorde ».');
-    process.exitCode = 2;
-    return;
-  }
+  if (illisibles) { process.exitCode = 2; return; }
   console.log('\n  ✅ Les annuaires mesures annoncent ce que le serveur sert.');
   console.log('     ⛔ Ce qui ne couvre QUE les annuaires listes ici, sans authentification.');
 }
