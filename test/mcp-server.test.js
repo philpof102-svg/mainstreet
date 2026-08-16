@@ -190,3 +190,76 @@ test('`mainstreet mcp` demarre bien le serveur', async () => {
     s2.arreter();
   }
 });
+
+/* ── ★ LE SCHEMA DECLARE `required`, ET PERSONNE NE L'APPLIQUAIT ─────────────────────────────────
+ * `inputSchema` n'est pas de la documentation: c'est le CONTRAT qu'un LLM lit pour construire son
+ * appel. `mainstreet_score` declare `required: ['address']` et `address: {type:'string'}` — et
+ * `enc(undefined)` rend '', donc l'appel partait quand meme.
+ *
+ * MESURE DU 2026-08-15 contre le stub local, en attribuant les requetes UNE PAR UNE:
+ *     {}                  -> requete PARTIE  /api/agent/score/
+ *     {address:''}        -> requete PARTIE  /api/agent/score/
+ *     {address:{a:1}}     -> requete PARTIE  /api/agent/score/%5Bobject%20Object%5D
+ * Et avec l'origine injoignable, les TROIS revenaient en `-32000 fetch failed` — le message d'une
+ * PANNE DE SERVICE.
+ *
+ * ⚖️ C'EST LA QUE CA COUTE: un agent autonome ne peut pas distinguer SA faute de NOTRE panne, et les
+ * deux appellent des conduites opposees — une panne se reessaie, un appel malforme se corrige.
+ * Servir le meme message aux deux enseigne a l'agent de boucler sur son propre bug.
+ *
+ * ⚖️ CE QUI N'EST PAS EXIGE ICI: la forme « 0x + 40 hex » ne vit que dans la `description`, en prose.
+ * L'exiger serait plus strict que ce qu'on a ANNONCE, et refuser une adresse qu'un futur reseau
+ * ecrirait autrement est une decision produit. Le serveur la tranche deja. */
+const ARGS_INVALIDES = [
+  ['aucun argument', {}],
+  ['address absente', { autre: 1 }],
+  ['address vide', { address: '' }],
+  ['address blanche', { address: '   ' }],
+  ['address = objet', { address: { a: 1 } }],
+  ['address = nombre', { address: 42 }],
+];
+
+test('★ un appel qui viole le schema DECLARE est refuse SANS toucher le reseau', async () => {
+  const s = session([SERVEUR]);
+  await s.demarrer();
+  try {
+    await s.appel(1, 'initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 't', version: '0' } });
+    const avantTout = s.demandes.length;
+    let id = 100;
+    for (const [titre, args] of ARGS_INVALIDES) {
+      const avant = s.demandes.length;
+      const r = await s.appel(++id, 'tools/call', { name: 'mainstreet_score', arguments: args });
+      assert.ok(r, titre + ': aucune reponse du serveur');
+      assert.equal(s.demandes.length, avant,
+        titre + ': une requete reseau est partie pour un appel que le schema declare invalide — '
+        + 'chaque appel malforme coute alors un aller-retour reel. Chemin: ' + s.demandes[avant]);
+      const msg = JSON.stringify(r.error || r.result);
+      assert.match(msg, /CALLER error/,
+        titre + ': le refus doit dire que la faute est celle de l APPELANT. Sinon un agent lit le meme '
+        + 'message qu une panne, reessaie, et boucle sur son propre bug. Recu: ' + msg.slice(0, 140));
+      assert.ok(!/fetch failed/.test(msg),
+        titre + ': le refus ne doit pas se deguiser en panne reseau. Recu: ' + msg.slice(0, 140));
+    }
+    assert.equal(s.demandes.length, avantTout, 'AUCUNE des entrees invalides ne doit atteindre le reseau');
+  } finally { s.arreter(); }
+});
+
+test('⚖️ TEMOIN — une chaine bien formee ATTEINT toujours le reseau (la garde ne bloque pas tout)', async () => {
+  /* ⛔ Sans lui, une garde qui refuserait TOUT satisferait le cas precedent et casserait l outil.
+   * On verifie aussi qu une chaine que le schema accepte mais que la prose refuserait (pas du 0x)
+   * passe bien: on applique le contrat DECLARE, pas la description. */
+  const s = session([SERVEUR]);
+  await s.demarrer();
+  try {
+    await s.appel(1, 'initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 't', version: '0' } });
+    const avant = s.demandes.length;
+    await s.appel(2, 'tools/call', { name: 'mainstreet_score', arguments: { address: '0x' + '11'.repeat(20) } });
+    assert.equal(s.demandes.length, avant + 1, 'une adresse valide doit atteindre le reseau');
+    assert.match(s.demandes[avant], /^\/api\/agent\/score\/0x1{40}$/, 'et sur la bonne route');
+
+    await s.appel(3, 'tools/call', { name: 'mainstreet_score', arguments: { address: 'pas-une-adresse' } });
+    assert.equal(s.demandes.length, avant + 2,
+      'une CHAINE non vide satisfait le schema declare: c est au serveur de la juger, pas a ce client '
+      + 'de decreter une forme que le schema n annonce pas');
+  } finally { s.arreter(); }
+});

@@ -148,7 +148,48 @@ async function callApi(path) {
  */
 const enc = (v) => encodeURIComponent(v === undefined || v === null ? '' : v);
 
+/* ⛔ LE SCHEMA DECLARE `required`, ET PERSONNE NE L'APPLIQUAIT.
+ * `inputSchema` existe pour etre lu par un LLM: c'est un CONTRAT annonce a l'appelant. Il etait
+ * annonce et jamais tenu — `enc(undefined)` rend '', donc un appel sans argument partait quand meme.
+ *
+ * MESURE DU 2026-08-15, en parlant JSON-RPC au vrai serveur, origine pointee sur un stub local:
+ *     mainstreet_score {}                 -> requete PARTIE: /api/agent/score/
+ *     mainstreet_score {address:''}       -> requete PARTIE: /api/agent/score/
+ *     mainstreet_score {address:{a:1}}    -> requete PARTIE: /api/agent/score/%5Bobject%20Object%5D
+ * 7 appels malformes = 7 allers-retours reseau reels. Et avec l'origine injoignable, les SEPT
+ * revenaient en `-32000 fetch failed` — le meme message qu'une panne de service.
+ *
+ * ⚖️ C'EST LA QUE CA COUTE. Un agent autonome ne peut pas distinguer SA faute de NOTRE panne. Or les
+ * deux appellent des conduites opposees: une panne se reessaie, un appel malforme se corrige. Servir
+ * le meme message aux deux, c'est enseigner a l'agent de boucler sur son propre bug.
+ *
+ * ⚖️ ON APPLIQUE CE QUI EST DECLARE, RIEN DE PLUS. `required` et `type: 'string'` sont dans le
+ * schema, donc ils sont exigibles. La forme « 0x + 40 hex » ne vit que dans la `description`, en
+ * prose: l'exiger serait plus strict que ce qu'on a annonce, et refuser une adresse qu'un futur
+ * reseau ecrirait autrement est une decision produit. On la laisse au serveur, qui la tranche deja. */
+function champsManquants(name, args) {
+  const outil = TOOLS.find((t) => t.name === name);
+  const requis = (outil && outil.inputSchema && outil.inputSchema.required) || [];
+  const props = (outil && outil.inputSchema && outil.inputSchema.properties) || {};
+  const manque = [];
+  for (const cle of requis) {
+    const v = args ? args[cle] : undefined;
+    if (v === undefined || v === null) { manque.push(cle + ' (absent)'); continue; }
+    if (props[cle] && props[cle].type === 'string') {
+      if (typeof v !== 'string') { manque.push(cle + ' (doit etre une chaine, recu ' + typeof v + ')'); continue; }
+      if (v.trim() === '') manque.push(cle + ' (chaine vide)');
+    }
+  }
+  return manque;
+}
+
 async function execTool(name, args) {
+  const manque = champsManquants(name, args);
+  if (manque.length) {
+    throw new Error('invalid arguments for ' + name + ': ' + manque.join(', ')
+      + ' — this is a CALLER error, not a MainStreet outage: retrying will not help, fix the arguments. '
+      + 'See the tool inputSchema.');
+  }
   switch (name) {
     case 'mainstreet_score':
       return await callApi('/api/agent/score/' + enc(args.address));
