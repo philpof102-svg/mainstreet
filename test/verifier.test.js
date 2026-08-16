@@ -173,3 +173,43 @@ test('la borne de fraicheur ferme les DEUX cotes — un horodatage FUTUR ne pass
   corps = attestationValide({ payload: { score: 99, timestamp: Math.floor(Date.now() / 1000), subject: SUJET, nonce: 1 } });
   assert.equal(await V.requireMinScore(A, 50, viemStub), 99);
 });
+
+/* ── LE PLANCHER DE L'APPELANT SUIT LA MEME REGLE QUE LES CHAMPS D'EN FACE ──────────────────────────
+ * Mesure du 2026-08-16, attestation signee de score 12: `requireMinScore(A, undefined)`, `(A, NaN)`,
+ * `(A, 'abc')` et `(A, null)` RENDAIENT 12 sans refus — `12 < undefined` est faux, donc la fonction
+ * nommee REQUIRE-min-score n'exigeait rien des qu'on lui passait un plancher illisible. La regle
+ * « une comparaison ne borne rien tant que la valeur n'est pas prouvee finie » etait appliquee aux
+ * champs de l'ATTESTATION, pas au minScore de l'appelant, une ligne plus loin. Et `buildOnchainCall`
+ * defautait a 0: un appel on-chain « n'exiger aucun score », construit par omission. */
+
+test('un plancher ILLISIBLE refuse — la fonction nommee require n exige jamais rien par accident', async () => {
+  corps = attestationValide({ payload: { score: 12, timestamp: Math.floor(Date.now() / 1000), subject: SUJET, nonce: 1 } });
+  for (const plancher of [undefined, null, NaN, 'abc']) {
+    await assert.rejects(() => V.requireMinScore(A, plancher, viemStub), /finite number/,
+      'plancher ' + String(plancher) + ': un plancher illisible n est PAS « pas de plancher »');
+  }
+});
+
+test('TEMOIN: un 0 EXPLICITE reste legal — accepter tout score est un choix qui se dit', async () => {
+  corps = attestationValide({ payload: { score: 12, timestamp: Math.floor(Date.now() / 1000), subject: SUJET, nonce: 1 } });
+  assert.equal(await V.requireMinScore(A, 0, viemStub), 12);
+});
+
+test('buildOnchainCall: SANS plancher explicite il jette — il construisait requireMinScore(0) en silence', () => {
+  const att = attestationValide();
+  assert.throws(() => V.buildOnchainCall(att), /explicit finite minScore/);
+  assert.throws(() => V.buildOnchainCall(att, 'abc'), /explicit finite minScore/);
+});
+
+test('buildOnchainCall TEMOIN: un plancher DIT voyage dans les args — premier exercice de cet export', () => {
+  /* Le commentaire d'en-tete de ce fichier avouait: « la verification ON-CHAIN (buildOnchainCall),
+   * qui n'est pas exercee ici ». Un export expedie sans aucun cas est une promesse sur parole. */
+  const att = attestationValide();
+  const zero = V.buildOnchainCall(att, 0);
+  assert.equal(zero.args[1], 0, 'exiger zero, EXPLICITEMENT, reste possible');
+  const call = V.buildOnchainCall(att, 50);
+  assert.equal(call.args[1], 50);
+  assert.equal(call.functionName, 'requireMinScore');
+  assert.ok(/^0x[0-9a-fA-F]{40}$/.test(call.address), 'l adresse du verifier voyage avec l appel');
+  assert.equal(call.args[0], SUJET);
+});

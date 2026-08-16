@@ -111,6 +111,19 @@ async function verifyAttestation(attestation, viem) {
  * @returns {Promise<number>} the verified score
  */
 async function requireMinScore(address, minScore, viem) {
+  /* ⛔ LE PLANCHER DE L'APPELANT SUIT LA MEME REGLE QUE LES CHAMPS D'EN FACE. La note ci-dessous
+   * (« une comparaison ne borne rien tant que la valeur n'est pas prouvee finie ») etait appliquee
+   * aux champs de l'ATTESTATION — et pas au minScore de l'appelant, une ligne plus loin. Mesure du
+   * 2026-08-16, attestation signee de score 12: `requireMinScore(A, undefined)`, `(A, NaN)`,
+   * `(A, 'abc')` et `(A, null)` RENDAIENT 12 sans refus — `12 < undefined` est faux, donc la
+   * fonction nommee REQUIRE-min-score n'exigeait rien des qu'on lui passait un plancher illisible.
+   * Un 0 EXPLICITE reste legal: « accepter tout score » est un choix qui se dit, pas un accident
+   * d'omission. Valide AVANT le fetch: on ne brule pas un appel reseau sur un appel invalide. */
+  const plancher = Number(minScore);
+  if (minScore === null || minScore === undefined || !Number.isFinite(plancher)) {
+    throw new Error('MainStreet: minScore must be a finite number — an absent or unreadable floor is '
+      + 'NOT "no floor". Pass 0 explicitly to accept any score on purpose.');
+  }
   const att = await fetchAttestation(address);
   const valid = await verifyAttestation(att, viem);
   if (!valid) throw new Error('MainStreet: attestation signature invalid');
@@ -137,7 +150,7 @@ async function requireMinScore(address, minScore, viem) {
   if (ageSec < -300) throw new Error('MainStreet: attestation timestamp is in the future');
   if (ageSec > 86400) throw new Error('MainStreet: attestation stale (>24h)');
   const score = finiOuRefus(att.payload.score, 'score');
-  if (score < minScore) throw new Error(`MainStreet: score ${score} < ${minScore}`);
+  if (score < plancher) throw new Error(`MainStreet: score ${score} < ${plancher}`);
   return score;
 }
 
@@ -158,14 +171,26 @@ async function verifyServerSide(attestation, options = {}) {
  * Build the on-chain transaction calldata to verify an attestation.
  * Use with viem.writeContract() or ethers.Contract.requireMinScore().
  */
-function buildOnchainCall(attestation, minScore = 0) {
+function buildOnchainCall(attestation, minScore) {
+  /* ⛔ PLUS DE `= 0` PAR DEFAUT. Un appel construit sans plancher devenait `requireMinScore(subject,
+   * 0, …)` on-chain — « n'exiger aucun score », silencieusement, depuis une fonction dont le nom
+   * promet le contraire. Le 0 reste legal mais il se DIT: exiger zero est un choix d'integration,
+   * pas un accident d'omission. Meme regle de finitude que requireMinScore ci-dessus (2026-08-16).
+   * BORNE: la coherence uint (entier, non negatif) reste jugee par l'encodeur ABI du wallet — il
+   * jette fort, on ne duplique pas son travail ici. */
+  const plancher = Number(minScore);
+  if (minScore === null || minScore === undefined || !Number.isFinite(plancher)) {
+    throw new Error('MainStreet: buildOnchainCall needs an explicit finite minScore — omitting it '
+      + 'used to silently build requireMinScore(0), a floor of nothing. Pass 0 explicitly to '
+      + 'require no floor on purpose.');
+  }
   return {
     address: VERIFIER_ADDRESS,
     abi: VERIFIER_ABI,
     functionName: 'requireMinScore',
     args: [
       attestation.payload.subject,
-      Number(minScore),
+      plancher,
       attestation.payload.score,
       BigInt(attestation.payload.timestamp),
       BigInt(attestation.payload.nonce),
