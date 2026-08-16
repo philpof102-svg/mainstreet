@@ -46,7 +46,8 @@
     "example": "node examples/basic-usage.js",
     "leaderboard": "node examples/score-leaderboard.js",
     "verify": "node examples/verify-payload.js",
-    "cli": "node bin/mainstreet.js"
+    "cli": "node bin/mainstreet.js",
+    "test:published": "node test/published-package-drift.js"
   },
   "keywords": [
     "mcp",
