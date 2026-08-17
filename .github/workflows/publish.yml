@@ -73,11 +73,66 @@ jobs:
             exit 1
           fi
 
+      # ⛔ L'ETAT D'AVANT, CAPTURE AVANT D'AGIR — et il gouverne DEUX choses: si npm doit tourner, et
+      # ce que la verification plus bas a le droit d'affirmer.
+      #
+      # Mesure du 2026-08-17, en comparant les trois depots freres: celui-ci etait le seul sans ce
+      # controle. Consequence, deja payee dans `biii` le 2026-07-27: quand `npm publish` echoue — une
+      # version deja publiee, un jeton absent — le job MEURT, et les trois etapes suivantes passent en
+      # « skipped ». Or la publication au registre MCP s'authentifie en OIDC et n'a AUCUN besoin de
+      # npm: elle aurait pu aboutir. Dans le journal, un saut ressemble a une decision, pas a un
+      # blocage — c'est ce qui rend ce mode d'echec cher.
+      - name: npm — cette version est-elle deja publiee ?
+        id: npmstate
+        run: |
+          V=$(node -p "require('./package.json').version")
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if npm view "mainstreet-oracle@$V" version >/dev/null 2>&1; then
+            echo "deja publie sur npm: mainstreet-oracle@$V — l'etape publish sera sautee, le registre MCP tournera quand meme"
+            echo "already=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "absent de npm: mainstreet-oracle@$V — l'etape publish tournera"
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Pas de `continue-on-error`: la condition remplace l'avalage. Quand npm DOIT tourner et
+      # echoue, la release ne doit pas aboutir — sinon le registre annoncerait une version que npm ne
+      # sert pas. Quand npm n'a rien a faire, l'etape est sautee et le registre continue.
       - name: npm publish
-        if: ${{ inputs.dry_run != 'true' }}
+        if: ${{ inputs.dry_run != 'true' && steps.npmstate.outputs.already != 'true' }}
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ⚠️ UNE GARDE QUI VERIFIE UN ETAT NE PROUVE PAS UN CHANGEMENT D'ETAT, et c'est pour ca qu'elle
+      # a DEUX branches. Un simple `npm view <pkg>@<v>` apres coup rend « present » aussi bien pour
+      # « on vient de la publier » que pour « elle existe depuis un mois » — mesure du 2026-08-17 sur
+      # le workflow voisin de `lawbor`, ou cette confusion faisait sortir un run VERT en n'ayant rien
+      # expedie. L'etat d'AVANT est donc ce qui autorise l'affirmation.
+      #
+      # La boucle de reessai n'est pas du zele: le registre npm propage avec du retard, et une lecture
+      # immediate a deja rendu 404 sur une version reellement publiee.
+      #
+      # La valeur passe par `env:`, jamais interpolee DANS le `run:`: une expression est substituee
+      # AVANT que bash ne voie la ligne.
+      - name: Verifier que npm sert VRAIMENT cette version
+        if: ${{ inputs.dry_run != 'true' }}
+        env:
+          DEJA_PUBLIE: ${{ steps.npmstate.outputs.already }}
+        run: |
+          V=$(node -p "require('./package.json').version")
+          if [ "$DEJA_PUBLIE" = "true" ]; then
+            echo "::notice::mainstreet-oracle@$V etait DEJA sur npm avant ce run — RIEN n'a ete publie."
+            echo "Ce run rafraichit le registre MCP uniquement. Pour expedier du code aux"
+            echo "installateurs, monter la version dans package.json (voir npm run test:published)."
+            exit 0
+          fi
+          for i in $(seq 1 12); do
+            GOT=$(npm view mainstreet-oracle@"$V" version 2>/dev/null || true)
+            if [ "$GOT" = "$V" ]; then echo "npm sert mainstreet-oracle@$V (publie par ce run)"; exit 0; fi
+            echo "npm ne sert pas encore $V (essai $i/12) — attente 10s"; sleep 10
+          done
+          echo "::error::mainstreet-oracle@$V n'est jamais apparu sur npm — la publication a echoue. Le secret NPM_TOKEN est-il pose et valide ?"; exit 1
 
       - name: Install mcp-publisher
         if: ${{ inputs.dry_run != 'true' }}
