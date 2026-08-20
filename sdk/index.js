@@ -188,8 +188,29 @@ const sdk = {
    */
   async vet(address, { minScore = 30, requireAlive = true } = {}) {
     const d = await this.score(address);
-    if (d.score == null || d.score < minScore) throw new Error(`score ${d.score} < ${minScore}`);
-    if (requireAlive && d.health && d.health.alive === false) throw new Error('endpoint unreachable');
+    // Un score ABSENT n'est pas un score BAS. Le premier veut dire « pas indexé, ou lecture
+    // dégradée » — une panne de notre côté —, le second est un verdict sur le sujet. Les fondre
+    // dans « score null < 30 » émet un jugement de réputation sur notre propre trou de données,
+    // ce que le README interdit explicitement. Les deux refusent (fail-closed), avec des mots
+    // différents, parce que l'appelant n'agit pas pareil : on RÉESSAIE une panne, on n'insiste
+    // pas sur un mauvais score.
+    if (d.score == null || typeof d.score !== 'number' || Number.isNaN(d.score)) {
+      throw new Error(`score unavailable for ${address} (not indexed or read degraded) — this is OUR gap, not a verdict about the agent; retry or use ?live=1`);
+    }
+    if (d.score < minScore) throw new Error(`score ${d.score} < ${minScore}`);
+    // ⛔ LE TROISIÈME ÉTAT, mesuré le 2026-08-20 par exécution : `requireAlive: true` n'exigeait
+    // RIEN quand personne n'avait sondé. `d.health` absent, `null`, ou `{}` faisait tomber la
+    // garde et la fonction rendait « safe to use » — sur la fonction que `sdk/tools.js` vend
+    // comme « alive gate BEFORE paying it ». Un paramètre nommé `require…` ne peut pas être
+    // satisfait par une ABSENCE.
+    // C'est le jumeau exact du défaut corrigé le 2026-08-16 sur `requireMinScore` (« an absent or
+    // unreadable floor is NOT "no floor" ») : le correctif d'alors n'avait pas traversé jusqu'ici.
+    if (requireAlive) {
+      if (!d.health || typeof d.health.alive !== 'boolean') {
+        throw new Error('liveness unknown — no health probe on record. requireAlive cannot be satisfied by an absence; pass requireAlive:false to accept an unprobed endpoint deliberately');
+      }
+      if (d.health.alive === false) throw new Error('endpoint unreachable');
+    }
     if (!d.resourcePath) throw new Error('no service URL published');
     return d; // safe to use
   },

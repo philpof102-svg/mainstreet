@@ -42,8 +42,19 @@ async function main() {
     console.log(`\n✗ Reject: score below threshold (${MIN_SCORE})`);
     process.exit(0);
   }
-  // Gate 2: endpoint must be alive (skip if unprobed — defaults to unknown)
-  if (health && health.alive === false) {
+  // Gate 2: endpoint must be alive.
+  // ⛔ 2026-08-20 : ce garde disait « skip if unprobed — defaults to unknown » et laissait donc
+  // passer un endpoint que PERSONNE n'a jamais sondé, jusqu'à imprimer « safe to pay ». L'en-tête
+  // de ce fichier promet exactement l'inverse : « only pays an agent whose endpoint is verified
+  // ALIVE ». Le commentaire interne et la promesse publiée se contredisaient, et c'est la
+  // promesse qu'un lecteur copie. Un acheteur « health-aware » qui paie un endpoint non sondé
+  // n'est pas health-aware — il est optimiste. Même correctif que `vet()` dans le SDK : une
+  // absence de mesure ne satisfait pas une exigence de mesure.
+  if (!health || typeof health.alive !== 'boolean') {
+    console.log('\n✗ Reject: liveness unknown — no health probe on record (an absence is not a pass)');
+    process.exit(0);
+  }
+  if (health.alive === false) {
     console.log('\n✗ Reject: endpoint unreachable (last probe failed)');
     process.exit(0);
   }
