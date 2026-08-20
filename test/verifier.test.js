@@ -46,13 +46,22 @@ const SUJET = '0x' + '00'.repeat(32);
 let srv;
 let V;
 let corps = null;
+let statut = 200;
+/* CE QUI A ETE ENVOYE SUR LE FIL, pas ce que le test croit avoir passe. `JSON.stringify` peut
+ * SUPPRIMER une cle (`undefined`) sans rien dire: seule la lecture du corps recu le prouve. */
+let recu = null;
 const vus = [];
 const viemStub = { recoverTypedDataAddress: async (a) => { vus.push(a); return V.OPERATOR; } };
 
 test.before(async () => {
   srv = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(corps));
+    let brut = '';
+    req.on('data', (c) => { brut += c; });
+    req.on('end', () => {
+      recu = brut;
+      res.writeHead(statut, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(corps));
+    });
   });
   await new Promise((r) => srv.listen(0, '127.0.0.1', r));
   /* Le module lit MAINSTREET_ORIGIN au chargement: il faut le poser AVANT le require. */
@@ -212,4 +221,117 @@ test('buildOnchainCall TEMOIN: un plancher DIT voyage dans les args — premier 
   assert.equal(call.functionName, 'requireMinScore');
   assert.ok(/^0x[0-9a-fA-F]{40}$/.test(call.address), 'l adresse du verifier voyage avec l appel');
   assert.equal(call.args[0], SUJET);
+});
+
+// ─── verifyServerSide : le TROISIEME frere, ni durci ni teste ────────────────────────────────────
+// `requireMinScore` et `buildOnchainCall` ont ete durcis le 2026-08-16 (plancher illisible = refus,
+// plancher omis = refus explicite) et testes ci-dessus. `verifyServerSide`, exporte dans le meme
+// module et parti dans le meme tarball npm, n'avait AUCUN cas — et gardait le defaut d'origine.
+//
+// MESURE : `JSON.stringify({minScore: undefined})` rend `{}`. La cle n'est pas envoyee `null`, elle
+// N'EST PAS ENVOYEE. Cote serveur, `minScore == null ? true : …` rend alors `passesThreshold: true`
+// et un hint qui dit « valid and meets threshold ». Un plancher perdu revient en seuil satisfait.
+//
+// ⛔ BORNE : ces cas prouvent ce que le SDK ENVOIE et comment il LIT la reponse. Le comportement du
+// vrai endpoint est teste dans agent-veille, pas ici.
+
+const reponseServeur = (extra) => Object.assign({
+  valid: true, signerMatch: true, ageSec: 5, fresh: true, score: 3,
+  passesThreshold: true, minScore: null, hint: 'attestation is valid and meets threshold',
+}, extra);
+
+test('TEMOIN: un plancher DIT voyage bien sur le fil, et le verdict revient', async () => {
+  corps = reponseServeur({ score: 80, minScore: 50 });
+  recu = null;
+  const out = await V.verifyServerSide(attestationValide(), { minScore: 50 });
+  assert.strictEqual(JSON.parse(recu).minScore, 50, 'sans ce temoin, un corps toujours vide passerait le cas suivant');
+  assert.strictEqual(out.valid, true);
+  assert.strictEqual(out.thresholdChecked, true, 'un plancher demande doit se dire verifie');
+  assert.strictEqual(out.minScoreRequested, 50);
+});
+
+test('LE FAIT: un plancher `undefined` DISPARAISSAIT du corps — l absence se dit maintenant', async () => {
+  // Le cas reel: une faute de casse (`minscore`) ou une variable restee undefined.
+  corps = reponseServeur();                       // le serveur repond « valide, meets threshold »
+  recu = null;
+  const out = await V.verifyServerSide(attestationValide(), { minscore: 80 });
+  assert.ok(!('minScore' in JSON.parse(recu)),
+    'la cle ne part pas — c est le fait mesure, et il est INCHANGE: on ne peut pas envoyer un plancher qu on n a pas');
+  assert.strictEqual(out.passesThreshold, true, 'le serveur affirme toujours le seuil, et son hint aussi');
+  assert.strictEqual(out.thresholdChecked, false,
+    'CE QUI CHANGE: le SDK dit qu AUCUN plancher n a ete verifie, la ou le hint dit « meets threshold »');
+  assert.strictEqual(out.minScoreRequested, null);
+});
+
+test('un plancher ILLISIBLE refuse, comme chez ses deux freres', async () => {
+  corps = reponseServeur();
+  for (const mauvais of ['abc', NaN, {}, [], '']) {
+    await assert.rejects(() => V.verifyServerSide(attestationValide(), { minScore: mauvais }), /is not a number/,
+      `minScore ${JSON.stringify(mauvais)} doit refuser, jamais s evaporer`);
+  }
+});
+
+test('CAS OPPOSE: un 0 EXPLICITE reste legal et VOYAGE — il ne doit pas etre avale comme « absent »', async () => {
+  corps = reponseServeur({ minScore: 0 });
+  recu = null;
+  const out = await V.verifyServerSide(attestationValide(), { minScore: 0 });
+  assert.strictEqual(JSON.parse(recu).minScore, 0, 'un test de verite (`if (minScore)`) avalerait ce 0');
+  assert.strictEqual(out.thresholdChecked, true, 'exiger zero est un choix qui se dit, pas une omission');
+  assert.strictEqual(out.minScoreRequested, 0);
+});
+
+test('un statut non-2xx n est pas un verdict', async () => {
+  corps = { error: 'boom' };
+  for (const code of [400, 402, 404, 500]) {
+    statut = code;
+    await assert.rejects(() => V.verifyServerSide(attestationValide(), { minScore: 50 }),
+      new RegExp(`HTTP ${code}`), `un ${code} revenait tel quel, avec valid=undefined`);
+  }
+  statut = 200;
+});
+
+test('une reponse SANS verdict booleen n est pas lue comme un refus — undefined n est pas false', async () => {
+  // Le piege exact: un appelant qui ecrit `if (r.valid === false) refuser` laissait passer un corps
+  // d erreur, parce que `undefined === false` est FAUX.
+  for (const sansVerdict of [{ error: 'nope' }, { valid: 'true' }, { valid: 1 }, {}]) {
+    corps = sansVerdict;
+    await assert.rejects(() => V.verifyServerSide(attestationValide(), { minScore: 50 }), /no boolean verdict/);
+  }
+  corps = reponseServeur();
+  const ok = await V.verifyServerSide(attestationValide(), { minScore: 50 });
+  assert.strictEqual(ok.valid, true, 'TEMOIN: un vrai booleen passe encore');
+});
+
+test('une attestation vide refuse explicitement, au lieu d un TypeError', async () => {
+  corps = reponseServeur();
+  for (const rien of [null, undefined, {}, { payload: {} }, { signature: '0x11' }]) {
+    await assert.rejects(() => V.verifyServerSide(rien, { minScore: 50 }), /nothing to verify/);
+  }
+});
+
+test('LE TROU PARTAGE PAR LES TROIS FRERES: `Number()` convertit au lieu de valider', async () => {
+  /* MESURE du 2026-08-20, decouverte en ecrivant le cas « plancher illisible » ci-dessus — mon
+   * temoin a refuse, et c etait le CODE qui avait tort:
+   *     Number([]) = 0     Number('') = 0     Number('  ') = 0     Number(true) = 1
+   * Le durcissement du 2026-08-16 exigeait « fini ». Un tableau vide est fini: il vaut ZERO. Donc
+   * `minScore: []` construisait un plancher de zero — n exiger RIEN — depuis une valeur que
+   * personne n a voulue comme zero. Meme motif que le `Number(null) === 0` qui a tue un repli
+   * ailleurs dans ce projet: la valeur vide se COMPTE comme un vrai zero. */
+  const att = attestationValide();
+  const pasDesPlanchers = [[], '', '   ', true, false, [50], {}, null, undefined];
+  for (const v of pasDesPlanchers) {
+    const q = JSON.stringify(v) ?? String(v);
+    await assert.rejects(() => V.requireMinScore(A, v, viemStub), /finite number/, `requireMinScore(${q})`);
+    assert.throws(() => V.buildOnchainCall(att, v), /explicit finite minScore/, `buildOnchainCall(${q})`);
+    if (v !== null && v !== undefined) {
+      await assert.rejects(() => V.verifyServerSide(att, { minScore: v }), /is not a number/, `verifyServerSide(${q})`);
+    }
+  }
+  // TEMOIN DANS LES DEUX SENS: ce qui EST un plancher passe toujours.
+  assert.equal(V.buildOnchainCall(att, 0).args[1], 0, 'exiger zero, EXPLICITEMENT, reste legal');
+  assert.equal(V.buildOnchainCall(att, '80').args[1], 80,
+    'une chaine numerique reste legale — un plancher arrive souvent de JSON ou d une variable d env');
+  corps = reponseServeur({ minScore: 80 });
+  const out = await V.verifyServerSide(att, { minScore: '80' });
+  assert.equal(out.minScoreRequested, 80);
 });

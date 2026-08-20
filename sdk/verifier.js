@@ -110,6 +110,30 @@ async function verifyAttestation(attestation, viem) {
  * Throws if score < minScore or attestation is invalid.
  * @returns {Promise<number>} the verified score
  */
+/* ⛔ `Number()` NE VALIDE PAS, IL CONVERTIT — et le durcissement du 2026-08-16 s'est arrete a
+ * « fini », ce qui laisse entrer tout ce que JS sait convertir. MESURE du 2026-08-20 :
+ *
+ *     Number([])   = 0      Number('')  = 0      Number('  ') = 0
+ *     Number(true) = 1      Number([50]) = 50
+ *
+ * Un plancher `[]` ou `''` passait donc `Number.isFinite` et devenait « exiger ZERO », c'est-a-dire
+ * n'exiger rien — depuis une valeur que personne n'a jamais voulue comme zero. C'est le meme motif
+ * que le `Number(null) === 0` qui avait tue un repli ailleurs dans ce projet : la valeur vide se
+ * COMPTE comme un vrai zero. Les TROIS freres (requireMinScore, buildOnchainCall, verifyServerSide)
+ * partageaient exactement ce trou, chacun avec sa propre copie de la comparaison.
+ *
+ * Regle : un plancher est un NOMBRE, ou une chaine NON VIDE qui en est un ('80' reste legal, il
+ * arrive de JSON et d'env). Ni tableau, ni objet, ni booleen, ni chaine vide ou blanche.
+ * `null`/`undefined` tombent aussi ici — l'absence n'est pas « pas de plancher ». */
+function plancherFini(v, refus) {
+  const numerique = typeof v === 'number'
+    || (typeof v === 'string' && v.trim() !== '');
+  if (!numerique) throw new Error(refus);
+  const n = Number(v);
+  if (!Number.isFinite(n)) throw new Error(refus);
+  return n;
+}
+
 async function requireMinScore(address, minScore, viem) {
   /* ⛔ LE PLANCHER DE L'APPELANT SUIT LA MEME REGLE QUE LES CHAMPS D'EN FACE. La note ci-dessous
    * (« une comparaison ne borne rien tant que la valeur n'est pas prouvee finie ») etait appliquee
@@ -119,11 +143,9 @@ async function requireMinScore(address, minScore, viem) {
    * fonction nommee REQUIRE-min-score n'exigeait rien des qu'on lui passait un plancher illisible.
    * Un 0 EXPLICITE reste legal: « accepter tout score » est un choix qui se dit, pas un accident
    * d'omission. Valide AVANT le fetch: on ne brule pas un appel reseau sur un appel invalide. */
-  const plancher = Number(minScore);
-  if (minScore === null || minScore === undefined || !Number.isFinite(plancher)) {
-    throw new Error('MainStreet: minScore must be a finite number — an absent or unreadable floor is '
-      + 'NOT "no floor". Pass 0 explicitly to accept any score on purpose.');
-  }
+  const plancher = plancherFini(minScore,
+    'MainStreet: minScore must be a finite number — an absent or unreadable floor is '
+    + 'NOT "no floor". Pass 0 explicitly to accept any score on purpose.');
   const att = await fetchAttestation(address);
   const valid = await verifyAttestation(att, viem);
   if (!valid) throw new Error('MainStreet: attestation signature invalid');
@@ -156,15 +178,59 @@ async function requireMinScore(address, minScore, viem) {
 
 /**
  * Server-side verification via the /verify endpoint (zero crypto deps).
- * @returns {Promise<{valid: boolean, score: number, hint: string}>}
+ *
+ * ⛔ LE PLANCHER DISPARAISSAIT DE LA REQUETE SANS UN MOT. `JSON.stringify({minScore: undefined})`
+ * rend `{}` — la cle n'est pas envoyee `null`, elle N'EST PAS ENVOYEE. Et cote serveur,
+ * `minScore == null ? true : …` traite l'absence comme « pas de plancher » et rend
+ * `passesThreshold: true`, avec un hint qui dit « valid and meets threshold ». Un appelant qui
+ * ecrit `{ minscore: 80 }` (casse), ou qui passe une variable restee `undefined`, recoit donc
+ * VALIDE sur un score de 3, et la phrase servie lui confirme un seuil que personne n'a verifie.
+ *
+ * Les deux freres de cette fonction — `requireMinScore` et `buildOnchainCall` — ont ete durcis le
+ * 2026-08-16 : plancher illisible = refus, plancher omis = refus explicite. Celui-ci, TROISIEME
+ * frere, n'a ete ni durci ni teste. C'est le meme correctif qui n'a pas visite tous ses jumeaux.
+ *
+ * Regle ici : omettre le plancher reste LEGAL (l'endpoint le documente `minScore?`, et « cette
+ * attestation est-elle authentique » est une question valable sans seuil) — mais l'absence se DIT
+ * desormais, via `thresholdChecked: false`. Un plancher PRESENT ET ILLISIBLE, lui, refuse.
+ *
+ * @param {{payload: object, signature: string}} attestation
+ * @param {{minScore?: number}} [options]
+ * @returns {Promise<{valid: boolean, score: number, hint: string, thresholdChecked: boolean, minScoreRequested: number|null}>}
  */
 async function verifyServerSide(attestation, options = {}) {
+  if (!attestation || !attestation.payload || !attestation.signature) {
+    throw new Error('MainStreet: nothing to verify — attestation has no payload or no signature');
+  }
+  const veutUnPlancher = options.minScore !== null && options.minScore !== undefined;
+  let plancher = null;
+  if (veutUnPlancher) {
+    plancher = plancherFini(options.minScore,
+      `MainStreet: minScore ${JSON.stringify(options.minScore)} is not a number — `
+      + 'an unreadable floor used to vanish from the request and come back as "meets threshold". '
+      + 'Pass a finite number, or omit minScore to check authenticity only.');
+  }
+  // La cle n'est posee QUE si elle porte un nombre : plus jamais un `undefined` qui s'evapore.
+  const corps = { payload: attestation.payload, signature: attestation.signature };
+  if (veutUnPlancher) corps.minScore = plancher;
+
   const r = await fetch(`${ORIGIN}/api/agent/verify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ payload: attestation.payload, signature: attestation.signature, minScore: options.minScore }),
+    body: JSON.stringify(corps),
   });
-  return r.json();
+  /* ⛔ UN CORPS D'ERREUR N'EST PAS UN VERDICT. Sans ce controle, un 404 (mauvaise ORIGIN), un 402
+   * (route derriere un paywall) ou un 500 revenaient tels quels : `valid` valait alors `undefined`,
+   * qui n'est PAS `false`. Un appelant qui teste `if (r.valid === false) refuser` laissait passer.
+   * On refuse fort, avec le statut, plutot que de rendre un objet qui ressemble a une reponse. */
+  if (!r.ok) {
+    throw new Error(`MainStreet: /api/agent/verify answered HTTP ${r.status} — no verdict was issued`);
+  }
+  const out = await r.json();
+  if (typeof out?.valid !== 'boolean') {
+    throw new Error('MainStreet: /api/agent/verify returned no boolean verdict — refusing to treat it as one');
+  }
+  return { ...out, thresholdChecked: veutUnPlancher, minScoreRequested: plancher };
 }
 
 /**
@@ -178,12 +244,10 @@ function buildOnchainCall(attestation, minScore) {
    * pas un accident d'omission. Meme regle de finitude que requireMinScore ci-dessus (2026-08-16).
    * BORNE: la coherence uint (entier, non negatif) reste jugee par l'encodeur ABI du wallet — il
    * jette fort, on ne duplique pas son travail ici. */
-  const plancher = Number(minScore);
-  if (minScore === null || minScore === undefined || !Number.isFinite(plancher)) {
-    throw new Error('MainStreet: buildOnchainCall needs an explicit finite minScore — omitting it '
-      + 'used to silently build requireMinScore(0), a floor of nothing. Pass 0 explicitly to '
-      + 'require no floor on purpose.');
-  }
+  const plancher = plancherFini(minScore,
+    'MainStreet: buildOnchainCall needs an explicit finite minScore — omitting it '
+    + 'used to silently build requireMinScore(0), a floor of nothing. Pass 0 explicitly to '
+    + 'require no floor on purpose.');
   return {
     address: VERIFIER_ADDRESS,
     abi: VERIFIER_ABI,
