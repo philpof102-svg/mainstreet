@@ -42,7 +42,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "test": "node --test test/oracle.test.js test/unreadable-input-is-not-a-score.test.js test/shape-check-is-not-authenticity.test.js test/sdk.test.js test/vet-absence-is-not-a-pass.test.js test/badges-carry-no-frozen-count.test.js test/cli.test.js test/mcp-server.test.js test/verifier.test.js test/examples.test.js test/examples-imports-exist.test.js test/sdk-query.test.js test/oracle-subject.test.js test/tools-params.test.js test/types-match-runtime.test.js test/esm-twin-names-match.test.js test/denylist-bounds.test.js test/directory-probe-reads.test.js test/named-paths-exist.test.js test/compiled-artifact-matches-source.test.js test/suite-coverage.test.js",
+    "test": "node --test test/oracle.test.js test/unreadable-input-is-not-a-score.test.js test/shape-check-is-not-authenticity.test.js test/published-calibration-matches-code.test.js test/sdk.test.js test/vet-absence-is-not-a-pass.test.js test/badges-carry-no-frozen-count.test.js test/cli.test.js test/mcp-server.test.js test/verifier.test.js test/examples.test.js test/examples-imports-exist.test.js test/sdk-query.test.js test/oracle-subject.test.js test/tools-params.test.js test/types-match-runtime.test.js test/esm-twin-names-match.test.js test/denylist-bounds.test.js test/directory-probe-reads.test.js test/named-paths-exist.test.js test/compiled-artifact-matches-source.test.js test/suite-coverage.test.js",
     "example": "node examples/basic-usage.js",
     "leaderboard": "node examples/score-leaderboard.js",
     "verify": "node examples/verify-payload.js",

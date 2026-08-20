@@ -105,9 +105,9 @@ Inputs come from observable onchain activity: ERC-8004 ReputationRegistry feedba
 |---|---|
 | Mature high-rated commerce (4.5★, 2k reviews) | 87 |
 | Newbie commerce (5★, 3 reviews) | 65 |
-| Top agent (Ethy-like, 99% success, 500 jobs, $50k vol, active today) | 78 |
+| Top agent (Ethy-like, 99% success, 500 jobs, $50k vol, active today) | 98 |
 | Mid agent (85% success, 50 jobs, $3k vol, 3d ago) | 80 |
-| Newbie agent (100% success, 2 jobs, $50 vol, today) | 20 |
+| Newbie agent (100% success, 2 jobs, $50 vol, today) | 40 |
 | Ghost agent (90% success, 100 jobs, $10k vol, dormant 60d) | 69 |
 
 ## Files in this scaffold
