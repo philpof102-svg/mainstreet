@@ -40,6 +40,14 @@ function color(score) {
   return DIM;
 }
 
+/* ⛔ UN COMPTEUR ABSENT N'EST PAS UN ZERO. `x || 0` et `x ?? 0` publient tous deux « 0 » quand la
+ * mesure manque — c'est-a-dire « nous avons regarde, il n'y a rien », alors que c'est « nous
+ * n'avons pas regarde ». Le serveur distingue deja les deux; c'est ici que l'information se
+ * perdait. Meme famille que `fmtJobs` juste en dessous, qui rendait deja `—` sur null. */
+function nombreOuTiret(n) { return Number.isFinite(n) ? String(n) : DIM + '—' + RESET; }
+/* Le vert n'est pose que sur une valeur REELLEMENT mesuree; l'absence reste neutre. */
+function vertSiMesure(n) { return Number.isFinite(n) ? GREEN + n + RESET : DIM + '—' + RESET; }
+
 function shortAddr(a) { return a ? a.slice(0, 6) + '…' + a.slice(-4) : '—'; }
 function fmtJobs(n) { if (n == null) return '—'; if (n >= 1000) return (n/1000).toFixed(1) + 'k'; return String(n); }
 
@@ -153,9 +161,14 @@ const commands = {
   async stats() {
     const [me, lb, hs] = await Promise.all([api('/api/agent/me'), api('/api/agent/leaderboard?limit=1'), api('/api/agent/health-summary')]);
     console.log(`${BOLD}MainStreet — live stats${RESET}`);
-    console.log(`  ${DIM}Indexed total:  ${RESET}${me.metrics?.bazaarIndexed || 0}`);
-    console.log(`  ${DIM}Scored today:   ${RESET}${GREEN}${me.metrics?.scoredToday || 0}${RESET}`);
-    console.log(`  ${DIM}Badges claimed: ${RESET}${me.metrics?.badgesClaimed || 0}`);
+    /* ⛔ `|| 0` PUBLIAIT UN ZERO QUE PERSONNE N'AVAIT MESURE. Un compteur absent devenait « 0 »,
+     * c'est-a-dire « nous avons regarde et il n'y a rien » — alors que c'est « nous n'avons pas
+     * regarde ». Le serveur, lui, distingue deja les deux (il sert `settlements24h: null` avec un
+     * `settlementsWindowStale: true`): c'est cote CLI que l'information se perdait. `—` dit
+     * l'absence, `0` reste reserve a un vrai zero. */
+    console.log(`  ${DIM}Indexed total:  ${RESET}${nombreOuTiret(me.metrics?.bazaarIndexed)}`);
+    console.log(`  ${DIM}Scored today:   ${RESET}${vertSiMesure(me.metrics?.scoredToday)}`);
+    console.log(`  ${DIM}Badges claimed: ${RESET}${nombreOuTiret(me.metrics?.badgesClaimed)}`);
     if (hs.uptimePct != null) console.log(`  ${DIM}Uptime:         ${RESET}${hs.uptimePct}% ${DIM}(${hs.alive}/${hs.totalProbed})${RESET}`);
     if (lb.networkBreakdown) {
       console.log(`\n  ${DIM}Networks:${RESET}`);
@@ -187,9 +200,19 @@ const commands = {
     const d = await api('/api/agent/me');
     console.log(`${BOLD}${d.project}${RESET}  ${DIM}${d.pitch}${RESET}\n`);
     console.log(`  ${DIM}operator: ${RESET}${BLUE}${d.operator?.address}${RESET}`);
-    console.log(`  ${DIM}token:    ${RESET}${BLUE}${d.token?.address}${RESET}  ${GREEN}(${d.token?.verified})${RESET}`);
-    console.log(`  ${DIM}registry: ${RESET}${BLUE}${d.erc8004?.reputationRegistry}${RESET}`);
-    console.log(`\n  ${DIM}indexed:${RESET} ${d.metrics?.bazaarIndexed}  ${DIM}scored:${RESET} ${d.metrics?.scoredToday}  ${DIM}badges:${RESET} ${d.metrics?.badgesClaimed}`);
+    /* ⛔ LE VERT ETAIT INCONDITIONNEL. `${GREEN}(${d.token?.verified})` peignait en vert TOUT ce que
+     * ce champ contenait — `false`, `undefined`, ou n'importe quelle chaine. Or c'est une chaine
+     * LIBRE venue d'un service tiers: mesure sur la prod le 2026-08-20, elle vaut
+     * « full_match (Sourcify, decentralized) ». Le jour ou elle vaut « partial_match » ou disparait,
+     * le CLI l'affiche toujours en vert — et dans un terminal la couleur se lit AVANT le texte.
+     * ⚖️ Ce correctif ne DECIDE pas quelles chaines valent « verifie »: seul un booleen `true` est
+     * un oui que nous savons lire, tout le reste s'affiche en neutre. Retirer une affirmation qu'on
+     * n'a pas gagnee, sans en inventer une autre. */
+    const v = d.token?.verified;
+    const couleurV = v === true ? GREEN : DIM;
+    console.log(`  ${DIM}token:    ${RESET}${BLUE}${d.token?.address || '—'}${RESET}  ${couleurV}(${v ?? 'verification unknown'})${RESET}`);
+    console.log(`  ${DIM}registry: ${RESET}${BLUE}${d.erc8004?.reputationRegistry || '—'}${RESET}`);
+    console.log(`\n  ${DIM}indexed:${RESET} ${nombreOuTiret(d.metrics?.bazaarIndexed)}  ${DIM}scored:${RESET} ${nombreOuTiret(d.metrics?.scoredToday)}  ${DIM}badges:${RESET} ${nombreOuTiret(d.metrics?.badgesClaimed)}`);
   },
 
   async tags(n) {
@@ -264,7 +287,13 @@ const commands = {
     const d = await api('/api/agent/receipts?for=' + addr);
     if (d.summary) {
       console.log(`${BOLD}${shortAddr(addr)}${RESET} ${DIM}(${d.summary.total} receipt${d.summary.total === 1 ? '' : 's'})${RESET}`);
-      console.log(`  success rate: ${GREEN}${(d.summary.successRate*100).toFixed(0)}%${RESET}`);
+      /* ⛔ UN TAUX DE 0 % ETAIT PEINT EN VERT. Le vert etait applique a la POSITION, jamais au
+       * contenu: « success rate: 0% » sortait avec la couleur qui dit « tout va bien ». Les deux
+       * lignes juste en dessous, elles, gardent deja `!= null` — trois champs, deux gardes.
+       * ⚖️ On ne remplace pas le vert par un seuil invente (« vert au-dessus de X » serait une
+       * decision produit): la valeur s'affiche sans couleur, et l'absence se dit. */
+      const tx = d.summary.successRate;
+      console.log(`  success rate: ${Number.isFinite(tx) ? (tx * 100).toFixed(0) + '%' : DIM + 'not measured' + RESET}`);
       if (d.summary.avgRating != null) console.log(`  avg rating:   ${d.summary.avgRating?.toFixed(1)}/100`);
       if (d.summary.avgLatencyMs != null) console.log(`  avg latency:  ${d.summary.avgLatencyMs}ms`);
     } else {
