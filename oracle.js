@@ -34,17 +34,52 @@ const SUBJECT_TYPES = {
   AGENT_ONCHAIN: 'agent-onchain',
 };
 
+// ─── Coercition numérique : une entrée illisible n'est pas un zéro ─────────────────────────────
+//
+// MESURÉ PAR EXÉCUTION le 2026-08-20 sur ce paquet publié (mainstreet-oracle 0.9.3) :
+//
+//     computeScoreAgent({ usdcVolume: '1,000', … })   -> NaN   -> sur le fil : {"score": null}
+//     computeScoreAgent({ successRate: 'x',   … })    -> NaN   -> {"score": null}
+//     computeScoreBusiness({ rating: 'quatre', … })   -> 20    (un rating ILLISIBLE publié comme
+//                                                              un score, via `Number(x) || 0`)
+//
+// Deux fautes OPPOSÉES dans le même fichier. Côté agent, `Number(x ?? 0)` : le `??` ne rattrape que
+// `null`/`undefined`, jamais `NaN` — un nombre formaté avec une virgule suffit, et `JSON.stringify`
+// transforme le NaN en `null`, BYTE-IDENTIQUE au signal délibéré « nous n'avons pas de score ». Un
+// accident arithmétique devient indistinguable d'une honnêteté. Côté business, `|| 0` fait l'inverse :
+// il AVALE l'illisible et publie un chiffre que personne n'a calculé.
+//
+// LE CORRECTIF NE S'INVENTE PAS ICI : `finite` et `clamp100` sont repris à l'identique du trust-core
+// vendorisé (biii/vendor/trust-core/score.js), byte-syncé au dépôt canonique et déjà exécuté par
+// biii. Son propre commentaire dit ce que ça a coûté : « measured on 7 of 7 probes … A NaN score
+// then loses EVERY comparison downstream » — `>= 50` et `>= 30` sont tous deux faux pour un NaN,
+// donc un verdict se choisit par défaut et sort publié comme un nombre.
+// C'est la copie faible À L'ENVERS : la version durcie était la copie gelée, l'original publié ne
+// l'avait jamais reçue.
+
+/** Une valeur non finie retombe sur un défaut NOMMÉ, jamais sur un zéro accidentel. */
+function finite(v, fallback) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Un total non fini n'est pas un score et ne doit pas être habillé en score : `null` force
+ *  l'appelant à dire quelque chose d'honnête plutôt qu'à publier un nombre que personne n'a calculé. */
+function clamp100(total) {
+  return Number.isFinite(total) ? Math.max(0, Math.min(100, Math.round(total))) : null;
+}
+
 // ─── Scoring : business Google ────────────────────────────────
 /**
  * @param {{rating: number|null, reviewCount: number|null}} snapshot
- * @returns {number} score 0-100
+ * @returns {number|null} score 0-100, ou null si le total n'est pas calculable
  */
 function computeScoreBusiness(snapshot) {
-  const rating = Number(snapshot?.rating) || 0;
-  const reviewCount = Number(snapshot?.reviewCount) || 0;
+  const rating = Math.max(0, finite(snapshot?.rating, 0));
+  const reviewCount = Math.max(0, finite(snapshot?.reviewCount, 0));
   const ratingPart = Math.max(0, Math.min(60, (rating / 5) * 60));
   const volumePart = Math.max(0, Math.min(40, Math.log10(Math.max(1, reviewCount)) * 10));
-  return Math.round(ratingPart + volumePart);
+  return clamp100(ratingPart + volumePart);
 }
 
 // ─── Scoring : agent IA onchain ────────────────────────────────
@@ -64,10 +99,10 @@ function computeScoreBusiness(snapshot) {
  */
 function computeScoreAgent(metrics) {
   // ?? 0 not || 0 — daysSinceLastJob can legitimately be 0 (active today)
-  const successRate = Math.max(0, Math.min(1, Number(metrics?.successRate ?? 0)));
-  const usdcVolume = Math.max(0, Number(metrics?.usdcVolume ?? 0));
-  const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob ?? 365));
-  const jobCount = Math.max(0, Number(metrics?.jobCount ?? 0));
+  const successRate = Math.max(0, Math.min(1, finite(metrics?.successRate, 0)));
+  const usdcVolume = Math.max(0, finite(metrics?.usdcVolume, 0));
+  const daysSinceLastJob = Math.max(0, finite(metrics?.daysSinceLastJob, 365));
+  const jobCount = Math.max(0, finite(metrics?.jobCount, 0));
 
   // Success rate : 50 pts, pénalisé si très peu de jobs (< 10) pour
   // éviter qu'un agent avec 1 succès = score parfait.
@@ -80,7 +115,7 @@ function computeScoreAgent(metrics) {
   // Récence : decay sur 30 jours, 20 pts si < 1 jour, 0 si > 30
   const recencyPart = Math.max(0, 20 * Math.exp(-daysSinceLastJob / 15));
 
-  return Math.round(successPart + volumePart + recencyPart);
+  return clamp100(successPart + volumePart + recencyPart);
 }
 
 // ─── Scoring : activity (public leaderboard) ───────────────────
@@ -101,15 +136,18 @@ function computeScoreAgent(metrics) {
  * reach the high 80s.
  */
 function computeActivityScore(metrics) {
-  const jobCount = Math.max(0, Number(metrics?.jobCount ?? 0));
-  const daysSinceLastJob = Math.max(0, Number(metrics?.daysSinceLastJob ?? 30));
-  const successRate = metrics?.successRate == null ? null : Math.max(0, Math.min(1, Number(metrics.successRate)));
+  const jobCount = Math.max(0, finite(metrics?.jobCount, 0));
+  const daysSinceLastJob = Math.max(0, finite(metrics?.daysSinceLastJob, 30));
+  // `null` reste distinct de 0 ici — c'est voulu : un successRate ABSENT ne donne aucun bonus de
+  // réputation, alors qu'un 0 mesuré en donne zéro pour une raison connue. Mais une valeur PRÉSENTE
+  // et illisible ('x') passait par `Number()` et rendait NaN, qui contaminait tout le total.
+  const successRate = metrics?.successRate == null ? null : Math.max(0, Math.min(1, finite(metrics.successRate, 0)));
   const alive = metrics?.alive;
   // Longevity signals — agent has been around for a while + showed up consistently
-  const ageDays = Math.max(0, Number(metrics?.ageDays ?? 0));
-  const snapshotDays = Math.max(0, Number(metrics?.snapshotDaysLast30 ?? 0));
+  const ageDays = Math.max(0, finite(metrics?.ageDays, 0));
+  const snapshotDays = Math.max(0, finite(metrics?.snapshotDaysLast30, 0));
   // Diversity — number of distinct tags / categories surfaced in Bazaar metadata
-  const tagCount = Math.max(0, Number(metrics?.tagCount ?? 0));
+  const tagCount = Math.max(0, finite(metrics?.tagCount, 0));
 
   // Activity (40 pts max — was 45, lowered to leave room for longevity/diversity)
   const activityPart = Math.min(40, Math.log10(Math.max(1, jobCount)) * 10);
@@ -149,9 +187,10 @@ function computeActivityScore(metrics) {
 
   const longevityPart = agePart + consistencyPart + diversityPart;
 
-  return Math.max(0, Math.min(100, Math.round(
-    activityPart + recencyPart + reputationPart + healthPart + longevityPart
-  )));
+  // Même refus que les deux autres scorers : un total non fini n'est pas un score. Le clamp seul
+  // ressemblait à une garantie du domaine 0-100 et n'en était pas une — `Math.min(100, NaN)` vaut
+  // NaN, et `Math.round(NaN)` aussi ; la borne laissait passer exactement ce qu'elle semblait exclure.
+  return clamp100(activityPart + recencyPart + reputationPart + healthPart + longevityPart);
 }
 
 // ─── Dispatcher ────────────────────────────────────────────────
